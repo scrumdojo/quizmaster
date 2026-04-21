@@ -28,6 +28,9 @@ export const answerNth = async (world: QuizmasterWorld, n: number) => {
 export const answerCorrectly = async (world: QuizmasterWorld) => answerNth(world, 0)
 export const answerIncorrectly = async (world: QuizmasterWorld) => answerNth(world, 1)
 
+export const answerPartiallyCorrectly = async (world: QuizmasterWorld) => answerNth(world, 2)
+
+
 export const repeatAsync = async (n: number, fn: () => Promise<void>) => {
     for (let i = 0; i < n; i++) await fn()
 }

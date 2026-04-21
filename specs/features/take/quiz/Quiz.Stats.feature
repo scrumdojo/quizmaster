@@ -84,3 +84,21 @@ Feature: Show stats
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       1 |        0 |          1 |       0 |
+
+  Scenario: Test playwright
+    Given quiz "Stats Quiz" with 3 questions
+      | time limit | 5s |
+
+    When I start the quiz
+    * I answer 1 question correctly
+    * I answer 1 question partially correctly
+    * I answer 1 question incorrectly
+    * 5 seconds pass
+
+    When I open quiz "Stats Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Partially Correct Answers | Incorrect Answers | Score | Status    |
+      |          | 3/2    | 1 (33%)         | 1 (33%)                   | 1 (33%)           | 50    | Finished |
+    And I see summary stats table
+      | Started | Finished | Unfinished | Timeout |
+      |       1 |        1 |          0 |       0 |
