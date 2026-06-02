@@ -28,6 +28,7 @@ export function WorkspacePage() {
     const [workspace, setWorkspace] = useState<Workspace>({ guid: workspaceId, title: '' })
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
     const [questionPage, setQuestionPage] = useState(0)
+    const [questionPageSize, setQuestionPageSize] = useState(0)
     const [questionTotalPages, setQuestionTotalPages] = useState(1)
     const [questionTotalElements, setQuestionTotalElements] = useState(0)
     const [quizzes, setQuizzes] = useState<readonly QuizListItem[]>([])
@@ -45,6 +46,7 @@ export function WorkspacePage() {
             setQuestions(result.content)
             setQuestionTotalPages(result.totalPages)
             setQuestionTotalElements(result.totalElements)
+            setQuestionPageSize(result.size)
             setQuestionPage(result.number)
         },
         [workspaceId],
@@ -149,7 +151,7 @@ export function WorkspacePage() {
                                 <QuestionItem
                                     key={q.id || index}
                                     question={q}
-                                    index={index}
+                                    index={questionPage * questionPageSize + index}
                                     onDeleteQuestion={() => onDeleteQuestion(q.id)}
                                 />
                             ))

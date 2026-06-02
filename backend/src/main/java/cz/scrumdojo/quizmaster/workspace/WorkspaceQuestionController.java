@@ -66,6 +66,7 @@ public class WorkspaceQuestionController {
                 items,
                 questionPage.getTotalPages(),
                 questionPage.getTotalElements(),
+                questionPage.getSize(),
                 questionPage.getNumber()
             )
         );

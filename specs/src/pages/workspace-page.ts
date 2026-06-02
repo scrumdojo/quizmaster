@@ -260,6 +260,11 @@ export class WorkspacePage {
         await this.questionPageLinkLocator(pageNum).click()
     }
 
+    expectQuestionOrderNumber = async (question: string, order: number) => {
+        await this.showQuestions()
+        await expect(this.questionLocator(question).locator('.question-index')).toHaveText(`Q${order}.`)
+    }
+
     expectQuestionsInOrder = async (titles: string[]) => {
         await this.showQuestions()
         const items = this.page.locator('.question-item')
