@@ -185,12 +185,12 @@ export function WorkspacePage() {
                             role="search"
                             onSubmit={event => event.preventDefault()}
                         >
-                            <label htmlFor="workspace-question-filter-input">Filter questions</label>
+                            <label htmlFor="workspace-question-filter-input">Filter questions or tags</label>
                             <input
                                 id="workspace-question-filter-input"
                                 type="search"
                                 value={questionFilter}
-                                placeholder="Type to filter questions"
+                                placeholder="Type question text or tag"
                                 onChange={event => setQuestionFilter(event.target.value)}
                             />
                         </form>

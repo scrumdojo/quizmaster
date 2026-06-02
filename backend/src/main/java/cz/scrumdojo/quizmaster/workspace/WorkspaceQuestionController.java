@@ -53,7 +53,7 @@ public class WorkspaceQuestionController {
         String normalizedQuery = query == null ? "" : query.trim();
         var questionPage = normalizedQuery.isEmpty()
             ? questionRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid, PageRequest.of(page, PAGE_SIZE))
-            : questionRepository.findByWorkspaceGuidAndQuestionContainingIgnoreCaseOrderByIdDesc(
+            : questionRepository.searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCase(
                   workspaceGuid,
                   normalizedQuery,
                   PageRequest.of(page, PAGE_SIZE)
