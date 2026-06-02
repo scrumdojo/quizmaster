@@ -10,14 +10,7 @@ import type {
     RobinGenerateRequest,
     RobinGenerationResult,
 } from '#fe/make/create-question/robin-ai/use-robin-prompt-form.ts'
-import type { RobinUndoBuffer } from '#fe/make/create-question/robin-ai/use-robin-undo-buffer.ts'
 import type { QuestionDraft, QuestionType } from '#fe/shared/model/question.ts'
-
-const noUndo: RobinUndoBuffer = {
-    hasPrevious: false,
-    capture: () => {},
-    restore: () => {},
-}
 
 const generateWorkspaceRobinDrafts = async (request: RobinGenerateRequest): Promise<RobinGenerationResult> => ({
     drafts: await postAiAssistantBatch(request.workspaceGuid, {
@@ -53,7 +46,6 @@ export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionsSaved }: Worksp
                     onGenerated={handleGenerated}
                     generateRequest={generateWorkspaceRobinDrafts}
                     saveDrafts={saveWorkspaceRobinDrafts(workspaceId, onQuestionsSaved)}
-                    undo={noUndo}
                     workspaceId={workspaceId}
                     questionType={questionType}
                     onQuestionTypeChange={setQuestionType}

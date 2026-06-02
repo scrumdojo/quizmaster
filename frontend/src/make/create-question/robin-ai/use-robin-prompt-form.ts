@@ -4,7 +4,6 @@ import { postAiAssistant } from '#fe/make/api/ai-assistant.ts'
 import type { QuestionDraft, QuestionType } from '#fe/shared/model/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'
-import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 export interface RobinFormBinding {
     readonly snapshot: () => QuestionFormStatePatch
@@ -31,7 +30,6 @@ interface UseRobinPromptFormArgs {
     readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
     readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
     readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
-    readonly undo: RobinUndoBuffer
     readonly workspaceId: string
     readonly questionType: QuestionType
     readonly onClose: () => void
@@ -51,7 +49,6 @@ export const useRobinPromptForm = ({
     onGenerated,
     generateRequest = generateSingleDraft,
     saveDrafts,
-    undo,
     workspaceId,
     questionType,
     onClose,
@@ -78,7 +75,6 @@ export const useRobinPromptForm = ({
                 questionType,
                 currentDrafts: generatedDrafts,
             })
-            undo.capture()
             await onGenerated(response.drafts)
             if (mode === 'chat') {
                 setGeneratedDrafts(response.drafts)

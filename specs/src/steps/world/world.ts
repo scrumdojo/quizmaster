@@ -122,7 +122,6 @@ export class QuizmasterWorld {
     clockInstalled = false
     scenarioClockNow?: Date
     lastAnsweredTitle?: string
-    rememberedAiQuestion = ''
     lastAiAssistantRequest?: {
         question: string
         questionType: string

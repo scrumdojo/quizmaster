@@ -341,10 +341,6 @@ Then('I do not see explanation fields', async function () {
     await this.questionEditPage.expectNoExplanationFields()
 })
 
-Then('I can restore the previous version', async function () {
-    await this.robinSheetPage.expectPreviousVersionAvailable()
-})
-
 Then('I see {int} generated questions in Robin chat', async function (count: number) {
     await this.robinSheetPage.expectGeneratedQuestionCount(count)
 })
@@ -602,60 +598,6 @@ When(
         ])
     },
 )
-
-Given('I start creating a new question when I already have generated content', async function () {
-    await ensureWorkspace(this)
-    await this.workspacePage.createNewQuestion()
-    this.questionWip = { text: '', answers: [] }
-    // Open Robin AI and generate first AI question
-    await this.robinSheetPage.open()
-    await this.robinSheetPage.enterPrompt(
-        'Generate a question about capital cities with 1 correct answer and 2 incorrect answers',
-    )
-    await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
-            timeout: AI_RESPONSE_TIMEOUT,
-        }),
-        this.robinSheetPage.generate(),
-    ])
-    this.rememberedAiQuestion = await this.questionEditPage.questionValue()
-})
-
-When('I generated a question by AI', async function () {
-    await this.robinSheetPage.enterPrompt(
-        'Generate a question about capital cities with 1 correct answer and 2 incorrect answers',
-    )
-    await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
-            timeout: AI_RESPONSE_TIMEOUT,
-        }),
-        this.robinSheetPage.generate(),
-    ])
-})
-
-When('I generated a new question by AI', async function () {
-    await this.robinSheetPage.enterPrompt(
-        'Generate a question about European history with 1 correct answer and 2 incorrect answers',
-    )
-    await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
-            timeout: AI_RESPONSE_TIMEOUT,
-        }),
-        this.robinSheetPage.generate(),
-    ])
-})
-
-When('I remember the current AI-generated question', async function () {
-    this.rememberedAiQuestion = await this.questionEditPage.questionValue()
-})
-
-When('I restore the previous version', async function () {
-    await this.robinSheetPage.restorePreviousVersion()
-})
-
-Then('I see the previous generated version', async function () {
-    await this.questionEditPage.expectQuestionValue(this.rememberedAiQuestion)
-})
 
 When(/I mark the question as (single choice|multiple choice|numerical)/, async function (choice: string) {
     if (choice === 'single choice') {

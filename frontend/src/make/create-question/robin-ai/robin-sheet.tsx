@@ -6,13 +6,11 @@ import type { QuestionDraft } from '#fe/shared/model/question.ts'
 
 import { useRobinPromptForm } from './use-robin-prompt-form.ts'
 import type { RobinGenerateRequest, RobinGenerationResult } from './use-robin-prompt-form.ts'
-import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 interface RobinSheetProps {
     readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
     readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
     readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
-    readonly undo: RobinUndoBuffer
     readonly workspaceId: string
     readonly questionType: QuestionType
     readonly onQuestionTypeChange: (type: QuestionType) => void
@@ -25,7 +23,6 @@ export const RobinSheet = ({
     onGenerated,
     generateRequest,
     saveDrafts,
-    undo,
     workspaceId,
     questionType,
     onQuestionTypeChange,
@@ -38,7 +35,6 @@ export const RobinSheet = ({
             onGenerated,
             generateRequest,
             saveDrafts,
-            undo,
             workspaceId,
             questionType,
             onClose,
@@ -89,18 +85,6 @@ export const RobinSheet = ({
                         {error}
                     </Alert>
                 )}
-                {undo.hasPrevious && (
-                    <Button
-                        id="previous-version-button"
-                        className="secondary button"
-                        onClick={() => {
-                            undo.restore()
-                            onClose()
-                        }}
-                    >
-                        Previous version
-                    </Button>
-                )}
                 <Button
                     id="robin-generate-button"
                     className="secondary button"
@@ -126,18 +110,6 @@ export const RobinSheet = ({
                     <Alert type="error" dataTestId="ai-assistant-error">
                         {error}
                     </Alert>
-                )}
-                {undo.hasPrevious && (
-                    <Button
-                        id="previous-version-button"
-                        className="secondary button"
-                        onClick={() => {
-                            undo.restore()
-                            onClose()
-                        }}
-                    >
-                        Previous version
-                    </Button>
                 )}
                 {chatMessages.length > 0 && (
                     <div className="robin-chat-messages">

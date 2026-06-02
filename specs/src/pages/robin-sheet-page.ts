@@ -10,7 +10,6 @@ export class RobinSheetPage {
     private chatMessageLocator = () => this.page.getByTestId('robin-chat-message')
     private generateButtonLocator = () => this.page.locator('#robin-generate-button')
     private saveButtonLocator = () => this.page.locator('#robin-save-button')
-    private previousVersionButtonLocator = () => this.page.locator('#previous-version-button')
     private questionTypeRadio = (value: string) => this.page.locator(`#robin-question-type-${value}`)
     private generatedQuestionsLocator = () => this.page.getByTestId('robin-generated-question')
     private generatedQuestionLocator = (index: number) => this.generatedQuestionsLocator().nth(index - 1)
@@ -51,8 +50,6 @@ export class RobinSheetPage {
     askForMultipleChoice = () => this.questionTypeRadio('multiple').check()
     askForNumericalChoice = () => this.questionTypeRadio('numerical').check()
 
-    restorePreviousVersion = () => this.previousVersionButtonLocator().click()
-
     saveGeneratedQuestions = () => this.saveButtonLocator().click()
 
     expectPromptVisible = () => expect(this.promptLocator().first()).toBeVisible()
@@ -71,8 +68,6 @@ export class RobinSheetPage {
         await expect(this.sheetLocator().locator('> [data-testid="robin-composer"]:last-child')).toBeVisible()
         await expect(this.sheetLocator().locator('> *')).toHaveCount(3)
     }
-    expectPreviousVersionAvailable = () => expect(this.previousVersionButtonLocator()).toBeVisible()
-    expectPreviousVersionNotAvailable = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
     expectNoGeneratedQuestions = () => expect(this.generatedQuestionsLocator()).toHaveCount(0)
 
     expectGeneratedQuestionCount = (count: number) => expect(this.generatedQuestionsLocator()).toHaveCount(count)

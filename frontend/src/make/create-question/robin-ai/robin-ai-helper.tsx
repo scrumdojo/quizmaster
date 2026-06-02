@@ -9,7 +9,6 @@ import { questionToPatch } from './question-draft-mappers.ts'
 import { RobinFab } from './robin-fab.tsx'
 import { RobinSheet } from './robin-sheet.tsx'
 import type { RobinFormBinding, RobinGenerateRequest } from './use-robin-prompt-form.ts'
-import { useRobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 interface RobinAiHelperProps {
     readonly form: RobinFormBinding
@@ -58,7 +57,6 @@ const editGenerateRequest =
 export const RobinAiHelper = ({ form, workspaceId, currentQuestion, currentQuestionId }: RobinAiHelperProps) => {
     const [sheetOpen, setSheetOpen] = useState(false)
     const [questionType, setQuestionType] = useState<QuestionType>(() => form.snapshot().questionType ?? 'single')
-    const undo = useRobinUndoBuffer(form)
     const handleGenerated = (drafts: readonly QuestionDraft[]) => {
         const [draft] = drafts
         if (!draft) return
@@ -74,7 +72,6 @@ export const RobinAiHelper = ({ form, workspaceId, currentQuestion, currentQuest
                     generateRequest={
                         currentQuestion ? editGenerateRequest(currentQuestion, currentQuestionId) : undefined
                     }
-                    undo={undo}
                     workspaceId={workspaceId}
                     questionType={questionType}
                     onQuestionTypeChange={setQuestionType}
