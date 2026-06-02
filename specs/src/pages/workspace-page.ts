@@ -201,7 +201,7 @@ export class WorkspacePage {
 
     expectQuizOrderNumber = async (quiz: string, order: number) => {
         await this.showQuizzes()
-        await expect(this.quizLocator(quiz).locator('.question-index')).toHaveText(`#${order}`)
+        await expect(this.quizLocator(quiz).locator('.question-index').first()).toHaveText(`#${order}`)
     }
 
     // ── Quiz pagination ──────────────────────────────
@@ -262,7 +262,7 @@ export class WorkspacePage {
 
     expectQuestionOrderNumber = async (question: string, order: number) => {
         await this.showQuestions()
-        await expect(this.questionLocator(question).locator('.question-index')).toHaveText(`Q${order}.`)
+        await expect(this.questionLocator(question).locator('.question-index').first()).toHaveText(`Q${order}.`)
     }
 
     expectQuestionsInOrder = async (titles: string[]) => {
