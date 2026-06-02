@@ -22,8 +22,8 @@ export class QuizWelcomePage {
 
     private individualsTableCaptionLocator = () => this.individualsLeaderboardTableLocator().locator('caption')
 
-    private individualsTableHeaderCellsLocator = () => this.individualsTableCaptionLocator().locator('thead th')
-    private individualsTableBodyRowsLocator = () => this.individualsTableCaptionLocator().locator('tbody tr')
+    private individualsTableHeaderCellsLocator = () => this.individualsLeaderboardTableLocator().locator('thead th')
+    private individualsTableBodyRowsLocator = () => this.individualsLeaderboardTableLocator().locator('tbody tr')
 
     expectHeader = (text: string) => expect(this.headerLocator()).toHaveText(text)
     expectName = (name: string) => expect(this.nameLocator()).toHaveText(name)
