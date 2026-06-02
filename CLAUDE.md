@@ -5,6 +5,7 @@ This file provides guidance to AI coding assistants (Claude Code, GitHub Copilot
 ## Project Overview
 
 Quizmaster is a training application for Scrum workshops at ScrumDojo.cz. Core features:
+
 - Create and manage questions, workspaces, and quizzes
 - Take standalone questions or complete quizzes
 
@@ -15,11 +16,11 @@ Built incrementally using thin slices of functionality — a key learning object
 The repo's prose documentation lives in two places:
 
 - **`docs/`** describes what is real in the codebase today.
-  - `architecture.md`, `domain-language.md`, `ai-assistant.md` — system-level
-  - `mcp/` — MCP server (overview, configuration, current REST auth state)
-  - `conventions/` — code, controller, and E2E style guides
-  - `team/` — definition of done, working agreement
-  - `devenv/` — how to set up and run the project locally
+    - `architecture.md`, `domain-language.md`, `ai-assistant.md` — system-level
+    - `mcp/` — MCP server (overview, configuration, current REST auth state)
+    - `conventions/` — code, controller, and E2E style guides
+    - `team/` — definition of done, working agreement
+    - `devenv/` — how to set up and run the project locally
 - **`backlog/`** holds planning material: target specs, design notes, and
   pending refactors. Anything aspirational or not-yet-implemented goes here,
   not in `docs/`.
@@ -36,6 +37,7 @@ into `docs/` and delete or trim the backlog entry.
 ## Architecture
 
 **Monorepo with frontend built into backend:**
+
 - Frontend: React 19 SPA (Vite) → builds to `backend/src/main/resources/static/`
 - Backend: Spring Boot 3 serves frontend at `/` and REST APIs at `/api/*`
 - Database: PostgreSQL (JPA/Hibernate + Flyway migrations in `backend/src/main/resources/db/migration/`)
@@ -82,14 +84,14 @@ pnpm coverage:e2e                  # FE + BE merged report (unit + E2E exec data
 
 ## Domain Model
 
-Entities: **Workspace**, **Question**, **Quiz**, **Attempt**. See
+Entities: **Workspace**, **Question**, **Quiz**, **Attempt**, **Poll**. See
 `docs/domain-language.md` for the model. Backend entity classes live in their
-respective packages (see *Backend Structure*).
+respective packages (see _Backend Structure_).
 
 ## Backend Structure
 
 Each domain has its own package under `cz.scrumdojo.quizmaster`: `question/`,
-`quiz/`, `workspace/`, `attempt/`, `aiassistant/`, plus `common/` and
+`quiz/`, `workspace/`, `attempt/`, `poll/`, `aiassistant/`, plus `common/` and
 `config/`. Style: `docs/conventions/controller-style.md` and
 `docs/conventions/code-style.md`.
 
@@ -98,7 +100,8 @@ Each domain has its own package under `cz.scrumdojo.quizmaster`: `question/`,
 Endpoints live under `/api/`. Two flavors:
 
 - **Authoring** is workspace-scoped: `/api/workspaces/{guid}/...` for
-  questions, quizzes, and AI drafting. Shared by FE and MCP. Includes
+  questions, quizzes, polls, and AI drafting. Shared by FE and MCP. Includes
+  `GET /api/workspaces/{guid}/polls/{id}` for poll detail and
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/quiz/{id}/leaderboard`,
@@ -107,7 +110,8 @@ Endpoints live under `/api/`. Two flavors:
 
 Controllers are the source of truth: workspace authoring lives in
 `workspace/` (`WorkspaceController`, `WorkspaceQuestionController`,
-`WorkspaceQuizController`); taking lives in `*TakeController` +
+`WorkspaceQuizController`), with poll authoring in `poll/`
+(`PollController`); taking lives in `*TakeController` +
 `AttemptController`; AI drafting in `AiAssistantController`. See
 `docs/mcp/rest-auth.md` for the (absent) auth state.
 
@@ -127,6 +131,7 @@ BDD specs in `specs/features/`, organized into `make/` (creating) and `take/` (a
 **Style guide:** See `docs/conventions/e2e-style-guide.md` and `docs/conventions/code-style.md`.
 
 **Test layers:**
+
 - **Page Objects** (`specs/src/pages/`) — DOM abstraction, queries and actions
 - **Ops** (`specs/src/steps/<feature>/ops.ts`) — multi-step workflows
 - **Expects** (`specs/src/steps/<feature>/expects.ts`) — domain assertions

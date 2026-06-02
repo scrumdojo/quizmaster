@@ -50,21 +50,21 @@ A **Quiz** is a curated set of [questions](#question) from one
 carries a title, an optional description, a question list, and optional
 **cohorts** used to group takers under the same quiz.
 
-Two settings shape *how* takers experience the quiz:
+Two settings shape _how_ takers experience the quiz:
 
 - **Mode** is either **Exam** or **Learning**.
-  - In **Exam mode**, submitting an answer immediately moves to the next
-    question. The taker sees no feedback or explanations until the whole quiz
-    is finished, and the final score and feedback appear once at the end.
-  - In **Learning mode**, feedback and explanations appear after each answer,
-    and the taker advances manually. Learning quizzes can be retaken.
+    - In **Exam mode**, submitting an answer immediately moves to the next
+      question. The taker sees no feedback or explanations until the whole quiz
+      is finished, and the final score and feedback appear once at the end.
+    - In **Learning mode**, feedback and explanations appear after each answer,
+      and the taker advances manually. Learning quizzes can be retaken.
 
-- **Difficulty** is **easy**, **hard**, or **keep**. *Easy* and *hard* override
+- **Difficulty** is **easy**, **hard**, or **keep**. _Easy_ and _hard_ override
   each question's own easy mark at quiz time so the taker sees a uniformly
-  easier or harder variant; *keep* respects whatever each question itself
+  easier or harder variant; _keep_ respects whatever each question itself
   declares.
 
-Three settings shape *which* questions appear and *when*:
+Three settings shape _which_ questions appear and _when_:
 
 - **Pass score** is the percentage of questions a taker must answer correctly
   to pass.
@@ -75,6 +75,21 @@ Three settings shape *which* questions appear and *when*:
 
 A quiz can also be **scheduled** with start and end times that bound when it is
 available to takers.
+
+## Poll
+
+A **Poll** is a single-question survey that belongs to exactly one
+[workspace](#workspace). Unlike a [question](#question), a poll is intended for
+quick opinion gathering rather than scoring.
+
+A poll contains:
+
+- One **question** text.
+- A list of **answers** from which a learner selects exactly one option.
+
+In the first implementation slice, the backend supports creating polls through
+workspace-scoped authoring API, and poll data is stored in memory for the
+duration of the running application process.
 
 ## Taking a quiz: Attempt
 
@@ -114,38 +129,39 @@ workspace, prompting the maker to refine the prompt instead.
 
 ## Alphabetical index
 
-| Term | See |
-| --- | --- |
-| Abandoned | [Attempt](#taking-a-quiz-attempt) |
-| Answer | [Question](#question) |
-| Attempt | [Attempt](#taking-a-quiz-attempt) |
-| Bookmark | [Attempt](#taking-a-quiz-attempt) |
-| Correct answer | [Question](#question) |
-| Difficulty | [Quiz](#quiz) |
-| Easy | [Question](#question), [Quiz](#quiz) |
-| Exam mode | [Quiz](#quiz) |
-| Explanation | [Question](#question) |
-| Finished | [Attempt](#taking-a-quiz-attempt) |
-| Image | [Question](#question) |
-| In-progress | [Attempt](#taking-a-quiz-attempt) |
-| Learning mode | [Quiz](#quiz) |
-| Multiple-choice | [Question](#question) |
-| Numerical | [Question](#question) |
-| Partially correct | [Attempt](#taking-a-quiz-attempt) |
-| Pass score | [Quiz](#quiz) |
-| Question | [Question](#question) |
-| Question explanation | [Question](#question) |
-| Question list | [Quiz](#quiz) |
-| Quiz | [Quiz](#quiz) |
-| Quiz maker | [Roles](#roles) |
-| Quiz taker | [Roles](#roles) |
-| Random question count | [Quiz](#quiz) |
-| Robin AI | [AI assistance](#ai-assistance-robin-ai) |
-| Schedule | [Quiz](#quiz) |
-| Single-choice | [Question](#question) |
-| Skip | [Attempt](#taking-a-quiz-attempt) |
-| Tags | [Question](#question) |
-| Time limit | [Quiz](#quiz) |
-| Timeout | [Attempt](#taking-a-quiz-attempt) |
-| Tolerance | [Question](#question) |
-| Workspace | [Workspace](#workspace) |
+| Term                  | See                                      |
+| --------------------- | ---------------------------------------- |
+| Abandoned             | [Attempt](#taking-a-quiz-attempt)        |
+| Answer                | [Question](#question)                    |
+| Attempt               | [Attempt](#taking-a-quiz-attempt)        |
+| Bookmark              | [Attempt](#taking-a-quiz-attempt)        |
+| Correct answer        | [Question](#question)                    |
+| Difficulty            | [Quiz](#quiz)                            |
+| Easy                  | [Question](#question), [Quiz](#quiz)     |
+| Exam mode             | [Quiz](#quiz)                            |
+| Explanation           | [Question](#question)                    |
+| Finished              | [Attempt](#taking-a-quiz-attempt)        |
+| Image                 | [Question](#question)                    |
+| In-progress           | [Attempt](#taking-a-quiz-attempt)        |
+| Learning mode         | [Quiz](#quiz)                            |
+| Multiple-choice       | [Question](#question)                    |
+| Numerical             | [Question](#question)                    |
+| Partially correct     | [Attempt](#taking-a-quiz-attempt)        |
+| Pass score            | [Quiz](#quiz)                            |
+| Poll                  | [Poll](#poll)                            |
+| Question              | [Question](#question)                    |
+| Question explanation  | [Question](#question)                    |
+| Question list         | [Quiz](#quiz)                            |
+| Quiz                  | [Quiz](#quiz)                            |
+| Quiz maker            | [Roles](#roles)                          |
+| Quiz taker            | [Roles](#roles)                          |
+| Random question count | [Quiz](#quiz)                            |
+| Robin AI              | [AI assistance](#ai-assistance-robin-ai) |
+| Schedule              | [Quiz](#quiz)                            |
+| Single-choice         | [Question](#question)                    |
+| Skip                  | [Attempt](#taking-a-quiz-attempt)        |
+| Tags                  | [Question](#question)                    |
+| Time limit            | [Quiz](#quiz)                            |
+| Timeout               | [Attempt](#taking-a-quiz-attempt)        |
+| Tolerance             | [Question](#question)                    |
+| Workspace             | [Workspace](#workspace)                  |
