@@ -138,7 +138,7 @@ export function WorkspacePage() {
                                 label="Create"
                                 icon="+"
                                 id="create-question"
-                                to={urls.workspaceQuestionNew(workspace.guid)}
+                                to={`${urls.workspaceQuestionNew(workspace.guid)}?tab=questions`}
                             />
                         }
                     >
@@ -190,7 +190,7 @@ export function WorkspacePage() {
                                 label="Create"
                                 icon="+"
                                 id="create-quiz"
-                                to={urls.workspaceQuizNew(workspace.guid)}
+                                to={`${urls.workspaceQuizNew(workspace.guid)}?tab=quizzes`}
                             />
                         }
                     >
