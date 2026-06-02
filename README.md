@@ -55,3 +55,4 @@ Prior to the class get yourself familiar with the tech stack:
 - [Vite](https://vitejs.dev/)
 - [Cucumber.js](https://cucumber.io/docs/guides/)
 - [Playwright](https://playwright.dev/)
+

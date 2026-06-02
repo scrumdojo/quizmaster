@@ -107,3 +107,8 @@ export const expectQuizFormErrors = async (quizCreatePage: QuizCreatePage, expec
         await expect.poll(() => quizCreatePage.hasError(error)).toBe(true)
     }
 }
+
+export const expectIndividualsLeaderboardTable = async (quizWelcomePage: QuizWelcomePage, data: DataTable) => {
+    const { headerCells, bodyRows } = parseTableData(data)
+    await quizWelcomePage.expectIndividualsLeaderboard('Individuals leaderboard', headerCells, bodyRows)
+}
