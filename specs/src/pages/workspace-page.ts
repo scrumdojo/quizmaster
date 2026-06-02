@@ -178,13 +178,45 @@ export class WorkspacePage {
     // ── Quiz list (gated → activate Quizzes tab first) ──
 
     private quizLocator = (quiz: string) => this.page.locator('.quiz-item').filter({ hasText: quiz })
+    private actionsButton = (quiz: string) => this.quizLocator(quiz).getByRole('button', { name: 'Actions' })
+
+    // Opens the Actions dropdown for a quiz row.
+    openActionsDropdown = async (quiz: string) => {
+        await this.showQuizzes()
+        await this.actionsButton(quiz).click()
+    }
+
+    // ── Quiz action assertions ───────────────────────────
+
+    expectQuizShareButtonVisible = async (quiz: string) => {
+        await this.showQuizzes()
+        await expect(this.quizLocator(quiz).getByRole('link', { name: 'Share' })).toBeVisible()
+    }
+    expectQuizActionsButtonVisible = async (quiz: string) => {
+        await this.showQuizzes()
+        await expect(this.actionsButton(quiz)).toBeVisible()
+    }
+    expectQuizActionsCollapsed = async (quiz: string) => {
+        await this.showQuizzes()
+        await expect(this.actionsButton(quiz)).toHaveAttribute('aria-expanded', 'false')
+    }
+    expectQuizActionsExpanded = async (quiz: string) => {
+        await expect(this.actionsButton(quiz)).toHaveAttribute('aria-expanded', 'true')
+    }
+    expectQuizEditHidden = async (quiz: string) => {
+        await this.showQuizzes()
+        await expect(this.quizLocator(quiz).getByRole('link', { name: 'Edit' })).toBeHidden()
+    }
+    expectQuizEditVisible = async (quiz: string) => {
+        await expect(this.quizLocator(quiz).getByRole('link', { name: 'Edit' })).toBeVisible()
+    }
 
     takeQuiz = async (quiz: string) => {
-        await this.showQuizzes()
+        await this.openActionsDropdown(quiz)
         await this.quizLocator(quiz).getByRole('link', { name: 'Take' }).click()
     }
     editQuiz = async (quiz: string) => {
-        await this.showQuizzes()
+        await this.openActionsDropdown(quiz)
         await this.quizLocator(quiz).getByRole('link', { name: 'Edit' }).click()
     }
     shareQuiz = async (quiz: string) => {
@@ -193,16 +225,16 @@ export class WorkspacePage {
         await this.page.locator('#share-page').waitFor({ state: 'visible' })
     }
     statsQuiz = async (quiz: string) => {
-        await this.showQuizzes()
+        await this.openActionsDropdown(quiz)
         await this.quizLocator(quiz).getByRole('link', { name: 'Statistics' }).click()
     }
     dryRunQuiz = async (quiz: string) => {
-        await this.showQuizzes()
+        await this.openActionsDropdown(quiz)
         await this.quizLocator(quiz).getByRole('link', { name: 'Dry run' }).click()
     }
 
     deleteQuiz = async (quiz: string) => {
-        await this.showQuizzes()
+        await this.openActionsDropdown(quiz)
         await this.quizLocator(quiz).getByRole('button', { name: 'Delete' }).click()
     }
     confirmDeletion = () => this.page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click()

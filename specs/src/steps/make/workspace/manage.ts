@@ -173,6 +173,36 @@ Then('I do not see quiz {string} in the workspace', async function (quizName: st
     await this.workspacePage.expectQuizNotVisible(quizName)
 })
 
+// ── Quiz action button assertions ───────────────────────
+
+Then('I see "Share" button for quiz {string}', async function (quiz: string) {
+    await this.workspacePage.expectQuizShareButtonVisible(quiz)
+})
+
+Then('I see "Actions" button for quiz {string}', async function (quiz: string) {
+    await this.workspacePage.expectQuizActionsButtonVisible(quiz)
+})
+
+Then('"Edit" is hidden for quiz {string}', async function (quiz: string) {
+    await this.workspacePage.expectQuizEditHidden(quiz)
+})
+
+Then('the "Actions" button is collapsed for quiz {string}', async function (quiz: string) {
+    await this.workspacePage.expectQuizActionsCollapsed(quiz)
+})
+
+When('I open the quiz actions for {string}', async function (quiz: string) {
+    await this.workspacePage.openActionsDropdown(quiz)
+})
+
+Then('the "Actions" button is expanded for quiz {string}', async function (quiz: string) {
+    await this.workspacePage.expectQuizActionsExpanded(quiz)
+})
+
+Then('"Edit" is visible in the quiz actions for {string}', async function (quiz: string) {
+    await this.workspacePage.expectQuizEditVisible(quiz)
+})
+
 Then('I see quiz {string} with order number {int}', async function (quizName: string, order: number) {
     await this.workspacePage.expectQuizOrderNumber(quizName, order)
 })
