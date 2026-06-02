@@ -38,26 +38,19 @@ export class RobinSheetPage {
 
     enterPrompt = (prompt: string) => this.promptLocator().fill(prompt)
     sendPromptByEnter = () => this.promptLocator().press('Enter')
-    generate = async () => {
-        if (await this.generateButtonLocator().isVisible()) {
-            await this.generateButtonLocator().click()
-            return
-        }
-        await this.sendPromptByEnter()
-    }
+    generate = () => this.sendPromptByEnter()
 
     askForSingleChoice = () => this.questionTypeRadio('single').check()
     askForMultipleChoice = () => this.questionTypeRadio('multiple').check()
     askForNumericalChoice = () => this.questionTypeRadio('numerical').check()
 
     saveGeneratedQuestions = () => this.saveButtonLocator().click()
+    useGeneratedQuestion = () => this.page.locator('#robin-use-button').first().click()
 
     expectPromptVisible = () => expect(this.promptLocator().first()).toBeVisible()
     expectPromptNotVisible = () => expect(this.promptLocator().first()).not.toBeVisible()
     expectPromptValue = (value: string) => expect(this.promptLocator()).toHaveValue(value)
-    expectGenerateButtonVisible = () => expect(this.generateButtonLocator()).toBeVisible()
     expectGenerateButtonNotVisible = () => expect(this.generateButtonLocator()).not.toBeVisible()
-    expectComposerNotVisible = () => expect(this.composerLocator()).not.toBeVisible()
     expectChatMessageVisible = (message: string) =>
         expect(this.chatMessageLocator().filter({ hasText: message })).toBeVisible()
     expectComposerDockedToBottom = async () => {
@@ -76,10 +69,18 @@ export class RobinSheetPage {
         expect(this.generatedQuestionNumberLocator(index)).toHaveText(`${index}.`)
     expectGeneratedQuestionTitle = (index: number, title: string) =>
         expect(this.generatedQuestionTitleLocator(index)).toHaveText(title)
+    generatedQuestionTitleText = async (index: number): Promise<string> =>
+        (await this.generatedQuestionTitleLocator(index).textContent())?.trim() ?? ''
     expectGeneratedQuestionAnswerCount = (index: number, count: number) =>
         expect(this.generatedQuestionAnswersLocator(index)).toHaveCount(count)
+    expectGeneratedQuestionAnswerCountAtLeast = async (index: number, count: number) =>
+        expect.poll(() => this.generatedQuestionAnswersLocator(index).count()).toBeGreaterThanOrEqual(count)
     expectGeneratedQuestionCorrectAnswerCount = (index: number, count: number) =>
         expect(this.generatedQuestionLocator(index).getByTestId('robin-generated-answer-correct')).toHaveCount(count)
+    expectGeneratedQuestionCorrectAnswerCountAtLeast = async (index: number, count: number) =>
+        expect
+            .poll(() => this.generatedQuestionLocator(index).getByTestId('robin-generated-answer-correct').count())
+            .toBeGreaterThanOrEqual(count)
     expectGeneratedAnswer = async (index: number, answer: string, correct: boolean) => {
         await expect(this.generatedQuestionAnswerLocator(index, answer)).toBeVisible()
         if (correct) {

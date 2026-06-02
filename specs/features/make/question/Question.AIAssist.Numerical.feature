@@ -1,7 +1,7 @@
 Feature: Generate numerical question using AI
-  AI can generate a numerical question from a topic and prefill the
-  numerical answer, tolerance, and question explanation before the
-  question is saved.
+  Robin AI drafts a numerical question in chat with its answer, tolerance,
+  and question explanation. The quiz maker reviews the draft and uses it to
+  fill the question form before saving.
 
   @ai
   Scenario: Generate a numerical question
@@ -9,8 +9,9 @@ Feature: Generate numerical question using AI
     When I open Robin AI
     And I ask AI for numerical question:
       | Generate a numerical question about basic arithmetic |
-    Then Question field is not empty
-    And the question is numerical
+    Then generated question 1 in Robin chat shows a numerical answer
+    When I use the generated question
+    Then the question is numerical
     And I see numerical answer field
     And I see non-empty numerical correct answer
     And I see tolerance "0"
@@ -26,10 +27,8 @@ Feature: Generate numerical question using AI
     And I ask AI for numerical question:
       | Generate a numerical question about a physics calculation |
       | and include tolerance                                     |
-    Then Question field is not empty
-    And the question is numerical
-    And I see non-empty numerical correct answer
-    And I see non-empty tolerance
+    Then generated question 1 in Robin chat shows a numerical answer
+    And generated question 1 in Robin chat shows tolerance
 
 
   @ai
@@ -39,10 +38,8 @@ Feature: Generate numerical question using AI
     And I ask AI for numerical question:
       | Generate a numerical question about geometry |
       | and include question explanation             |
-    Then Question field is not empty
-    And the question is numerical
-    And I see non-empty numerical correct answer
-    And I see non-empty question explanation
+    Then generated question 1 in Robin chat shows a numerical answer
+    And generated question 1 in Robin chat shows question explanation
 
 
   @ai
@@ -54,11 +51,9 @@ Feature: Generate numerical question using AI
       | asking <prompt>               |
       | with correct answer <answer>  |
       | and include tolerance         |
-    Then Question field is not empty
-    And the question is numerical
-    And I see numerical correct answer <answer>
-    And tolerance is greater than "0"
-    And tolerance is less than <answer-magnitude>
+    Then generated question 1 in Robin chat has numerical answer <answer>
+    And generated question 1 in Robin chat has tolerance greater than "0"
+    And generated question 1 in Robin chat has tolerance less than <answer-magnitude>
 
     Examples:
       | prompt            | answer | answer-magnitude |

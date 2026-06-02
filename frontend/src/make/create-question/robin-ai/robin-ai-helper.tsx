@@ -57,10 +57,9 @@ const editGenerateRequest =
 export const RobinAiHelper = ({ form, workspaceId, currentQuestion, currentQuestionId }: RobinAiHelperProps) => {
     const [sheetOpen, setSheetOpen] = useState(false)
     const [questionType, setQuestionType] = useState<QuestionType>(() => form.snapshot().questionType ?? 'single')
-    const handleGenerated = (drafts: readonly QuestionDraft[]) => {
-        const [draft] = drafts
-        if (!draft) return
+    const handleUseDraft = (draft: QuestionDraft) => {
         form.applyPatch(questionToPatch(draft))
+        setSheetOpen(false)
     }
 
     return createPortal(
@@ -68,7 +67,7 @@ export const RobinAiHelper = ({ form, workspaceId, currentQuestion, currentQuest
             <RobinFab onOpen={() => setSheetOpen(true)} />
             {sheetOpen && (
                 <RobinSheet
-                    onGenerated={handleGenerated}
+                    onUseDraft={handleUseDraft}
                     generateRequest={
                         currentQuestion ? editGenerateRequest(currentQuestion, currentQuestionId) : undefined
                     }
@@ -76,7 +75,6 @@ export const RobinAiHelper = ({ form, workspaceId, currentQuestion, currentQuest
                     questionType={questionType}
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
-                    mode="classic"
                 />
             )}
         </>,

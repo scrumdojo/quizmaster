@@ -27,14 +27,10 @@ export interface RobinGenerateRequest {
 }
 
 interface UseRobinPromptFormArgs {
-    readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
     readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
     readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
     readonly workspaceId: string
     readonly questionType: QuestionType
-    readonly onClose: () => void
-    readonly closeOnGenerated?: boolean
-    readonly mode?: 'classic' | 'chat'
 }
 
 const generateSingleDraft = async ({
@@ -46,14 +42,10 @@ const generateSingleDraft = async ({
 })
 
 export const useRobinPromptForm = ({
-    onGenerated,
     generateRequest = generateSingleDraft,
     saveDrafts,
     workspaceId,
     questionType,
-    onClose,
-    closeOnGenerated = true,
-    mode = 'classic',
 }: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
@@ -75,12 +67,8 @@ export const useRobinPromptForm = ({
                 questionType,
                 currentDrafts: generatedDrafts,
             })
-            await onGenerated(response.drafts)
-            if (mode === 'chat') {
-                setGeneratedDrafts(response.drafts)
-                setChatMessages(messages => [...messages, { role: 'user', text: submittedPrompt }])
-            }
-            if (closeOnGenerated) onClose()
+            setGeneratedDrafts(response.drafts)
+            setChatMessages(messages => [...messages, { role: 'user', text: submittedPrompt }])
         } catch (e) {
             const message = e instanceof Error ? e.message : 'AI assistant request failed.'
             setError(message || 'AI assistant request failed.')

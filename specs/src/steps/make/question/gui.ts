@@ -283,16 +283,8 @@ Then('I see AI section', async function () {
     await this.robinSheetPage.expectPromptVisible()
 })
 
-Then('I see Robin AI send button', async function () {
-    await this.robinSheetPage.expectGenerateButtonVisible()
-})
-
 Then('Robin AI message composer is docked to the bottom of the chat', async function () {
     await this.robinSheetPage.expectComposerDockedToBottom()
-})
-
-Then('I do not see Robin AI message composer', async function () {
-    await this.robinSheetPage.expectComposerNotVisible()
 })
 
 Then('I do not see Robin AI send button', async function () {
@@ -369,9 +361,23 @@ Then('generated question {int} in Robin chat has {int} answers', async function 
 })
 
 Then(
+    'generated question {int} in Robin chat has at least {int} answers',
+    async function (index: number, count: number) {
+        await this.robinSheetPage.expectGeneratedQuestionAnswerCountAtLeast(index, count)
+    },
+)
+
+Then(
     'generated question {int} in Robin chat has {int} highlighted correct answers',
     async function (index: number, count: number) {
         await this.robinSheetPage.expectGeneratedQuestionCorrectAnswerCount(index, count)
+    },
+)
+
+Then(
+    'generated question {int} in Robin chat has at least {int} highlighted correct answers',
+    async function (index: number, count: number) {
+        await this.robinSheetPage.expectGeneratedQuestionCorrectAnswerCountAtLeast(index, count)
     },
 )
 
@@ -487,9 +493,10 @@ const normalizeQuestionText = (question: string) =>
         .replace(/\s+/g, ' ')
         .trim()
 
-Then('the generated question should not ask {string}', async function (question: string) {
-    const generatedQuestion = await this.questionEditPage.questionValue()
-    expect(normalizeQuestionText(generatedQuestion)).not.toBe(normalizeQuestionText(question))
+Then('the generated question in Robin chat should not ask {string}', async function (question: string) {
+    await this.robinSheetPage.expectGeneratedQuestionVisible(1)
+    const title = await this.robinSheetPage.generatedQuestionTitleText(1)
+    expect(normalizeQuestionText(title)).not.toBe(normalizeQuestionText(question))
 })
 
 // Field edits
@@ -538,6 +545,10 @@ When('I ask AI to generate multiple questions:', async function (dataTable: Data
 
 When('I save the generated questions', async function () {
     await this.robinSheetPage.saveGeneratedQuestions()
+})
+
+When('I use the generated question', async function () {
+    await this.robinSheetPage.useGeneratedQuestion()
 })
 
 When('I enter Robin AI message {string}', async function (message: string) {

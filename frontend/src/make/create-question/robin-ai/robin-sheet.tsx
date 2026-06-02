@@ -8,38 +8,30 @@ import { useRobinPromptForm } from './use-robin-prompt-form.ts'
 import type { RobinGenerateRequest, RobinGenerationResult } from './use-robin-prompt-form.ts'
 
 interface RobinSheetProps {
-    readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
     readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
     readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
+    readonly onUseDraft?: (draft: QuestionDraft) => void
     readonly workspaceId: string
     readonly questionType: QuestionType
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
-    readonly closeOnGenerated?: boolean
-    readonly mode?: 'classic' | 'chat'
 }
 
 export const RobinSheet = ({
-    onGenerated,
     generateRequest,
     saveDrafts,
+    onUseDraft,
     workspaceId,
     questionType,
     onQuestionTypeChange,
     onClose,
-    closeOnGenerated,
-    mode = 'classic',
 }: RobinSheetProps) => {
     const { promptText, setPromptText, loading, saving, error, generate, save, generatedDrafts, chatMessages } =
         useRobinPromptForm({
-            onGenerated,
             generateRequest,
             saveDrafts,
             workspaceId,
             questionType,
-            onClose,
-            closeOnGenerated,
-            mode,
         })
 
     const submitPrompt = () => {
@@ -51,50 +43,6 @@ export const RobinSheet = ({
         if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
         event.preventDefault()
         submitPrompt()
-    }
-
-    if (mode === 'classic') {
-        return (
-            <div className="robin-sheet robin-sheet--classic" data-testid="robin-sheet">
-                <div className="header">
-                    <span className="title">Ask Robin AI</span>
-                    <button type="button" className="close-button" onClick={onClose}>
-                        ✕
-                    </button>
-                </div>
-                <Field
-                    label="Question type"
-                    required
-                    note="Single choice requires one correct answer. Multiple choice requires at least two correct answers. Numerical questions require a numeric answer."
-                >
-                    <QuestionTypeRadioSet
-                        name="robin-question-type"
-                        value={questionType}
-                        onChange={onQuestionTypeChange}
-                    />
-                </Field>
-                <TextArea
-                    id="robin-prompt-text"
-                    placeholder="What do you want to ask?"
-                    value={promptText}
-                    onChange={setPromptText}
-                />
-                <span className="example">Example: "What is the capital of France? Generate 6 answers."</span>
-                {error && (
-                    <Alert type="error" dataTestId="ai-assistant-error">
-                        {error}
-                    </Alert>
-                )}
-                <Button
-                    id="robin-generate-button"
-                    className="secondary button"
-                    onClick={() => void generate()}
-                    disabled={loading}
-                >
-                    {loading ? 'Loading...' : 'Generate'}
-                </Button>
-            </div>
-        )
     }
 
     return (
@@ -187,12 +135,22 @@ export const RobinSheet = ({
                                             {draft.questionExplanation}
                                         </p>
                                     )}
+
+                                    {onUseDraft && (
+                                        <Button
+                                            id="robin-use-button"
+                                            className="secondary button"
+                                            onClick={() => onUseDraft(draft)}
+                                        >
+                                            Use this question
+                                        </Button>
+                                    )}
                                 </article>
                             )
                         })}
                     </div>
                 )}
-                {generatedDrafts.length > 0 && (
+                {saveDrafts && generatedDrafts.length > 0 && (
                     <Button
                         id="robin-save-button"
                         className="secondary button"

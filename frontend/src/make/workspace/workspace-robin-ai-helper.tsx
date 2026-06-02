@@ -36,22 +36,17 @@ export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionsSaved }: Worksp
     const [sheetOpen, setSheetOpen] = useState(false)
     const [questionType, setQuestionType] = useState<QuestionType>('single')
 
-    const handleGenerated = async (_drafts: readonly QuestionDraft[]) => {}
-
     return createPortal(
         <>
             <RobinFab onOpen={() => setSheetOpen(true)} />
             {sheetOpen && (
                 <RobinSheet
-                    onGenerated={handleGenerated}
                     generateRequest={generateWorkspaceRobinDrafts}
                     saveDrafts={saveWorkspaceRobinDrafts(workspaceId, onQuestionsSaved)}
                     workspaceId={workspaceId}
                     questionType={questionType}
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
-                    closeOnGenerated={false}
-                    mode="chat"
                 />
             )}
         </>,
