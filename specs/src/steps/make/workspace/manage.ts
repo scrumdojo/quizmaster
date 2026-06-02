@@ -135,6 +135,14 @@ Then('I do not see image thumbnail for question {string}', async function (quest
     await this.workspacePage.expectQuestionThumbnailNotVisible(question)
 })
 
+Then('I see the image preview inside the title row for question {string}', async function (question: string) {
+    await this.workspacePage.expectQuestionImageInTitleRow(question)
+})
+
+Then('I do not see an image preview inside the title row for question {string}', async function (question: string) {
+    await this.workspacePage.expectQuestionImageNotInTitleRow(question)
+})
+
 When('I take question {string} from the list', async function (question: string) {
     this.activeQuestionBookmark = question
     await this.workspacePage.takeQuestion(question)

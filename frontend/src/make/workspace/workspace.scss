@@ -442,11 +442,12 @@
 }
 
 .question-item .question-thumbnail {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     object-fit: cover;
     flex-shrink: 0;
-    border-radius: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .question-item .question-content {

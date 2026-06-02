@@ -116,6 +116,8 @@ export class WorkspacePage {
 
     private questionThumbnailLocator = (question: string) =>
         this.questionLocator(question).locator('img.question-thumbnail')
+    private questionTitleRowPreviewLocator = (question: string) =>
+        this.questionLocator(question).locator('.question-main-row img.question-thumbnail')
     expectQuestionThumbnailVisible = async (question: string) => {
         await this.showQuestions()
         await expect(this.questionThumbnailLocator(question)).toBeVisible()
@@ -123,6 +125,14 @@ export class WorkspacePage {
     expectQuestionThumbnailNotVisible = async (question: string) => {
         await this.showQuestions()
         await expect(this.questionThumbnailLocator(question)).not.toBeVisible()
+    }
+    expectQuestionImageInTitleRow = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionTitleRowPreviewLocator(question)).toBeVisible()
+    }
+    expectQuestionImageNotInTitleRow = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionTitleRowPreviewLocator(question)).not.toBeVisible()
     }
 
     // ── Question tag badge ───────────────────────────
