@@ -47,8 +47,9 @@ const AnimationSettings = () => {
             data-testid="animation-settings"
             style={{
                 position: 'fixed',
-                right: 16,
-                bottom: 16,
+                top: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
                 zIndex: 10,
                 display: 'flex',
                 background: 'rgba(255,255,255,0.92)',

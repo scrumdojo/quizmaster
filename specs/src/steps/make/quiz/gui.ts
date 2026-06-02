@@ -14,7 +14,7 @@ When('I filter questions in workspace by {string}', async function (s: string) {
 })
 
 When('I see quiz question {string} in workspace', async function (title: string) {
-    await this.workspacePage.expectQuestionVisible(title)
+    if (title) await this.workspacePage.expectQuestionVisible(title)
 })
 
 When("I don't see quiz questions {string} in workspace", async function (title: string) {

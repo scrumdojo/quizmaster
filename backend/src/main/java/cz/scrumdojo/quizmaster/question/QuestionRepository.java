@@ -20,12 +20,14 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
         SELECT *
         FROM question q
         WHERE q.workspace_guid = :workspaceGuid
-          AND (
-                lower(q.question) LIKE lower(concat('%', :query, '%'))
-                OR EXISTS (
+          AND NOT EXISTS (
+              SELECT 1
+              FROM regexp_split_to_table(lower(:query), '\\s+') AS word
+              WHERE lower(q.question) NOT LIKE concat('%', word, '%')
+                AND NOT EXISTS (
                     SELECT 1
                     FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
-                    WHERE lower(tag) LIKE lower(concat('%', :query, '%'))
+                    WHERE lower(tag) LIKE concat('%', word, '%')
                 )
           )
         ORDER BY q.id DESC
@@ -34,12 +36,14 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
         SELECT count(*)
         FROM question q
         WHERE q.workspace_guid = :workspaceGuid
-          AND (
-                lower(q.question) LIKE lower(concat('%', :query, '%'))
-                OR EXISTS (
+          AND NOT EXISTS (
+              SELECT 1
+              FROM regexp_split_to_table(lower(:query), '\\s+') AS word
+              WHERE lower(q.question) NOT LIKE concat('%', word, '%')
+                AND NOT EXISTS (
                     SELECT 1
                     FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
-                    WHERE lower(tag) LIKE lower(concat('%', :query, '%'))
+                    WHERE lower(tag) LIKE concat('%', word, '%')
                 )
           )
         """,
