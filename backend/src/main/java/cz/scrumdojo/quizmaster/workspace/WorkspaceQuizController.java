@@ -78,10 +78,10 @@ public class WorkspaceQuizController {
         var quizPage = normalizedQuery.isEmpty()
             ? quizRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid, PageRequest.of(page, PAGE_SIZE))
             : quizRepository.findByWorkspaceGuidAndTitleContainingIgnoreCaseOrderByIdDesc(
-                workspaceGuid,
-                normalizedQuery,
-                PageRequest.of(page, PAGE_SIZE)
-            );
+                  workspaceGuid,
+                  normalizedQuery,
+                  PageRequest.of(page, PAGE_SIZE)
+              );
 
         var items = quizPage
             .getContent()
