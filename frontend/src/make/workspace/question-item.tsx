@@ -25,8 +25,10 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                     </div>
                 )}
                 <div className="question-main-row">
-                    <span className="question-text">{question.question}</span>
-                    {question.imageUrl && <img src={question.imageUrl} alt="" className="question-thumbnail" />}
+                    <div className="question-title-group">
+                        <span className="question-text">{question.question}</span>
+                        {question.imageUrl && <img src={question.imageUrl} alt="" className="question-thumbnail" />}
+                    </div>
                     <LinkButton
                         label="Edit"
                         to={`${urls.workspaceQuestionEdit(workspaceId, question.id)}?tab=questions`}

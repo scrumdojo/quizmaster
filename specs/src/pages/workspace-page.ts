@@ -136,6 +136,12 @@ export class WorkspacePage {
         await this.showQuestions()
         await expect(this.questionTitleRowPreviewLocator(question)).not.toBeVisible()
     }
+    expectImageGroupedWithTitle = async (question: string) => {
+        await this.showQuestions()
+        await expect(
+            this.questionLocator(question).locator('.question-title-group img.question-thumbnail'),
+        ).toBeVisible()
+    }
 
     // ── Question tag badge ───────────────────────────
 

@@ -480,8 +480,17 @@
     min-width: 0;
 }
 
+.question-item .question-content .question-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
 .question-item .question-content .question-text {
-    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

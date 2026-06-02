@@ -147,6 +147,10 @@ Then('I do not see image thumbnail for question {string}', async function (quest
     await this.workspacePage.expectQuestionThumbnailNotVisible(question)
 })
 
+Then('the image preview is grouped with the title for question {string}', async function (question: string) {
+    await this.workspacePage.expectImageGroupedWithTitle(question)
+})
+
 Then('I see the image preview inside the title row for question {string}', async function (question: string) {
     await this.workspacePage.expectQuestionImageInTitleRow(question)
 })
