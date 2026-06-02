@@ -3,7 +3,7 @@ Feature: Generate numerical question using AI
   numerical answer, tolerance, and question explanation before the
   question is saved.
 
-  @ai @slow
+  @ai
   Scenario: Generate a numerical question
     Given I start creating a new question
     When I open Robin AI
@@ -19,7 +19,7 @@ Feature: Generate numerical question using AI
     Then the question is saved in the workspace
 
 
-  @ai @slow
+  @ai
   Scenario: Numerical question with tolerance
     Given I start creating a new question
     When I open Robin AI
@@ -32,7 +32,7 @@ Feature: Generate numerical question using AI
     And I see non-empty tolerance
 
 
-  @ai @slow
+  @ai
   Scenario: Numerical question with question explanation
     Given I start creating a new question
     When I open Robin AI
@@ -45,7 +45,7 @@ Feature: Generate numerical question using AI
     And I see non-empty question explanation
 
 
-  @ai @slow
+  @ai
   Scenario Outline: Vague tolerance request yields a non-zero tolerance bounded by the answer
     Given I start creating a new question
     When I open Robin AI

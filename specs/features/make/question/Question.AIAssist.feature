@@ -14,7 +14,7 @@ Feature: Generate question using AI
     Then I do not see Robin AI message composer
 
 
-  @ai @slow
+  @ai
   Scenario: AI-generated question shows explanations
     Given I start creating a new question
     When I open Robin AI
@@ -25,7 +25,7 @@ Feature: Generate question using AI
     And all answers have explanations
 
 
-  @ai @slow
+  @ai
   Scenario: Generate a single-choice question
     Given I start creating a new question
     And the question is single choice
@@ -39,7 +39,7 @@ Feature: Generate question using AI
     And exactly 1 answer is marked correct
 
 
-  @ai @slow
+  @ai
   Scenario: Generate a multiple-choice question
     Given I start creating a new question
     When I open Robin AI
@@ -52,7 +52,7 @@ Feature: Generate question using AI
     And at least 2 answers are marked correct
 
 
-  @ai @slow
+  @ai
   Scenario: Do not generate a question that duplicates an existing workspace question
     Given I start creating a new question
     And the workspace already contains the question "Which country is the largest producer of coffee?"
@@ -60,7 +60,7 @@ Feature: Generate question using AI
     Then the generated question should not ask "Which country is the largest producer of coffee?"
 
 
-  @ai @slow
+  @ai
   Scenario: Save an AI-generated question
     Given I start creating a new question
     When I open Robin AI
@@ -72,7 +72,7 @@ Feature: Generate question using AI
     Then the question is saved in the workspace
 
 
-  @ai @slow
+  @ai
   Scenario: Edit an AI-generated question before saving
     Given I start creating a new question
     When I open Robin AI
@@ -85,7 +85,7 @@ Feature: Generate question using AI
     Then I see question in list "What is the capital of France?"
 
 
-  @ai @slow
+  @ai
   Scenario: Regenerate replaces previous AI response
     Given I start creating a new question
     And the question is single choice
@@ -168,7 +168,7 @@ Feature: Generate question using AI
     * AI received current question context with answer "Bratislava"
 
 
-  @ai @slow
+  @ai
   Scenario: After question is generated previous version is available
     Given I start creating a new question
     When I open Robin AI
@@ -177,7 +177,7 @@ Feature: Generate question using AI
     Then I can restore the previous version
 
 
-  @ai @slow
+  @ai
   Scenario: After I restore the previous version I see the previous generated content
     Given I start creating a new question when I already have generated content
     When I open Robin AI
@@ -188,7 +188,7 @@ Feature: Generate question using AI
     Then I see the previous generated version
 
 
-  @ai @slow
+  @ai
   Scenario: Previous version is available after generating multiple questions
     Given I start creating a new question when I already have generated content
     When I open Robin AI
@@ -201,7 +201,7 @@ Feature: Generate question using AI
     Then I can restore the previous version
 
 
-  @ai @slow
+  @ai
   Scenario: Can restore to previous generated version and see content
     Given I start creating a new question when I already have generated content
     When I open Robin AI
@@ -216,7 +216,7 @@ Feature: Generate question using AI
     Then I see the previous generated version
 
 
-  @ai @slow
+  @ai
   Scenario: Can navigate backward through multiple generated versions
     Given I start creating a new question
     When I open Robin AI
@@ -235,7 +235,7 @@ Feature: Generate question using AI
     Then I can restore the previous version
 
 
-  @ai @slow
+  @ai
   Scenario: Can restore to first generated version in history
     Given I start creating a new question
     When I open Robin AI

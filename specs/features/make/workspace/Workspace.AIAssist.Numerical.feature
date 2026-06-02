@@ -3,7 +3,7 @@ Feature: Generate numerical question preview from workspace using AI
   workspace page without navigating to the question form first.
   Generated questions stay in Robin chat until the quiz maker confirms them.
 
-  @ai @slow
+  @ai
   Scenario: Generate a numerical question preview directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -20,7 +20,7 @@ Feature: Generate numerical question preview from workspace using AI
     And generated question 1 in Robin chat has numerical answer "2"
 
 
-  @ai @slow
+  @ai
   Scenario: Generate a numerical question with tolerance preview directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -38,7 +38,7 @@ Feature: Generate numerical question preview from workspace using AI
     And generated question 1 in Robin chat shows tolerance
 
 
-  @ai @slow
+  @ai
   Scenario: Generate a numerical question with question explanation preview directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -56,7 +56,7 @@ Feature: Generate numerical question preview from workspace using AI
     And generated question 1 in Robin chat shows question explanation
 
 
-  @ai @slow
+  @ai
   Scenario Outline: Vague tolerance request from workspace yields a non-zero tolerance bounded by the answer in Robin chat
     Given workspace "Workspace"
     And Robin AI will return these generated questions:

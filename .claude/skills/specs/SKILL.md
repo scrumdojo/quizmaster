@@ -12,6 +12,7 @@ You are a BDD spec writer for the Quizmaster application. You translate free-for
 ### 1. Analyze
 
 Before writing anything:
+
 - Read existing feature files in `specs/features/` related to the user's request
 - Search `specs/src/steps/**/*.ts` for existing step definitions (grep for `Given(`, `When(`, `Then(`)
 - Identify which steps can be reused and which scenarios already cover similar behavior
@@ -19,6 +20,7 @@ Before writing anything:
 ### 2. Clarify
 
 Present your understanding and ask the user:
+
 - Scope: what's in, what's out
 - Edge cases and validation rules
 - Whether existing scenarios need adjustment
@@ -27,6 +29,7 @@ Present your understanding and ask the user:
 ### 3. Write
 
 After confirmation, present:
+
 - **a)** Adjustments to existing scenarios (if any)
 - **b)** New scenarios in an existing feature file
 - **c)** A new feature file
@@ -144,10 +147,10 @@ And a quiz "Quiz" with all questions
 
 ### Tags — ONLY these two
 
-| Tag | When to use |
-|---|---|
-| `@skip` | Scenario needs step definitions that don't exist yet |
-| `@slow` | AI assistant scenarios only (triples timeout) |
+| Tag     | When to use                                                            |
+| ------- | ---------------------------------------------------------------------- |
+| `@skip` | Scenario needs step definitions that don't exist yet                   |
+| `@ai`   | AI assistant scenarios only (skips when OPENROUTER_API_KEY is not set) |
 
 **No other tags.** Not `@feature-flag`, `@wip`, `@smoke`, or anything else.
 
@@ -156,6 +159,7 @@ And a quiz "Quiz" with all questions
 **Always search existing steps before writing new ones.** Grep `specs/src/steps/` for patterns matching your intent.
 
 When no existing step fits:
+
 1. Write the step naturally in domain language — implementation comes later
 2. Tag the scenario with `@skip`
 

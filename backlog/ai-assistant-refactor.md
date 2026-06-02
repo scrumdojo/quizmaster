@@ -72,7 +72,7 @@ Before opening the worktree branch:
 
 - Confirm `master` builds clean: `pnpm code && pnpm test:be:local && pnpm test:e2e`.
 - Note: `Workspace.AIAssist.Batch.feature` and `Workspace.AIAssist.Chat.feature`
-  carry `@ai @slow` scenarios that hit OpenRouter — they require `ai.token` in
+  carry `@ai` scenarios that hit OpenRouter — they require `ai.token` in
   `application-local.properties`. If the token is missing locally, those
   scenarios are skipped; the refactor must not regress that skip behavior.
 - Inventory the magic strings to be replaced: search
@@ -131,13 +131,13 @@ test fixtures use the no-arg setters or the two-arg form.
 - Convert the two `@Tag("ai")` happy-path assertions in
   `AiAssistantControllerTest.java:33-81` from `jsonPath` chains to a single
   `content().json(...)` text block per `controller-style.md:36-37`.
-  - The text body of `question` and individual `answers` vary across LLM
-    calls — keep `jsonPath` only for those slots. The shape (`answers.length`,
-    `correctAnswers.length`, `explanations.length`, top-level keys) goes into
-    the JSON text block, using `Customization.STRICT_ORDER == false` defaults.
-  - If the contract is too tight for non-deterministic LLM output, split into
-    a shape check (JSON text block of empty arrays with correct lengths) and a
-    contentful jsonPath for the dynamic strings.
+    - The text body of `question` and individual `answers` vary across LLM
+      calls — keep `jsonPath` only for those slots. The shape (`answers.length`,
+      `correctAnswers.length`, `explanations.length`, top-level keys) goes into
+      the JSON text block, using `Customization.STRICT_ORDER == false` defaults.
+    - If the contract is too tight for non-deterministic LLM output, split into
+      a shape check (JSON text block of empty arrays with correct lengths) and a
+      contentful jsonPath for the dynamic strings.
 - The 400/404 tests already use status-only assertions; no change.
 
 **Independent:** yes. No spec changes.
@@ -164,19 +164,19 @@ Step 4.
   `String questionType` (line 491-498).
 - Update each prompt's example JSON to include a literal `"questionType"`
   field (`"single"` / `"multiple"` / `"numerical"`) and add one rule line:
-  *"Always include `questionType` matching the requested type."* This keeps
+  _"Always include `questionType` matching the requested type."_ This keeps
   every prompt internally consistent while still being type-specialized;
   Step 4 will unify them.
 - `validateForType(response, resolvedType)` (line 353-360) gets a guard at
   the top:
-  ```java
-  if (response.questionType() == null || !response.questionType().equals(resolvedType)) {
-      throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-          "AI assistant returned invalid response: questionType mismatch.");
-  }
-  ```
-  — i.e. for now we still pass `resolvedType` (the FE-chosen type) and
-  require the model to echo it. The two collapse into one in Step 4.
+    ```java
+    if (response.questionType() == null || !response.questionType().equals(resolvedType)) {
+        throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+            "AI assistant returned invalid response: questionType mismatch.");
+    }
+    ```
+    — i.e. for now we still pass `resolvedType` (the FE-chosen type) and
+    require the model to echo it. The two collapse into one in Step 4.
 - `toDraftResponse(...)` (line 469-479) now reads
   `assistantResponse.questionType()` instead of taking it as a parameter.
 - New tests: `validateResponse_questionTypeMismatch`,
@@ -191,7 +191,7 @@ differently; it already trusts what the BE returns via `QuestionDraft`.
 
 **Commit message:** `refactor(aiassistant): require AssistantResponse to declare questionType`
 
-**Pre-commit check:** as above. The `@ai`/`@slow` scenarios are the real
+**Pre-commit check:** as above. The `@ai` scenarios are the real
 truth test here — they exercise actual LLM responses against the new contract.
 
 ---
@@ -205,29 +205,29 @@ truth test here — they exercise actual LLM responses against the new contract.
 
 - Add `backend/src/main/resources/prompts/draft-question.md` covering all
   three types in one document:
-  - One "rules" section (language matches prompt, output JSON only,
-    `questionExplanation` empty unless requested, etc.).
-  - Three labeled type sections (single / multiple / numerical) each with the
-    answer-count rule and a JSON example carrying its own `"questionType"`.
-  - One "edit-or-create" note: *"If the user provides a `currentQuestion`
-    JSON, modify only the fields the instruction asks about and preserve
-    the rest."* — wired in fully at Step 7, but mention it here so the
-    Step 7 commit is a behavior change, not a prompt rewrite.
-  - One "batch" note: *"If the user asks for N questions, return an array
-    of N items; otherwise return an array of 1 item."* Even single-question
-    callers receive `{"questions": [...]}` from the LLM — simplifies the
-    handler.
+    - One "rules" section (language matches prompt, output JSON only,
+      `questionExplanation` empty unless requested, etc.).
+    - Three labeled type sections (single / multiple / numerical) each with the
+      answer-count rule and a JSON example carrying its own `"questionType"`.
+    - One "edit-or-create" note: _"If the user provides a `currentQuestion`
+      JSON, modify only the fields the instruction asks about and preserve
+      the rest."_ — wired in fully at Step 7, but mention it here so the
+      Step 7 commit is a behavior change, not a prompt rewrite.
+    - One "batch" note: _"If the user asks for N questions, return an array
+      of N items; otherwise return an array of 1 item."_ Even single-question
+      callers receive `{"questions": [...]}` from the LLM — simplifies the
+      handler.
 - Delete the six existing `.md` files in the same commit.
 - In `AiAssistantService.java`:
-  - One `loadPrompt("prompts/draft-question.md")` in the constructor; drop
-    the six fields and the six loads (lines 41-46, 63-68).
-  - Delete `chooseSystemPrompt` and `chooseBatchSystemPrompt` (lines 335-351).
-  - `generateCandidate` and `generateBatchCandidate` now both prepend the
-    same prompt + `embeddingUniquenessRule`.
-  - **Important**: this commit still passes `questionType` to the prompt as
-    a request hint (via the user-message body) so behavior is unchanged.
-    Mixed-type batching becomes possible architecturally but is not yet
-    exercised — the FE still sends one type.
+    - One `loadPrompt("prompts/draft-question.md")` in the constructor; drop
+      the six fields and the six loads (lines 41-46, 63-68).
+    - Delete `chooseSystemPrompt` and `chooseBatchSystemPrompt` (lines 335-351).
+    - `generateCandidate` and `generateBatchCandidate` now both prepend the
+      same prompt + `embeddingUniquenessRule`.
+    - **Important**: this commit still passes `questionType` to the prompt as
+      a request hint (via the user-message body) so behavior is unchanged.
+      Mixed-type batching becomes possible architecturally but is not yet
+      exercised — the FE still sends one type.
 - Update `AssistantBatchResponse` is unchanged; it already wraps `responses`.
 - Adjust `AiAssistantServiceTest`'s validation tests to drop the per-type
   prompt assumption.
@@ -237,14 +237,14 @@ note is documentation-only at this point; nothing in the request carries a
 `currentQuestion` until Step 7. The note costs nothing and avoids a prompt
 rewrite later.
 
-**Spec impact:** the existing `@ai @slow` scenarios exercise the new prompt
+**Spec impact:** the existing `@ai` scenarios exercise the new prompt
 end-to-end. If the LLM produces measurably different output (e.g.
 question-type echoing fails), it shows up here. Adjust prompt wording within
 this commit; do not let Step 5 follow before specs are green.
 
 **Commit message:** `refactor(aiassistant): collapse six prompts into one unified draft-question prompt`
 
-**Pre-commit check:** as above; pay special attention to `@ai @slow`
+**Pre-commit check:** as above; pay special attention to `@ai`
 scenarios in `Question.AIAssist.feature` and `Workspace.AIAssist.Batch.feature`.
 Skipped without `ai.token` — if skipped, flag this in the PR description
 so a reviewer with the token can run them before merge.
@@ -260,7 +260,7 @@ so a reviewer with the token can run them before merge.
 
 - `generateQuestions(prompt, questionType)` and the two-arg overload disappear.
   Keep one entry point `generateQuestions(prompt, questionType, workspaceGuid,
-  excludedQuestionId)`. (Consistent with `ai-assistant-service-refactor.md`'s
+excludedQuestionId)`. (Consistent with `ai-assistant-service-refactor.md`'s
   collapse direction.)
 - Line 115 becomes
   `questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, excludedQuestionId);`.
@@ -288,17 +288,17 @@ so no Gherkin scenario changes. The unit test is the regression guard.
 **Changes:**
 
 - Add at least three scenarios:
-  - *Robin updates the numeric answer of an existing numerical question* —
-    open existing question, ask "change the answer to 42", assert answer
-    becomes 42, tolerance preserved.
-  - *Robin updates tolerance of an existing numerical question* — assert
-    answer preserved, tolerance becomes the requested value.
-  - *Robin rewords the question of an existing numerical question* — assert
-    answer and tolerance preserved, question text changes.
+    - _Robin updates the numeric answer of an existing numerical question_ —
+      open existing question, ask "change the answer to 42", assert answer
+      becomes 42, tolerance preserved.
+    - _Robin updates tolerance of an existing numerical question_ — assert
+      answer preserved, tolerance becomes the requested value.
+    - _Robin rewords the question of an existing numerical question_ — assert
+      answer and tolerance preserved, question text changes.
 - Use the same stub pattern as `Question.AIAssist.feature:118-135` (stubbed
   AI returning a known payload).
 - This step **must run on master's behavior** — i.e. these scenarios should
-  pass against the code *as it exists after Step 4* and continue passing
+  pass against the code _as it exists after Step 4_ and continue passing
   after Steps 7-8. They lock in the behavior the user described as
   unreliable. If they fail on master, that's the bug to address inside
   Step 7.
@@ -325,23 +325,23 @@ value is paired with Steps 7-8.
   record in `cz.scrumdojo.quizmaster.aiassistant` mirroring the shared TS
   type. Reuse `QuestionResponse.draft(...)` shape — fields:
   `question, answers, correctAnswers, explanations, questionExplanation,
-  tolerance, questionType`.) Use `@Valid` cascading is unnecessary for now —
+tolerance, questionType`.) Use `@Valid` cascading is unnecessary for now —
   it's pass-through data for the LLM.
 - In the unified prompt, promote the "edit-or-create" note added in Step 4
-  to the load-bearing instruction: *"If the request includes
+  to the load-bearing instruction: _"If the request includes
   `currentQuestion`, treat it as the current state; apply only the user's
   instruction; preserve every field the instruction does not need to
-  change."*
+  change."_
 - In `AiAssistantService`, format `existingQuestion` as a JSON block in the
-  *user* message (after the maker's instruction), not the system message.
+  _user_ message (after the maker's instruction), not the system message.
   This keeps the system prompt static and lets prompt caching (if any)
   remain effective.
 - Add new BE tests asserting that:
-  - When `existingQuestion` is null, behavior matches today.
-  - When `existingQuestion` is present, the system prompt is unchanged and
-    the user message carries the JSON.
-  - The 400 path for malformed `existingQuestion` (when its `questionType`
-    doesn't match `request.questionType()` — that's an obvious user error).
+    - When `existingQuestion` is null, behavior matches today.
+    - When `existingQuestion` is present, the system prompt is unchanged and
+      the user message carries the JSON.
+    - The 400 path for malformed `existingQuestion` (when its `questionType`
+      doesn't match `request.questionType()` — that's an obvious user error).
 - Document the new field in `docs/ai-assistant.md` (the "RobinFormBinding"
   section already talks about the FE contract; add an "Edit-or-create"
   paragraph under `AiAssistantService`).
@@ -359,7 +359,7 @@ reason — see Step 8 for the FE half).
 
 **Commit message:** `feat(aiassistant): backend accepts existingQuestion for in-place edits`
 
-**Pre-commit check:** `pnpm test:e2e` — primarily the `@ai @slow` scenarios
+**Pre-commit check:** `pnpm test:e2e` — primarily the `@ai` scenarios
 to confirm the LLM follows the new edit instruction.
 
 ---
@@ -397,7 +397,7 @@ string-wrapped JSON. **This is the commit where editing becomes reliable.**
 **Commit message:** `feat(robin): send existingQuestion to backend instead of wrapping it in the prompt`
 
 **Pre-commit check:** the numerical-edit scenarios from Step 6 are the
-sharpest signal; `@ai @slow` scenarios that actually exercise edits are
+sharpest signal; `@ai` scenarios that actually exercise edits are
 secondary.
 
 ---
@@ -458,7 +458,7 @@ from the wire's perspective.
 **Changes:**
 
 - Extend `AiAssistantRequest` with `Integer count` (default null → 1).
-  `questionType` becomes optional (a *hint*); when present and
+  `questionType` becomes optional (a _hint_); when present and
   `existingQuestion` is also present, prompt instructs the LLM to preserve
   the type unless told otherwise; when both are absent, the LLM picks per
   question (mixed-type batch).
@@ -473,20 +473,20 @@ from the wire's perspective.
   format: the LLM always returns `{"questions": [...]}` with N items
   (`AssistantBatchResponse` is the only shape).
 - Update FE:
-  - `postAiAssistant` returns `readonly QuestionDraft[]`. Single-draft
-    callers do `[draft] = await postAiAssistant(...)`.
-  - `postAiAssistantBatch` disappears.
-  - `workspace-robin-ai-helper.tsx`: drop the `wantsMultipleQuestions`
-    branch (already gone in Step 9). The count selector now drives the
-    `count` field of the request body.
+    - `postAiAssistant` returns `readonly QuestionDraft[]`. Single-draft
+      callers do `[draft] = await postAiAssistant(...)`.
+    - `postAiAssistantBatch` disappears.
+    - `workspace-robin-ai-helper.tsx`: drop the `wantsMultipleQuestions`
+      branch (already gone in Step 9). The count selector now drives the
+      `count` field of the request body.
 - Update MCP:
-  - `quizmaster_generate_question_draft` tool returns
-    `readonly QuestionDraft[]`. Tool description updated.
-  - Backwards-compatibility: if MCP consumers depend on a single-object
-    response shape, this is a breaking change — call it out in the commit
-    message and `docs/mcp/overview.md`. Per the user's earlier guidance,
-    this is a training app, not an enterprise system; breaking changes are
-    fine if documented.
+    - `quizmaster_generate_question_draft` tool returns
+      `readonly QuestionDraft[]`. Tool description updated.
+    - Backwards-compatibility: if MCP consumers depend on a single-object
+      response shape, this is a breaking change — call it out in the commit
+      message and `docs/mcp/overview.md`. Per the user's earlier guidance,
+      this is a training app, not an enterprise system; breaking changes are
+      fine if documented.
 - Update Gherkin: any scenario expecting the singular endpoint or shape;
   in practice the specs go through the page object, so changes are local
   to `robin-sheet-page.ts` and one-or-two step glue files.
@@ -506,7 +506,7 @@ Consider splitting into two commits if the diff is large:
 The split is fine because step 1 leaves both controller endpoints intact (each
 calls into the array-returning service).
 
-**Pre-commit check:** all `@ai @slow` scenarios; the BE controller test suite
+**Pre-commit check:** all `@ai` scenarios; the BE controller test suite
 (now exercising the unified endpoint); MCP unit tests.
 
 ---
@@ -519,19 +519,19 @@ backlog file made obsolete by the above.
 **Changes:**
 
 - `docs/ai-assistant.md`:
-  - "Robin AI is decoupled from forms via `RobinFormBinding`" stays.
-  - Replace the implicit type-gating description with: *"Robin generates one
-    or more question drafts per request. Each draft declares its own type."*
-  - Add an "Edit-or-create" sub-section pointing at the `existingQuestion`
-    field.
-  - Update "Where to look" if any paths changed during the refactor.
+    - "Robin AI is decoupled from forms via `RobinFormBinding`" stays.
+    - Replace the implicit type-gating description with: _"Robin generates one
+      or more question drafts per request. Each draft declares its own type."_
+    - Add an "Edit-or-create" sub-section pointing at the `existingQuestion`
+      field.
+    - Update "Where to look" if any paths changed during the refactor.
 - `CLAUDE.md` AI Assistant paragraph (line 142): rewrite if the
   endpoint shape or behavior summary changed.
 - `backlog/`:
-  - `ai-assistant-service-refactor.md`: mark resolved or update what
-    remains (the observability work is independent and survives).
-  - `robin-workspace-intent.md`: mark resolved (subsumed by Step 9).
-  - This file: archive or leave for reference.
+    - `ai-assistant-service-refactor.md`: mark resolved or update what
+      remains (the observability work is independent and survives).
+    - `robin-workspace-intent.md`: mark resolved (subsumed by Step 9).
+    - This file: archive or leave for reference.
 
 **Commit message:** `docs(aiassistant): align documentation with the refactored AI assistant`
 
@@ -545,14 +545,14 @@ out of habit).
 
 - **LLM prompt-following regression after Step 4.** A unified prompt is
   longer than any one specialized prompt and may degrade output quality.
-  Mitigation: keep all three example blocks; the `@ai @slow` scenarios are
+  Mitigation: keep all three example blocks; the `@ai` scenarios are
   the canary; if measurably worse, revert Step 4 and split into "single
   prompt for choice questions" + "numerical prompt", keeping the
   type-declared-in-response gain from Step 3.
 - **MCP breaking change in Step 10.** The single→array shape change is
   surface-visible. Mitigation: document, version-bump the MCP package.
 - **`ai.token` not configured locally.** Steps 3, 4, 7, 8, 10 should all
-  succeed on stubbed scenarios; the `@ai @slow` scenarios are the canary
+  succeed on stubbed scenarios; the `@ai` scenarios are the canary
   for real LLM behavior. If they're skipped locally, leave a clear note in
   each PR description so a reviewer with the token can run them.
 - **Cross-step ordering drift.** Steps 3→4→7→8→10 form a chain; each
@@ -566,6 +566,6 @@ out of habit).
 - [ ] Code + tests + docs in the same commit.
 - [ ] `pnpm code` clean.
 - [ ] `pnpm test:be:local` green.
-- [ ] `pnpm test:e2e` green (or `@ai @slow` skipped with a note).
+- [ ] `pnpm test:e2e` green (or `@ai` skipped with a note).
 - [ ] `git status` clean after `pnpm code` ([memory: commit hygiene](../.claude/projects/-home-dev-workspace-quizmaster/memory/feedback_commit_hygiene.md)).
 - [ ] Reviewed by the user before commit ([memory: wait for review](../.claude/projects/-home-dev-workspace-quizmaster/memory/feedback_wait_for_review_before_commit.md)).

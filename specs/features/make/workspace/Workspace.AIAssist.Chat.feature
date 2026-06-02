@@ -59,7 +59,7 @@ Feature: Show generated questions in workspace Robin AI chat
     And workspace question count increased by 2
 
 
-  @ai @slow
+  @ai
   Scenario: Robin shows generated questions in the workspace chat
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -78,7 +78,7 @@ Feature: Show generated questions in workspace Robin AI chat
     And I do not see question "Which of these are European capitals?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario: Generated questions are numbered in Robin chat
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -99,7 +99,7 @@ Feature: Show generated questions in workspace Robin AI chat
     And I do not see question "What is the capital of France?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario: Robin shows answers and highlights correct ones for generated questions
     Given workspace "Workspace"
     And Robin AI will return these generated questions:

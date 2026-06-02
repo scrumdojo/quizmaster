@@ -1,7 +1,7 @@
 @feature-tag
 Feature: Tags
 
-  @ai @slow
+  @ai
   Scenario: Multi-tag on one line
     Given x
     Then y

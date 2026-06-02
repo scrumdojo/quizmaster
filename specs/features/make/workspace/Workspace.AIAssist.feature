@@ -3,14 +3,14 @@ Feature: Generate question preview from workspace using AI
   can generate a question preview without opening the question form first.
   Generated questions stay in Robin chat until the quiz maker confirms them.
 
-  @ai @slow
+  @ai
   Scenario: Open Robin AI from workspace
     Given workspace "Workspace"
     When I open Robin AI
     Then I see AI section
 
 
-  @ai @slow
+  @ai
   Scenario: Generate a single-choice question preview directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -28,7 +28,7 @@ Feature: Generate question preview from workspace using AI
     And I see generated question 1 in Robin chat
 
 
-  @ai @slow
+  @ai
   Scenario: Generate a multiple-choice question preview directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -46,7 +46,7 @@ Feature: Generate question preview from workspace using AI
     And I see generated question 1 in Robin chat
 
 
-  @ai @slow
+  @ai
   Scenario: Repeated generation from workspace keeps the workspace unchanged until confirmation
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -70,7 +70,7 @@ Feature: Generate question preview from workspace using AI
     And I do not see question "Which of these are European capitals?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario: Asking Robin in chat to save a generated question saves it to the workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:

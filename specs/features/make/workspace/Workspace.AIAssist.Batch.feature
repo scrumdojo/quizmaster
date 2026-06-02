@@ -3,7 +3,7 @@ Feature: Generate multiple question previews from workspace using AI
   Generated questions stay in Robin chat until the quiz maker confirms them.
   Batch generation must work regardless of the language used in the prompt.
 
-  @ai @slow
+  @ai
   Scenario: Batch generation keeps Robin AI open after generation
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -23,7 +23,7 @@ Feature: Generate multiple question previews from workspace using AI
     And I do not see question "What is the capital of France?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario: Generate two single-choice questions in Robin chat directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -42,7 +42,7 @@ Feature: Generate multiple question previews from workspace using AI
     And I do not see question "What is the capital of France?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario: A one-line Czech prompt asking for multiple questions generates multiple previews
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -59,7 +59,7 @@ Feature: Generate multiple question previews from workspace using AI
     And I do not see question "What is the capital of France?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario: Generate two multiple-choice questions in Robin chat directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -78,7 +78,7 @@ Feature: Generate multiple question previews from workspace using AI
     And I do not see question "Which of these are Nordic capitals?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario: Batch generation does not append questions to the existing workspace until confirmed
     Given workspace "Workspace" with questions
       | question  | answers  |
@@ -99,7 +99,7 @@ Feature: Generate multiple question previews from workspace using AI
     And I do not see question "What is the capital of France?" in the list
 
 
-  @ai @slow
+  @ai
   Scenario Outline: Asking Robin in chat to save generated questions saves all of them for a non-English prompt
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -124,7 +124,7 @@ Feature: Generate multiple question previews from workspace using AI
       | Vygeneruj 2 otázky o hlavních městech | každá má 1 správnou odpověď | a 2 nesprávné odpovědi | Ulož to      |
 
 
-  @ai @slow
+  @ai
   Scenario Outline: Generate two single-choice questions from one non-English prompt into Robin chat directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
@@ -148,7 +148,7 @@ Feature: Generate multiple question previews from workspace using AI
       | Vygeneruj 2 otázky o hlavních městech | každá má 1 správnou odpověď | a 2 nesprávné odpovědi |
 
 
-  @ai @slow
+  @ai
   Scenario Outline: Generate two multiple-choice questions from one non-English prompt into Robin chat directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
