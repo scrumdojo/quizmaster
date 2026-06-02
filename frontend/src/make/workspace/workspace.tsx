@@ -163,12 +163,12 @@ export function WorkspacePage() {
                     </ItemList>
 
                     {questionTotalPages > 1 && (
-                        <nav className="question-pagination" aria-label="Question pages">
+                        <nav className="workspace-pagination question-pagination" aria-label="Question pages">
                             {Array.from({ length: questionTotalPages }, (_, i) => (
                                 <button
                                     key={i}
                                     type="button"
-                                    className={`question-pagination__page${i === questionPage ? ' question-pagination__page--active' : ''}`}
+                                    className={`workspace-pagination__page${i === questionPage ? ' workspace-pagination__page--active' : ''}`}
                                     aria-label={`Page ${i + 1}`}
                                     aria-current={i === questionPage ? 'page' : undefined}
                                     onClick={() => void loadQuestionPage(i)}
@@ -217,12 +217,12 @@ export function WorkspacePage() {
                     </ItemList>
 
                     {quizTotalPages > 1 && (
-                        <nav className="quiz-pagination" aria-label="Quiz pages">
+                        <nav className="workspace-pagination quiz-pagination" aria-label="Quiz pages">
                             {Array.from({ length: quizTotalPages }, (_, i) => (
                                 <button
                                     key={i}
                                     type="button"
-                                    className={`quiz-pagination__page${i === quizPage ? ' quiz-pagination__page--active' : ''}`}
+                                    className={`workspace-pagination__page${i === quizPage ? ' workspace-pagination__page--active' : ''}`}
                                     aria-label={`Page ${i + 1}`}
                                     aria-current={i === quizPage ? 'page' : undefined}
                                     onClick={() => void loadQuizPage(i)}
