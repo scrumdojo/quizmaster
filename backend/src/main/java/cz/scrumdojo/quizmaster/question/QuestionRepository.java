@@ -11,6 +11,11 @@ import org.springframework.data.repository.query.Param;
 public interface QuestionRepository extends JpaRepository<Question, Integer> {
     List<Question> findByWorkspaceGuidOrderByIdDesc(String guid);
 
+    org.springframework.data.domain.Page<Question> findByWorkspaceGuidOrderByIdDesc(
+        String guid,
+        org.springframework.data.domain.Pageable pageable
+    );
+
     Optional<Question> findByIdAndWorkspaceGuid(Integer id, String workspaceGuid);
 
     long countByIdInAndWorkspaceGuid(Collection<Integer> ids, String workspaceGuid);

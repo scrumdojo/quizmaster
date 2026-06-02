@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -38,20 +39,36 @@ public class WorkspaceQuestionController {
         this.questionEmbeddingService = questionEmbeddingService;
     }
 
+    private static final int PAGE_SIZE = 10;
+
     @Transactional(readOnly = true)
     @GetMapping
-    public ResponseEntity<List<QuestionListItem>> getWorkspaceQuestions(@PathVariable String workspaceGuid) {
+    public ResponseEntity<QuestionPageResponse> getWorkspaceQuestions(
+        @PathVariable String workspaceGuid,
+        @RequestParam(defaultValue = "0") int page
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        List<Question> questions = questionRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid);
+        var questionPage = questionRepository.findByWorkspaceGuidOrderByIdDesc(
+            workspaceGuid,
+            PageRequest.of(page, PAGE_SIZE)
+        );
         Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
 
-        var items = questions
+        var items = questionPage
+            .getContent()
             .stream()
             .map(q -> QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId())))
             .toList();
 
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(
+            new QuestionPageResponse(
+                items,
+                questionPage.getTotalPages(),
+                questionPage.getTotalElements(),
+                questionPage.getNumber()
+            )
+        );
     }
 
     @Transactional(readOnly = true)

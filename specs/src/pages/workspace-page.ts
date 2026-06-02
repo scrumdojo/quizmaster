@@ -229,6 +229,27 @@ export class WorkspacePage {
         }
     }
 
+    // ── Question pagination ──────────────────────────
+
+    private questionPaginationLocator = () => this.page.locator('.question-pagination')
+    private questionPageLinkLocator = (pageNum: number) =>
+        this.page.locator('.question-pagination').getByRole('button', { name: `Page ${pageNum}` })
+
+    expectQuestionPageLinkVisible = async (pageNum: number) => {
+        await this.showQuestions()
+        await expect(this.questionPageLinkLocator(pageNum)).toBeVisible()
+    }
+
+    expectQuestionPageLinksHidden = async () => {
+        await this.showQuestions()
+        await expect(this.questionPaginationLocator()).toBeHidden()
+    }
+
+    goToQuestionPage = async (pageNum: number) => {
+        await this.showQuestions()
+        await this.questionPageLinkLocator(pageNum).click()
+    }
+
     expectQuestionsInOrder = async (titles: string[]) => {
         await this.showQuestions()
         const items = this.page.locator('.question-item')

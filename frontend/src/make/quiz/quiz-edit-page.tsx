@@ -22,7 +22,7 @@ export const QuizEditPage = () => {
     const [quiz, setQuiz] = useState<Quiz | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string>('')
 
-    useApi(workspaceId, fetchWorkspaceQuestions, setWorkspaceQuestions)
+    useApi(workspaceId, async guid => (await fetchWorkspaceQuestions(guid)).content, setWorkspaceQuestions)
     useApi(quizId, id => fetchWorkspaceQuiz(workspaceId, id), setQuiz)
 
     const onSubmit = (data: QuizEditFormData) =>

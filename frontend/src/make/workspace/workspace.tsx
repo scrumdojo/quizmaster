@@ -20,6 +20,9 @@ export function WorkspacePage() {
 
     const [workspace, setWorkspace] = useState<Workspace>({ guid: workspaceId, title: '' })
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
+    const [questionPage, setQuestionPage] = useState(0)
+    const [questionTotalPages, setQuestionTotalPages] = useState(1)
+    const [questionTotalElements, setQuestionTotalElements] = useState(0)
     const [quizzes, setQuizzes] = useState<readonly QuizListItem[]>([])
     const [quizPage, setQuizPage] = useState(0)
     const [quizTotalPages, setQuizTotalPages] = useState(1)
@@ -27,7 +30,17 @@ export function WorkspacePage() {
     const [activeTab, setActiveTab] = useState<'quizzes' | 'questions'>('quizzes')
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
-    const refreshQuestions = useApi(workspaceId, fetchWorkspaceQuestions, setQuestions)
+
+    const loadQuestionPage = useCallback(
+        async (page: number) => {
+            const result = await fetchWorkspaceQuestions(workspaceId, page)
+            setQuestions(result.content)
+            setQuestionTotalPages(result.totalPages)
+            setQuestionTotalElements(result.totalElements)
+            setQuestionPage(result.number)
+        },
+        [workspaceId],
+    )
 
     const loadQuizPage = useCallback(
         async (page: number) => {
@@ -39,13 +52,20 @@ export function WorkspacePage() {
         [workspaceId],
     )
 
+    // Stable reference used by WorkspaceRobinAiHelper to refresh questions after AI generation.
+    const refreshQuestions = useCallback(() => loadQuestionPage(0), [loadQuestionPage])
+
+    useEffect(() => {
+        void loadQuestionPage(0)
+    }, [loadQuestionPage])
+
     useEffect(() => {
         void loadQuizPage(0)
     }, [loadQuizPage])
 
     const onDeleteQuestion = async (id: number) => {
         await deleteQuestion(workspaceId, String(id))
-        setQuestions(await fetchWorkspaceQuestions(workspaceId))
+        await loadQuestionPage(questionPage)
     }
 
     const onConfirmDeleteQuiz = async () => {
@@ -53,11 +73,11 @@ export function WorkspacePage() {
         await deleteQuiz(workspaceId, String(quizToDelete.id))
         setQuizToDelete(null)
         await loadQuizPage(quizPage)
-        setQuestions(await fetchWorkspaceQuestions(workspaceId))
+        await loadQuestionPage(questionPage)
     }
 
     const hasQuestions = questions.length > 0
-    const hasAtLeastTwoQuestions = questions.length >= 2
+    const hasAtLeastTwoQuestions = questionTotalElements >= 2
     const hasQuizzes = quizzes.length > 0
 
     return (
@@ -71,8 +91,8 @@ export function WorkspacePage() {
                 </div>
                 <div className="workspace-header__stats" aria-label="Workspace summary">
                     <div className="workspace-header__stat">
-                        <strong>{questions.length}</strong>
-                        <span>{questions.length === 1 ? 'question' : 'questions'}</span>
+                        <strong>{questionTotalElements}</strong>
+                        <span>{questionTotalElements === 1 ? 'question' : 'questions'}</span>
                     </div>
                     <div className="workspace-header__stat">
                         <strong>{quizzes.length}</strong>
@@ -134,6 +154,23 @@ export function WorkspacePage() {
                             </div>
                         )}
                     </ItemList>
+
+                    {questionTotalPages > 1 && (
+                        <nav className="question-pagination" aria-label="Question pages">
+                            {Array.from({ length: questionTotalPages }, (_, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    className={`question-pagination__page${i === questionPage ? ' question-pagination__page--active' : ''}`}
+                                    aria-label={`Page ${i + 1}`}
+                                    aria-current={i === questionPage ? 'page' : undefined}
+                                    onClick={() => void loadQuestionPage(i)}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                        </nav>
+                    )}
                 </section>
             )}
 

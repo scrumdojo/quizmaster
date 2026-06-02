@@ -175,6 +175,22 @@ Then('I see questions in order: {string}, {string}, {string}', async function (a
     await this.workspacePage.expectQuestionsInOrder([a, b, c])
 })
 
+Then('I see {int} question(s) on the page', async function (count: number) {
+    await this.workspacePage.expectQuestionCount(count)
+})
+
+Then('I see question page link {int}', async function (pageNum: number) {
+    await this.workspacePage.expectQuestionPageLinkVisible(pageNum)
+})
+
+Then('I do not see question page links', async function () {
+    await this.workspacePage.expectQuestionPageLinksHidden()
+})
+
+When('I go to question page {int}', async function (pageNum: number) {
+    await this.workspacePage.goToQuestionPage(pageNum)
+})
+
 Then('I take quiz {string}', async function (quiz: string) {
     await this.workspacePage.takeQuiz(quiz)
 })

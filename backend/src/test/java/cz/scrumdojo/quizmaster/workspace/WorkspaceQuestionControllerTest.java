@@ -39,16 +39,14 @@ public class WorkspaceQuestionControllerTest {
         mockMvc
             .perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
             .andExpect(status().isOk())
-            .andExpect(
-                content().json(
-                    """
-                    [
-                        {"id": %d, "isInAnyQuiz": false},
-                        {"id": %d, "isInAnyQuiz": true}
-                    ]
-                    """.formatted(question1.getId(), question2.getId())
-                )
-            );
+            .andExpect(jsonPath("$.totalPages").value(1))
+            .andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.number").value(0))
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.content[0].id").value(question2.getId()))
+            .andExpect(jsonPath("$.content[0].isInAnyQuiz").value(true))
+            .andExpect(jsonPath("$.content[1].id").value(question1.getId()))
+            .andExpect(jsonPath("$.content[1].isInAnyQuiz").value(false));
     }
 
     @Test
