@@ -52,7 +52,7 @@ Feature: Show generated questions in workspace Robin AI chat
     And I open Robin AI
     And I enter Robin AI message "Vytvor 2 otazky na tema hlavni mesta v Evrope"
     And I press Enter to send the Robin AI message
-    And I tell Robin AI "Uloz to"
+    And I save the generated questions
     Then Robin AI message composer is empty
     And I see Robin AI chat message "Saved 2 questions to workspace."
     And I do not see generated questions in Robin chat

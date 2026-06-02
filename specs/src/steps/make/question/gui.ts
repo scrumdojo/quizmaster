@@ -540,9 +540,8 @@ When('I ask AI to generate multiple questions:', async function (dataTable: Data
     ])
 })
 
-When('I tell Robin AI {string}', async function (message: string) {
-    await this.robinSheetPage.enterPrompt(message)
-    await this.robinSheetPage.generate()
+When('I save the generated questions', async function () {
+    await this.robinSheetPage.saveGeneratedQuestions()
 })
 
 When('I enter Robin AI message {string}', async function (message: string) {

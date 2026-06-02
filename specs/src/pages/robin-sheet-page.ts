@@ -9,6 +9,7 @@ export class RobinSheetPage {
     private promptLocator = () => this.page.locator('#robin-prompt-text')
     private chatMessageLocator = () => this.page.getByTestId('robin-chat-message')
     private generateButtonLocator = () => this.page.locator('#robin-generate-button')
+    private saveButtonLocator = () => this.page.locator('#robin-save-button')
     private previousVersionButtonLocator = () => this.page.locator('#previous-version-button')
     private questionTypeRadio = (value: string) => this.page.locator(`#robin-question-type-${value}`)
     private generatedQuestionsLocator = () => this.page.getByTestId('robin-generated-question')
@@ -51,6 +52,8 @@ export class RobinSheetPage {
     askForNumericalChoice = () => this.questionTypeRadio('numerical').check()
 
     restorePreviousVersion = () => this.previousVersionButtonLocator().click()
+
+    saveGeneratedQuestions = () => this.saveButtonLocator().click()
 
     expectPromptVisible = () => expect(this.promptLocator().first()).toBeVisible()
     expectPromptNotVisible = () => expect(this.promptLocator().first()).not.toBeVisible()

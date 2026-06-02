@@ -42,45 +42,7 @@ const wantsMultipleQuestions = (prompt: string): boolean => {
     return false
 }
 
-const isSaveGeneratedQuestionsPrompt = (prompt: string): boolean => {
-    const normalized = normalizePrompt(prompt)
-    if (!normalized) return false
-
-    const words = normalized.split(' ')
-    const hasSaveVerb = words.some(word => word === 'save' || word === 'store' || word.startsWith('uloz'))
-    const hasReferenceTarget = words.some(
-        word => word === 'it' || word === 'them' || word === 'to' || word === 'je' || word === 'ich',
-    )
-    const hasQuestionTarget = words.some(
-        word =>
-            word === 'question' ||
-            word === 'questions' ||
-            word === 'draft' ||
-            word === 'drafts' ||
-            word.startsWith('otazk'),
-    )
-
-    return hasSaveVerb && (hasQuestionTarget || hasReferenceTarget)
-}
-
-const generateWorkspaceRobinDrafts = async (
-    request: RobinGenerateRequest & {
-        onQuestionsSaved: () => Promise<void>
-    },
-): Promise<RobinGenerationResult> => {
-    if (request.currentDrafts.length > 0 && isSaveGeneratedQuestionsPrompt(request.question)) {
-        await Promise.all(
-            request.currentDrafts.map(async draft => {
-                await saveQuestion(request.workspaceGuid, questionDraftToRequest(draft))
-            }),
-        )
-        await request.onQuestionsSaved()
-        return {
-            drafts: [],
-            assistantMessage: `Saved ${request.currentDrafts.length} question${request.currentDrafts.length === 1 ? '' : 's'} to workspace.`,
-        }
-    }
-
+const generateWorkspaceRobinDrafts = async (request: RobinGenerateRequest): Promise<RobinGenerationResult> => {
     const aiRequest = {
         question: request.question,
         questionType: request.questionType,
@@ -90,6 +52,14 @@ const generateWorkspaceRobinDrafts = async (
     }
     return { drafts: [await postAiAssistant(request.workspaceGuid, aiRequest)] }
 }
+
+const saveWorkspaceRobinDrafts =
+    (workspaceGuid: string, onQuestionsSaved: () => Promise<void>) =>
+    async (drafts: readonly QuestionDraft[]): Promise<string> => {
+        await Promise.all(drafts.map(draft => saveQuestion(workspaceGuid, questionDraftToRequest(draft))))
+        await onQuestionsSaved()
+        return `Saved ${drafts.length} question${drafts.length === 1 ? '' : 's'} to workspace.`
+    }
 
 interface WorkspaceRobinAiHelperProps {
     readonly workspaceId: string
@@ -108,12 +78,8 @@ export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionsSaved }: Worksp
             {sheetOpen && (
                 <RobinSheet
                     onGenerated={handleGenerated}
-                    generateRequest={request =>
-                        generateWorkspaceRobinDrafts({
-                            ...request,
-                            onQuestionsSaved,
-                        })
-                    }
+                    generateRequest={generateWorkspaceRobinDrafts}
+                    saveDrafts={saveWorkspaceRobinDrafts(workspaceId, onQuestionsSaved)}
                     undo={noUndo}
                     workspaceId={workspaceId}
                     questionType={questionType}

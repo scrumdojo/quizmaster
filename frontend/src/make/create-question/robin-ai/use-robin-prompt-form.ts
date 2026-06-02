@@ -18,7 +18,6 @@ export interface RobinChatMessage {
 
 export interface RobinGenerationResult {
     readonly drafts: readonly QuestionDraft[]
-    readonly assistantMessage?: string
 }
 
 export interface RobinGenerateRequest {
@@ -31,6 +30,7 @@ export interface RobinGenerateRequest {
 interface UseRobinPromptFormArgs {
     readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
     readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
+    readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
     readonly undo: RobinUndoBuffer
     readonly workspaceId: string
     readonly questionType: QuestionType
@@ -50,6 +50,7 @@ const generateSingleDraft = async ({
 export const useRobinPromptForm = ({
     onGenerated,
     generateRequest = generateSingleDraft,
+    saveDrafts,
     undo,
     workspaceId,
     questionType,
@@ -59,6 +60,7 @@ export const useRobinPromptForm = ({
 }: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
+    const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
     const [generatedDrafts, setGeneratedDrafts] = useState<readonly QuestionDraft[]>([])
     const [chatMessages, setChatMessages] = useState<readonly RobinChatMessage[]>([])
@@ -79,13 +81,8 @@ export const useRobinPromptForm = ({
             undo.capture()
             await onGenerated(response.drafts)
             if (mode === 'chat') {
-                const nextMessages: RobinChatMessage[] = [{ role: 'user', text: submittedPrompt }]
-                if (response.assistantMessage) {
-                    nextMessages.push({ role: 'assistant', text: response.assistantMessage })
-                }
-
                 setGeneratedDrafts(response.drafts)
-                setChatMessages(messages => [...messages, ...nextMessages])
+                setChatMessages(messages => [...messages, { role: 'user', text: submittedPrompt }])
             }
             if (closeOnGenerated) onClose()
         } catch (e) {
@@ -96,5 +93,21 @@ export const useRobinPromptForm = ({
         }
     }
 
-    return { promptText, setPromptText, loading, error, generate, generatedDrafts, chatMessages }
+    const save = async () => {
+        if (saving || !saveDrafts || generatedDrafts.length === 0) return
+        setError('')
+        setSaving(true)
+        try {
+            const assistantMessage = await saveDrafts(generatedDrafts)
+            setGeneratedDrafts([])
+            setChatMessages(messages => [...messages, { role: 'assistant', text: assistantMessage }])
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'AI assistant request failed.'
+            setError(message || 'AI assistant request failed.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    return { promptText, setPromptText, loading, saving, error, generate, save, generatedDrafts, chatMessages }
 }

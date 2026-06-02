@@ -82,6 +82,6 @@ Feature: Generate question preview from workspace using AI
       | Generate a question about capital cities |
       | with 1 correct answer                    |
       | and 2 incorrect answers                  |
-    And I tell Robin AI "Uloz otazky"
+    And I save the generated questions
     Then workspace question count increased by 1
     And I see question in list "What is the capital of Czech Republic?"

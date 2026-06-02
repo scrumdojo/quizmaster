@@ -100,7 +100,7 @@ Feature: Generate multiple question previews from workspace using AI
 
 
   @ai
-  Scenario Outline: Asking Robin in chat to save generated questions saves all of them for a non-English prompt
+  Scenario: Saving generated questions from a non-English prompt saves all of them
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
       | question                               | answers                  |
@@ -109,19 +109,13 @@ Feature: Generate multiple question previews from workspace using AI
     When I remember workspace question count
     And I open Robin AI
     And I ask AI to generate multiple questions:
-      | <line-1> |
-      | <line-2> |
-      | <line-3> |
-    And I tell Robin AI "<save-command>"
+      | Vygeneruj 2 otazky o hlavnych mestach |
+      | kazda ma 1 spravnu odpoved            |
+      | a 2 nespravne odpovede                |
+    And I save the generated questions
     Then workspace question count increased by 2
     And I see question in list "What is the capital of Czech Republic?"
     And I see question in list "What is the capital of France?"
-
-    Examples:
-      | line-1                                | line-2                      | line-3                 | save-command |
-      | Vygeneruj 2 otazky o hlavnych mestach | kazda ma 1 spravnu odpoved  | a 2 nespravne odpovede | Uloz otazky  |
-      | Vygeneruj 2 otázky o hlavních městech | každá má 1 správnou odpověď | a 2 nesprávné odpovědi | Ulož otázky  |
-      | Vygeneruj 2 otázky o hlavních městech | každá má 1 správnou odpověď | a 2 nesprávné odpovědi | Ulož to      |
 
 
   @ai

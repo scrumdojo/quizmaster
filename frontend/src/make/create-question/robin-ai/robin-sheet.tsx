@@ -11,6 +11,7 @@ import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
 interface RobinSheetProps {
     readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
     readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
+    readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
     readonly undo: RobinUndoBuffer
     readonly workspaceId: string
     readonly questionType: QuestionType
@@ -23,6 +24,7 @@ interface RobinSheetProps {
 export const RobinSheet = ({
     onGenerated,
     generateRequest,
+    saveDrafts,
     undo,
     workspaceId,
     questionType,
@@ -31,16 +33,18 @@ export const RobinSheet = ({
     closeOnGenerated,
     mode = 'classic',
 }: RobinSheetProps) => {
-    const { promptText, setPromptText, loading, error, generate, generatedDrafts, chatMessages } = useRobinPromptForm({
-        onGenerated,
-        generateRequest,
-        undo,
-        workspaceId,
-        questionType,
-        onClose,
-        closeOnGenerated,
-        mode,
-    })
+    const { promptText, setPromptText, loading, saving, error, generate, save, generatedDrafts, chatMessages } =
+        useRobinPromptForm({
+            onGenerated,
+            generateRequest,
+            saveDrafts,
+            undo,
+            workspaceId,
+            questionType,
+            onClose,
+            closeOnGenerated,
+            mode,
+        })
 
     const submitPrompt = () => {
         if (loading || promptText.trim().length === 0) return
@@ -215,6 +219,16 @@ export const RobinSheet = ({
                             )
                         })}
                     </div>
+                )}
+                {generatedDrafts.length > 0 && (
+                    <Button
+                        id="robin-save-button"
+                        className="secondary button"
+                        onClick={() => void save()}
+                        disabled={saving || loading}
+                    >
+                        {saving ? 'Saving...' : 'Save'}
+                    </Button>
                 )}
             </div>
             <div className="robin-sheet__composer" data-testid="robin-composer">
