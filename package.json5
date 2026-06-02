@@ -16,7 +16,7 @@
         "install:mcp": "cd mcp && pnpm install",
         "install:psql": "./scripts/install-psql.sh",
 
-        "install:all": "pnpm env:init && pnpm install && pnpm install:fe && pnpm install:specs && pnpm install:mcp && pnpm install:psql",
+        "install:all": "pnpm env:init && pnpm hooks:install && pnpm install && pnpm install:fe && pnpm install:specs && pnpm install:mcp && pnpm install:psql",
 
         // Build scripts
         "build:fe:dev": "cd frontend && pnpm build:dev",
