@@ -1,5 +1,3 @@
-import { type Page } from '@playwright/test'
-
 export class QuizNicknamePage {
-    constructor(private page: Page) {}
+    constructor() {}
 }
