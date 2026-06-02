@@ -77,3 +77,26 @@ Feature: Quiz Welcome page
     Then I see the welcome page
     When I start the quiz
     Then I see question "Q1"
+
+
+  @skip
+  Scenario: Quiz welcome page shows individuals leaderboard before start
+    Given workspace "Welcome" with questions
+      | bookmark | question  | answers  |
+      | Q1       | 1 + 1 = ? | 2 (*), 3 |
+      | Q2       | 2 + 2 = ? | 4 (*), 5 |
+      | Q3       | 3 + 3 = ? | 6 (*), 7 |
+      | Q4       | 4 + 4 = ? | 8 (*), 9 |
+    And quiz "Quiz A" with questions "Q1, Q2, Q3, Q4"
+    And quiz "Quiz A" has finished individuals attempts
+      | nickname | correct |
+      | Alice    | 4       |
+      | Bob      | 3       |
+      | Charlie  | 2       |
+    When I open quiz "Quiz A"
+    Then I see the welcome page
+    And I see the individuals leaderboard
+      | Rank | nickname | Score |
+      | 1    | Alice    | 100   |
+      | 2    | Bob      | 75    |
+      | 3    | Charlie  | 50    |

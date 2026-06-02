@@ -1,8 +1,12 @@
 import type { DataTable } from '@cucumber/cucumber'
 
 import { Given, Then } from '#steps/fixture.ts'
-import { addCohortViaShareScreen, seedFinishedCohortAttemptViaUI } from '#steps/make/quiz/ops.ts'
-import { expectCohortLeaderboardTable } from '#steps/quiz/expects.ts'
+import {
+    addCohortViaShareScreen,
+    seedFinishedCohortAttemptViaUI,
+    seedFinishedIndividualAttemptViaUI,
+} from '#steps/make/quiz/ops.ts'
+import { expectCohortLeaderboardTable, expectIndividualsLeaderboardTable } from '#steps/quiz/expects.ts'
 
 Then('I see the welcome page', async function () {
     await this.quizWelcomePage.expectHeader('Welcome to the quiz')
@@ -58,4 +62,14 @@ Given('quiz {string} has finished cohort attempts', async function (quizName: st
     for (const row of data.hashes()) {
         await seedFinishedCohortAttemptViaUI(this, quizName, row.cohort, Number.parseInt(row.correct, 10))
     }
+})
+
+Given('quiz {string} has finished individuals attempts', async function (quizName: string, data: DataTable) {
+    for (const row of data.hashes()) {
+        await seedFinishedIndividualAttemptViaUI(this, quizName, row.nickname, Number.parseInt(row.correct, 10))
+    }
+})
+
+Then('I see the individuals leaderboard', async function (data: DataTable) {
+    await expectIndividualsLeaderboardTable(this.quizWelcomePage, data)
 })

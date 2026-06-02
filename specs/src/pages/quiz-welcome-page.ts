@@ -18,6 +18,13 @@ export class QuizWelcomePage {
     private tableHeaderCellsLocator = () => this.cohortLeaderboardTableLocator().locator('thead th')
     private tableBodyRowsLocator = () => this.cohortLeaderboardTableLocator().locator('tbody tr')
 
+    private individualsLeaderboardTableLocator = () => this.page.getByTestId('individuals-leaderboard-table')
+
+    private individualsTableCaptionLocator = () => this.individualsLeaderboardTableLocator().locator('caption')
+
+    private individualsTableHeaderCellsLocator = () => this.individualsTableCaptionLocator().locator('thead th')
+    private individualsTableBodyRowsLocator = () => this.individualsTableCaptionLocator().locator('tbody tr')
+
     expectHeader = (text: string) => expect(this.headerLocator()).toHaveText(text)
     expectName = (name: string) => expect(this.nameLocator()).toHaveText(name)
     expectDescription = (description: string) => expect(this.descriptionLocator()).toHaveText(description)
@@ -58,4 +65,25 @@ export class QuizWelcomePage {
     private dryRunIndicatorLocator = () => this.page.getByTestId('dry-run-indicator')
     expectDryRunIndicatorVisible = () => expect(this.dryRunIndicatorLocator()).toBeVisible()
     expectDryRunIndicatorNotVisible = () => expect(this.dryRunIndicatorLocator()).not.toBeVisible()
+
+    expectIndividualsLeaderboard = async (captionText: string, headerCells: string[], bodyRows: string[][]) => {
+        await expectTextToBe(this.individualsTableCaptionLocator(), captionText)
+
+        for (let i = 0; i < headerCells.length; i++) {
+            if (headerCells[i] !== '') {
+                await expectTextToBe(this.individualsTableHeaderCellsLocator().nth(i), headerCells[i])
+            }
+        }
+
+        const rows = this.individualsTableBodyRowsLocator()
+        await expect(rows).toHaveCount(bodyRows.length)
+
+        for (let i = 0; i < bodyRows.length; i++) {
+            for (let j = 0; j < bodyRows[i].length; j++) {
+                if (bodyRows[i][j] !== '') {
+                    await expectTextToBe(rows.nth(i).locator('td').nth(j), bodyRows[i][j])
+                }
+            }
+        }
+    }
 }
