@@ -15,6 +15,7 @@ import {
     QuizStatsPage,
     TakeQuestionPage,
 } from '#pages/index.ts'
+import { QuizNicknamePage } from '#pages/quiz-nickname-page'
 import type { AnswerSpec, QuestionSpec } from '#steps/shared/specs.ts'
 
 export class QuizmasterWorld {
@@ -50,6 +51,8 @@ export class QuizmasterWorld {
     readonly quizScorePage: QuizScorePage
     readonly workspacePage: WorkspacePage
     readonly quizCreatePage: QuizCreatePage
+
+    readonly quizNicknamePage: QuizNicknamePage
     readonly homePage: HomePage
 
     workspaceGuid = ''

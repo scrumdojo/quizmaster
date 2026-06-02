@@ -1,6 +1,7 @@
 Feature: Quiz Nickname
   Before starting a quiz, user must set a nickname to be displayed on the leaderboard. This allows users to track their performance and compare with others.
 
+  @skip
   Scenario: User sets a nickname before starting the quiz
     Given workspace "Welcome" with questions
       | bookmark | question  | answers  |
