@@ -261,4 +261,7 @@ export class WorkspacePage {
             await expect(items.nth(i)).toContainText(titles[i])
         }
     }
+
+    enterQuestionFilterString = (filter: string) => this.page.locator('#ws-question-filter').fill(filter)
+    getQuestion = (question: string) => this.page.locator('label', { hasText: question })
 }

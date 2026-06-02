@@ -9,6 +9,18 @@ When('I start creating a new quiz', async function () {
     await this.workspacePage.createNewQuiz()
 })
 
+When('I filter questions in workspace by {string}', async function (s: string) {
+    await this.workspacePage.enterQuestionFilterString(s)
+})
+
+When('I see quiz question {string} in workspace', async function (title: string) {
+    await expect(this.workspacePage.getQuestion(title).first()).toBeVisible()
+})
+
+When("I don't see quiz questions {string} in workspace", async function (title: string) {
+    await expect(this.workspacePage.getQuestion(title).first()).toBeHidden()
+})
+
 Then('I see the quiz creation page', async function () {
     await this.page.waitForSelector('#create-quiz-page')
     const isVisible = await this.page.locator('#create-quiz-page').isVisible()

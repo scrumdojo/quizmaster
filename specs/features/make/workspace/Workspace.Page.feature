@@ -112,3 +112,48 @@ Feature: Workspace page management
       | 2 + 2 = ?             | 4 (*), 5     |                                     |
     Then I see image thumbnail for question "Which animal is this?"
     And I do not see image thumbnail for question "2 + 2 = ?"
+
+
+  @skip
+  Scenario: Filter questions in workspace
+    Given workspace "Workspace" with questions
+      | question                       | answers            |
+      | Which animal is this?          | Cat (*), Dog       |
+      | 3 * 3 = ?                      | 9 (*), 6           |
+      | 4 / 2 = ?                      | 2 (*), 3           |
+      | Jaký nábytek má Ikea?          | Stůl (*), Auto     |
+      | Jaké má nádobí Ikea?           | Talíř (*), Kolo    |
+      | Jaké nádobí má Ikea?           | Talíř (*), Kolo    |
+      | Jaký venkovní Nábytek má Ikea? | Židle (*), Triangl |
+    When I filter questions in workspace by "<filter>"
+    Then I see quiz question "<visibleQuestion1>" in workspace
+    And I see quiz question "<visibleQuestion2>" in workspace
+    And I don't see quiz questions "<hiddenQuestion1>" in workspace
+    And I don't see quiz questions "<hiddenQuestion2>" in workspace
+
+    Examples:
+      | filter    | visibleQuestion1      | visibleQuestion2               | hiddenQuestion1       | hiddenQuestion2                |
+      | 2         | 2 + 2 = ?             | 4 / 2 = ?                      | 3 * 3 = ?             | Jaký nábytek má Ikea?          |
+      | Ikea      | Jaký nábytek má Ikea? | Jaké nádobí má Ikea?           | 2 + 2 = ?             | 3 * 3 = ?                      |
+      | nábytek   | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? | 2 + 2 = ?             | 4 / 2 = ?                      |
+      | nábyt     | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? | 2 + 2 = ?             | 4 / 2 = ?                      |
+      | má nádobí | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | 2 + 2 = ?             | 4 / 2 = ?                      |
+      | má nád    | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |
+
+
+  @skip
+  Scenario: Filter questions in workspace by tag
+    Given workspace "Workspace" with questions
+      | question              | tag   | answers                              |
+      | What is a Sprint?     | scrum | Time-boxed iteration (*), A ceremony |
+      | Jaký nábytek má Ikea? | ikea  | Stůl (*), Auto                       |
+      | What is a Backlog?    |       | Ordered list (*), Random list        |
+    When I filter questions in workspace by "<tag>"
+    Then I see quiz question "<question>" in workspace
+    And I don't see quiz questions "<hiddenQuestion>" in workspace
+
+    Examples:
+      | tag   | question              | hiddenQuestion     |
+      | scrum | What is a Sprint?     | What is a Backlog? |
+      | zoo   |                       | What is a Sprint?  |
+      | ikea  | Jaký nábytek má Ikea? | What is a Sprint?  |
