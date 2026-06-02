@@ -66,7 +66,7 @@ Given('quiz {string} has finished cohort attempts', async function (quizName: st
 
 Given('quiz {string} has finished individuals attempts', async function (quizName: string, data: DataTable) {
     for (const row of data.hashes()) {
-        await seedFinishedIndividualAttemptViaUI(this, quizName, row.nickname, Number.parseInt(row.correct, 10))
+        await seedFinishedIndividualAttemptViaUI(this, quizName, Number.parseInt(row.correct, 10))
     }
 })
 

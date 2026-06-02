@@ -1,4 +1,4 @@
-import { Given, When, Then } from '#steps/fixture.ts'
+import { When } from '#steps/fixture.ts'
 
 When('I continue to Nickname page', async function () {
     // const nicknameUrl = world.quizBookmarks[quizBookmark]

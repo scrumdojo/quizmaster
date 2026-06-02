@@ -44,7 +44,6 @@ export const seedFinishedCohortAttemptViaUI = async (
 export const seedFinishedIndividualAttemptViaUI = async (
     world: QuizmasterWorld,
     quizBookmark: string,
-    nickName: string,
     correctAnswers: number,
 ) => {
     await world.workspacePage.goto(world.workspaceGuid)
