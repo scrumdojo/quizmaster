@@ -7,6 +7,7 @@
         // Worktree management
         "worktree:add": "./scripts/worktree-add.sh",
         "worktree:delete": "./scripts/worktree-delete.sh",
+        "hooks:install": "./scripts/install-git-hooks.sh",
 
         // Install dependencies, psql client, Playwright browsers
         "env:init": "./scripts/init-env.sh",

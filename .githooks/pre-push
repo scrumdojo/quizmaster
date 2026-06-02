@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+remote_name="${1:-}"
+remote_url="${2:-}"
+zero_oid="0000000000000000000000000000000000000000"
+pushes_master=0
+
+while read -r local_ref local_oid remote_ref remote_oid; do
+    if [[ "$remote_ref" != "refs/heads/master" ]]; then
+        continue
+    fi
+
+    pushes_master=1
+
+    if [[ "$local_oid" == "$zero_oid" ]]; then
+        echo "Refusing to delete master on ${remote_name:-remote} (${remote_url:-unknown URL})."
+        exit 1
+    fi
+
+    if [[ "$remote_oid" != "$zero_oid" ]]; then
+        if ! git rev-parse --verify --quiet "$remote_oid^{commit}" >/dev/null; then
+            echo "Cannot verify whether master push is fast-forward because the remote tip is not present locally."
+            echo "Fetch master first, then push again."
+            exit 1
+        fi
+
+        if ! git merge-base --is-ancestor "$remote_oid" "$local_oid"; then
+            echo "Refusing non-fast-forward push to master on ${remote_name:-remote} (${remote_url:-unknown URL})."
+            exit 1
+        fi
+    fi
+done
+
+if [[ "$pushes_master" -eq 0 ]]; then
+    exit 0
+fi
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+echo "Push to master detected on ${remote_name:-remote} (${remote_url:-unknown URL})."
+echo "Running the same local check set as .github/workflows/ci.yml."
+
+"$repo_root/scripts/ci-pre-push.sh"
