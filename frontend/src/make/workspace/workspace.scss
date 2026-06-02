@@ -355,6 +355,17 @@
     margin-top: 1rem;
 }
 
+.workspace-info-message {
+    margin: 0.5rem 0 0.75rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid var(--accent);
+}
+
 .quiz-item {
     .question-index {
         font-weight: 600;

@@ -120,6 +120,10 @@ export function WorkspacePage() {
     const hasQuestions = questions.length > 0
     const hasAtLeastTwoQuestions = questionTotalElements >= 2
     const hasQuizzes = quizzes.length > 0
+    const [quizCreateMessage, setQuizCreateMessage] = useState<string | null>(null)
+    const handleCreateQuizBlocked = () => {
+        setQuizCreateMessage("It's not possible to create quiz without min 2 questions exist")
+    }
 
     return (
         <div className="workspace-page">
@@ -240,14 +244,29 @@ export function WorkspacePage() {
                     <ItemList
                         title="My Quizzes"
                         action={
-                            <LinkButton
-                                label="Create"
-                                icon="+"
-                                id="create-quiz"
-                                to={`${urls.workspaceQuizNew(workspace.guid)}?tab=quizzes`}
-                            />
+                            hasAtLeastTwoQuestions ? (
+                                <LinkButton
+                                    label="Create"
+                                    icon="+"
+                                    id="create-quiz"
+                                    to={`${urls.workspaceQuizNew(workspace.guid)}?tab=quizzes`}
+                                />
+                            ) : (
+                                <button
+                                    type="button"
+                                    id="create-quiz"
+                                    className="link-button"
+                                    onClick={handleCreateQuizBlocked}
+                                >
+                                    <span className="link-button__icon" aria-hidden="true">
+                                        +
+                                    </span>
+                                    Create
+                                </button>
+                            )
                         }
                     >
+                        {quizCreateMessage && <p className="workspace-info-message">{quizCreateMessage}</p>}
                         {hasQuizzes ? (
                             quizzes.map((quiz, index) => (
                                 <QuizItem

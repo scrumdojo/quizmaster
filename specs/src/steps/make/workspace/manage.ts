@@ -33,6 +33,14 @@ Then('the {string} tab is closed', async function (name: string) {
     await this.workspacePage.expectTabNotSelected(name)
 })
 
+When('I click the quiz create button', async function () {
+    await this.workspacePage.clickQuizCreateButton()
+})
+
+Then('I see the message {string}', async function (message: string) {
+    await this.workspacePage.expectInfoMessage(message)
+})
+
 Then('I see the {string} section', async function (section: string) {
     await this.workspacePage.expectSectionVisible(section)
 })

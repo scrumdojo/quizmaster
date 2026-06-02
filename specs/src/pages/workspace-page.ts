@@ -148,6 +148,11 @@ export class WorkspacePage {
         await this.showQuizzes()
         await this.page.locator('#create-quiz').click()
     }
+    clickQuizCreateButton = async () => {
+        await this.showQuizzes()
+        await this.page.locator('#create-quiz').click()
+    }
+    expectInfoMessage = (message: string) => expect(this.page.locator('.workspace-info-message')).toHaveText(message)
 
     expectQuizCreateButtonInSection = (section: string) =>
         expect(this.sectionLocator(section).locator('#create-quiz')).toBeVisible()
