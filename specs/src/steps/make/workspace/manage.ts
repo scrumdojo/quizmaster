@@ -95,6 +95,16 @@ Then('I see workspace quiz count {int}', async function (count: number) {
     await this.workspacePage.expectWorkspaceQuizSummaryCount(count)
 })
 
+// ── Question used-in-quiz badge ─────────────────────────
+
+Then('I see question {string} marked as used', async function (question: string) {
+    await this.workspacePage.expectQuestionMarkedAsUsed(question)
+})
+
+Then('I do not see question {string} marked as used', async function (question: string) {
+    await this.workspacePage.expectQuestionNotMarkedAsUsed(question)
+})
+
 // ── Question management ─────────────────────────────────
 
 Then('the question is saved in the workspace', async function () {

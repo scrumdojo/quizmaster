@@ -355,6 +355,18 @@
     margin-top: 1rem;
 }
 
+.question-used-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: #e5e7eb;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
 .workspace-info-message {
     margin: 0.5rem 0 0.75rem;
     padding: 0.7rem 1rem;

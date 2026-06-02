@@ -138,6 +138,19 @@ export class WorkspacePage {
         await expect(this.questionTagBadgeLocator(question)).not.toBeVisible()
     }
 
+    // ── Question used-in-quiz badge ──────────────────
+
+    private questionUsedBadgeLocator = (question: string) =>
+        this.questionLocator(question).locator('.question-used-badge')
+    expectQuestionMarkedAsUsed = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionUsedBadgeLocator(question)).toBeVisible()
+    }
+    expectQuestionNotMarkedAsUsed = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionUsedBadgeLocator(question)).not.toBeVisible()
+    }
+
     // ── Create new question / quiz ───────────────────
 
     createNewQuestion = async () => {
