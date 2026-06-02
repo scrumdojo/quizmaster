@@ -50,6 +50,23 @@ public class WorkspaceQuestionControllerTest {
     }
 
     @Test
+    public void getWorkspaceQuestionsFilteredByQuery() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question matchingQuestion = fixtures.save(fixtures.questionIn(workspace).question("Capital of Italy?").build());
+        fixtures.save(fixtures.questionIn(workspace).question("What is Scrum?").build());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()).queryParam("query", "italy"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalPages").value(1))
+            .andExpect(jsonPath("$.totalElements").value(1))
+            .andExpect(jsonPath("$.number").value(0))
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].id").value(matchingQuestion.getId()))
+            .andExpect(jsonPath("$.content[0].question").value("Capital of Italy?"));
+    }
+
+    @Test
     public void getWorkspaceQuestion() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));

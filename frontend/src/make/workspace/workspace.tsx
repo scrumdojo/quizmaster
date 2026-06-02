@@ -27,6 +27,8 @@ export function WorkspacePage() {
 
     const [workspace, setWorkspace] = useState<Workspace>({ guid: workspaceId, title: '' })
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
+    const [questionFilter, setQuestionFilter] = useState('')
+    const [debouncedQuestionFilter, setDebouncedQuestionFilter] = useState('')
     const [questionPage, setQuestionPage] = useState(0)
     const [questionPageSize, setQuestionPageSize] = useState(0)
     const [questionTotalPages, setQuestionTotalPages] = useState(1)
@@ -40,17 +42,37 @@ export function WorkspacePage() {
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
 
+    useEffect(() => {
+        const timeout = window.setTimeout(() => {
+            setDebouncedQuestionFilter(questionFilter.trim())
+        }, 300)
+
+        return () => {
+            window.clearTimeout(timeout)
+        }
+    }, [questionFilter])
+
     const loadQuestionPage = useCallback(
-        async (page: number) => {
-            const result = await fetchWorkspaceQuestions(workspaceId, page)
+        async (page: number, query = '') => {
+            const result = await fetchWorkspaceQuestions(workspaceId, page, query)
             setQuestions(result.content)
             setQuestionTotalPages(result.totalPages)
             setQuestionTotalElements(result.totalElements)
             setQuestionPageSize(result.size)
             setQuestionPage(result.number)
+
+            // Keep workspace-level counters stable while user is filtering.
+            if (query.length === 0) {
+                setQuestionTotalElements(result.totalElements)
+            }
         },
         [workspaceId],
     )
+
+    const refreshQuestionTotals = useCallback(async () => {
+        const result = await fetchWorkspaceQuestions(workspaceId, 0)
+        setQuestionTotalElements(result.totalElements)
+    }, [workspaceId])
 
     const loadQuizPage = useCallback(
         async (page: number) => {
@@ -64,11 +86,16 @@ export function WorkspacePage() {
     )
 
     // Stable reference used by WorkspaceRobinAiHelper to refresh questions after AI generation.
-    const refreshQuestions = useCallback(() => loadQuestionPage(0), [loadQuestionPage])
+    const refreshQuestions = useCallback(async () => {
+        await loadQuestionPage(0, debouncedQuestionFilter)
+        if (debouncedQuestionFilter.length > 0) {
+            await refreshQuestionTotals()
+        }
+    }, [debouncedQuestionFilter, loadQuestionPage, refreshQuestionTotals])
 
     useEffect(() => {
-        void loadQuestionPage(0)
-    }, [loadQuestionPage])
+        void loadQuestionPage(0, debouncedQuestionFilter)
+    }, [debouncedQuestionFilter, loadQuestionPage])
 
     useEffect(() => {
         void loadQuizPage(0)
@@ -76,7 +103,10 @@ export function WorkspacePage() {
 
     const onDeleteQuestion = async (id: number) => {
         await deleteQuestion(workspaceId, String(id))
-        await loadQuestionPage(questionPage)
+        await loadQuestionPage(questionPage, debouncedQuestionFilter)
+        if (debouncedQuestionFilter.length > 0) {
+            await refreshQuestionTotals()
+        }
     }
 
     const onConfirmDeleteQuiz = async () => {
@@ -84,7 +114,7 @@ export function WorkspacePage() {
         await deleteQuiz(workspaceId, String(quizToDelete.id))
         setQuizToDelete(null)
         await loadQuizPage(quizPage)
-        await loadQuestionPage(questionPage)
+        await loadQuestionPage(questionPage, debouncedQuestionFilter)
     }
 
     const hasQuestions = questions.length > 0
@@ -146,6 +176,17 @@ export function WorkspacePage() {
                             />
                         }
                     >
+                        <form className="workspace-question-filter" role="search" onSubmit={event => event.preventDefault()}>
+                            <label htmlFor="workspace-question-filter-input">Filter questions</label>
+                            <input
+                                id="workspace-question-filter-input"
+                                type="search"
+                                value={questionFilter}
+                                placeholder="Type to filter questions"
+                                onChange={event => setQuestionFilter(event.target.value)}
+                            />
+                        </form>
+
                         {hasQuestions ? (
                             questions.map((q, index) => (
                                 <QuestionItem
@@ -155,6 +196,11 @@ export function WorkspacePage() {
                                     onDeleteQuestion={() => onDeleteQuestion(q.id)}
                                 />
                             ))
+                        ) : debouncedQuestionFilter.length > 0 ? (
+                            <div className="workspace-empty-state workspace-empty-state--questions">
+                                <h3>No matching questions</h3>
+                                <p>Try a different filter phrase.</p>
+                            </div>
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--questions">
                                 <h3>Create your first question</h3>
@@ -175,7 +221,7 @@ export function WorkspacePage() {
                                     className={`workspace-pagination__page${i === questionPage ? ' workspace-pagination__page--active' : ''}`}
                                     aria-label={`Page ${i + 1}`}
                                     aria-current={i === questionPage ? 'page' : undefined}
-                                    onClick={() => void loadQuestionPage(i)}
+                                    onClick={() => void loadQuestionPage(i, debouncedQuestionFilter)}
                                 >
                                     {i + 1}
                                 </button>

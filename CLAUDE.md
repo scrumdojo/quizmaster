@@ -104,6 +104,8 @@ Endpoints live under `/api/`. Two flavors:
   `GET /api/workspaces/{guid}/polls/{id}` for poll detail,
   `GET /api/workspaces/{guid}/polls/{id}/results` for poll results, and
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.
+  Question listing supports optional server-side filtering via
+  `GET /api/workspaces/{guid}/questions?query=...`.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/quiz/{id}/leaderboard`,
   `/api/question/{id}`, `/api/poll/{id}/submit`, `/api/attempt/...`.

@@ -13,8 +13,15 @@ export const postWorkspace = async (workspace: WorkspaceRequest) =>
 
 export const fetchWorkspace = async (guid: string) => await fetchJson<Workspace>(`/api/workspaces/${guid}`)
 
-export const fetchWorkspaceQuestions = async (guid: string, page = 0): Promise<QuestionPage> =>
-    await fetchJson<QuestionPage>(`/api/workspaces/${guid}/questions?page=${page}`)
+export const fetchWorkspaceQuestions = async (guid: string, page = 0, query = ''): Promise<QuestionPage> => {
+    const searchParams = new URLSearchParams({ page: String(page) })
+    const normalizedQuery = query.trim()
+    if (normalizedQuery.length > 0) {
+        searchParams.set('query', normalizedQuery)
+    }
+
+    return await fetchJson<QuestionPage>(`/api/workspaces/${guid}/questions?${searchParams.toString()}`)
+}
 
 export const fetchWorkspaceQuizzes = async (guid: string, page = 0): Promise<QuizPage> =>
     await fetchJson<QuizPage>(`/api/workspaces/${guid}/quizzes?page=${page}`)

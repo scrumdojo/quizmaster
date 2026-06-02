@@ -274,6 +274,12 @@ export class WorkspacePage {
         }
     }
 
-    enterQuestionFilterString = (filter: string) => this.page.locator('#ws-question-filter').fill(filter)
-    getQuestion = (question: string) => this.page.locator('label', { hasText: question })
+    enterQuestionFilterString = async (filter: string) => {
+        await this.showQuestions()
+        const filterInput = this.page.locator('#workspace-question-filter-input')
+        await expect(filterInput).toBeVisible()
+        await filterInput.fill(filter)
+    }
+
+    getQuestion = (question: string) => this.page.locator('.question-item', { hasText: question })
 }

@@ -16,6 +16,12 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
         org.springframework.data.domain.Pageable pageable
     );
 
+    org.springframework.data.domain.Page<Question> findByWorkspaceGuidAndQuestionContainingIgnoreCaseOrderByIdDesc(
+        String workspaceGuid,
+        String query,
+        org.springframework.data.domain.Pageable pageable
+    );
+
     Optional<Question> findByIdAndWorkspaceGuid(Integer id, String workspaceGuid);
 
     long countByIdInAndWorkspaceGuid(Collection<Integer> ids, String workspaceGuid);

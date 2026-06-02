@@ -14,11 +14,11 @@ When('I filter questions in workspace by {string}', async function (s: string) {
 })
 
 When('I see quiz question {string} in workspace', async function (title: string) {
-    await expect(this.workspacePage.getQuestion(title).first()).toBeVisible()
+    await this.workspacePage.expectQuestionVisible(title)
 })
 
 When("I don't see quiz questions {string} in workspace", async function (title: string) {
-    await expect(this.workspacePage.getQuestion(title).first()).toBeHidden()
+    await this.workspacePage.expectQuestionNotVisible(title)
 })
 
 Then('I see the quiz creation page', async function () {

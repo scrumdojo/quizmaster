@@ -45,14 +45,19 @@ public class WorkspaceQuestionController {
     @GetMapping
     public ResponseEntity<QuestionPageResponse> getWorkspaceQuestions(
         @PathVariable String workspaceGuid,
-        @RequestParam(defaultValue = "0") int page
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(required = false) String query
     ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        var questionPage = questionRepository.findByWorkspaceGuidOrderByIdDesc(
-            workspaceGuid,
-            PageRequest.of(page, PAGE_SIZE)
-        );
+        String normalizedQuery = query == null ? "" : query.trim();
+        var questionPage = normalizedQuery.isEmpty()
+            ? questionRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid, PageRequest.of(page, PAGE_SIZE))
+            : questionRepository.findByWorkspaceGuidAndQuestionContainingIgnoreCaseOrderByIdDesc(
+                workspaceGuid,
+                normalizedQuery,
+                PageRequest.of(page, PAGE_SIZE)
+            );
         Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
 
         var items = questionPage

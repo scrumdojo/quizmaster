@@ -114,10 +114,10 @@ Feature: Workspace page management
     And I do not see image thumbnail for question "2 + 2 = ?"
 
 
-  @skip
   Scenario: Filter questions in workspace
     Given workspace "Workspace" with questions
       | question                       | answers            |
+      | 2 + 2 = ?                      | 4 (*), 5           |
       | Which animal is this?          | Cat (*), Dog       |
       | 3 * 3 = ?                      | 9 (*), 6           |
       | 4 / 2 = ?                      | 2 (*), 3           |
