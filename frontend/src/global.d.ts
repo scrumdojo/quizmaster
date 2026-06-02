@@ -19,4 +19,6 @@ declare module '*.css' {}
 interface Window {
     /** Set by E2E test harness to skip the decorative canvas background. */
     __noCrazyBackground?: boolean
+    /** Live-switch the background animation theme and persist to localStorage. */
+    __setAnimationTheme?: (theme: 'angels' | 'mammoths' | 'off') => void
 }

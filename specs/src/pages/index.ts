@@ -1,3 +1,4 @@
+export * from './app-page.ts'
 export * from './page-navigation.ts'
 export * from './workspace-create-page.ts'
 export * from './home-page.ts'

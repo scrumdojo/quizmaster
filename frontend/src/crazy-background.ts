@@ -707,17 +707,432 @@ function drawSatan(ctx: CanvasRenderingContext2D, satan: Satan, scale = 1, opaci
     ctx.restore()
 }
 
-// ─── bootstrap ───────────────────────────────────────────────────────────────
+// ─── mammoth types ───────────────────────────────────────────────────────────
 
-if (!window.__noCrazyBackground) {
-    start()
+type Mammoth = {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    t: number
+    flip: boolean
 }
 
-function start() {
+type Hunter = {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    t: number
+    flip: boolean
+    spears: Array<{ x: number; y: number; vx: number; vy: number }>
+    shootCooldown: number
+}
+
+function makeMammoth(w: number, h: number): Mammoth {
+    return {
+        x: w + 80,
+        y: Math.random() * h * 0.55 + h * 0.3,
+        vx: -(0.5 + Math.random() * 0.7),
+        vy: (Math.random() - 0.5) * 0.35,
+        t: 0,
+        flip: true,
+    }
+}
+
+function makeHunter(_w: number, h: number): Hunter {
+    return {
+        x: -60,
+        y: Math.random() * h * 0.55 + h * 0.3,
+        vx: 0.8 + Math.random() * 0.7,
+        vy: (Math.random() - 0.5) * 0.35,
+        t: 0,
+        flip: false,
+        spears: [],
+        shootCooldown: 80 + Math.floor(Math.random() * 120),
+    }
+}
+
+function drawMammoth(ctx: CanvasRenderingContext2D, m: Mammoth) {
+    ctx.save()
+    ctx.translate(m.x, m.y)
+    if (m.flip) ctx.scale(-1, 1)
+
+    const legSwing = Math.sin(m.t * 0.1) * 5
+
+    // Back legs
+    ctx.fillStyle = '#7B3A0E'
+    ctx.save()
+    ctx.translate(-12, 20)
+    ctx.rotate(legSwing * 0.05)
+    ctx.fillRect(-4, 0, 8, 18)
+    ctx.restore()
+    ctx.save()
+    ctx.translate(8, 20)
+    ctx.rotate(-legSwing * 0.05)
+    ctx.fillRect(-4, 0, 8, 18)
+    ctx.restore()
+
+    // Body
+    ctx.globalAlpha = 0.9
+    ctx.fillStyle = '#8B4513'
+    ctx.beginPath()
+    ctx.ellipse(0, 4, 38, 24, 0, 0, TAU)
+    ctx.fill()
+
+    // Fur texture
+    ctx.globalAlpha = 0.18
+    ctx.strokeStyle = '#3d1a00'
+    ctx.lineWidth = 1.5
+    for (let i = 0; i < 6; i++) {
+        ctx.beginPath()
+        ctx.arc(-28 + i * 11, -17, 6, Math.PI, 0)
+        ctx.stroke()
+    }
+
+    // Front legs
+    ctx.globalAlpha = 1
+    ctx.fillStyle = '#7B3A0E'
+    ctx.save()
+    ctx.translate(-20, 22)
+    ctx.rotate(-legSwing * 0.05)
+    ctx.fillRect(-4, 0, 8, 18)
+    ctx.restore()
+    ctx.save()
+    ctx.translate(2, 22)
+    ctx.rotate(legSwing * 0.05)
+    ctx.fillRect(-4, 0, 8, 18)
+    ctx.restore()
+
+    // Head
+    ctx.globalAlpha = 0.92
+    ctx.fillStyle = '#7B3A0E'
+    ctx.beginPath()
+    ctx.ellipse(36, -7, 18, 15, -0.2, 0, TAU)
+    ctx.fill()
+
+    // Trunk
+    ctx.globalAlpha = 0.88
+    ctx.strokeStyle = '#6B2D05'
+    ctx.lineWidth = 7
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(51, -3)
+    ctx.bezierCurveTo(62, 4, 60, 18, 49, 22)
+    ctx.stroke()
+
+    // Tusks
+    ctx.globalAlpha = 0.85
+    ctx.strokeStyle = '#F0EDD5'
+    ctx.lineWidth = 3.5
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.arc(42, -1, 13, 0.4, 1.7)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.arc(41, 5, 9, 0.2, 1.4)
+    ctx.stroke()
+
+    // Eye
+    ctx.globalAlpha = 1
+    ctx.fillStyle = '#1a0800'
+    ctx.beginPath()
+    ctx.arc(42, -12, 2.5, 0, TAU)
+    ctx.fill()
+
+    ctx.restore()
+}
+
+function drawHunter(ctx: CanvasRenderingContext2D, h: Hunter) {
+    ctx.save()
+    ctx.translate(h.x, h.y)
+    if (h.flip) ctx.scale(-1, 1)
+
+    const legSwing = Math.sin(h.t * 0.14) * 7
+
+    ctx.globalAlpha = 0.86
+
+    // Spear (behind body)
+    ctx.strokeStyle = '#5C3D11'
+    ctx.lineWidth = 2.5
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(4, -7)
+    ctx.lineTo(24, -25)
+    ctx.stroke()
+    ctx.fillStyle = '#9E9E9E'
+    ctx.beginPath()
+    ctx.moveTo(24, -25)
+    ctx.lineTo(20, -33)
+    ctx.lineTo(30, -29)
+    ctx.closePath()
+    ctx.fill()
+
+    // Legs
+    ctx.strokeStyle = '#8B4513'
+    ctx.lineWidth = 3
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(0, 4)
+    ctx.lineTo(-5 + legSwing * 0.28, 21)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(0, 4)
+    ctx.lineTo(5 - legSwing * 0.28, 21)
+    ctx.stroke()
+
+    // Body
+    ctx.strokeStyle = '#C47C3A'
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.moveTo(0, -12)
+    ctx.lineTo(0, 4)
+    ctx.stroke()
+
+    // Arms
+    ctx.strokeStyle = '#D4A87A'
+    ctx.lineWidth = 2.5
+    ctx.beginPath()
+    ctx.moveTo(0, -6)
+    ctx.lineTo(-8, 2)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(0, -6)
+    ctx.lineTo(7, -10)
+    ctx.stroke()
+
+    // Head
+    ctx.fillStyle = '#E8C589'
+    ctx.beginPath()
+    ctx.arc(0, -19, 8, 0, TAU)
+    ctx.fill()
+
+    // Hair
+    ctx.fillStyle = '#3d1a00'
+    ctx.beginPath()
+    ctx.arc(0, -24, 5, Math.PI, 0)
+    ctx.fill()
+
+    ctx.globalAlpha = 1
+    ctx.restore()
+}
+
+function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): () => void {
+    let cancelled = false
+    let w = (canvas.width = window.innerWidth)
+    let h = (canvas.height = window.innerHeight)
+
+    const mammoths: Mammoth[] = []
+    const hunters: Hunter[] = []
+    const particles: SplatParticle[] = []
+
+    const onResize = () => {
+        w = canvas.width = window.innerWidth
+        h = canvas.height = window.innerHeight
+    }
+    window.addEventListener('resize', onResize)
+
+    for (let i = 0; i < 5; i++) mammoths.push(makeMammoth(w, h))
+    for (let i = 0; i < 4; i++) hunters.push(makeHunter(w, h))
+
+    function tick() {
+        if (cancelled) return
+        ctx.clearRect(0, 0, w, h)
+        ctx.globalAlpha = 1
+
+        // ── mammoths ────────────────────────────────────
+        for (let i = mammoths.length - 1; i >= 0; i--) {
+            const m = mammoths[i]
+            m.t++
+            m.x += m.vx
+            m.y += m.vy + Math.sin(m.t * 0.022) * 0.4
+
+            if (m.x < -100) {
+                mammoths[i] = makeMammoth(w, h)
+                continue
+            }
+            drawMammoth(ctx, m)
+        }
+
+        // ── hunters ─────────────────────────────────────
+        for (let i = hunters.length - 1; i >= 0; i--) {
+            const hu = hunters[i]
+            hu.t++
+            hu.x += hu.vx
+            hu.y += hu.vy + Math.sin(hu.t * 0.026) * 0.3
+
+            if (hu.x > w + 80) {
+                hunters[i] = makeHunter(w, h)
+                continue
+            }
+
+            // Shoot spear
+            hu.shootCooldown--
+            if (hu.shootCooldown <= 0) {
+                hu.shootCooldown = 100 + Math.floor(Math.random() * 140)
+                const dir = hu.flip ? -1 : 1
+                hu.spears.push({
+                    x: hu.x + dir * 20,
+                    y: hu.y - 12,
+                    vx: dir * (3.8 + Math.random() * 2),
+                    vy: (Math.random() - 0.5) * 1.2,
+                })
+            }
+
+            // Update spears
+            for (let j = hu.spears.length - 1; j >= 0; j--) {
+                const sp = hu.spears[j]
+                sp.x += sp.vx
+                sp.y += sp.vy
+                sp.vy += 0.03
+
+                if (sp.x < -20 || sp.x > w + 20 || sp.y > h + 20) {
+                    hu.spears.splice(j, 1)
+                    continue
+                }
+
+                // Hit test against mammoths
+                let hit = false
+                for (let k = mammoths.length - 1; k >= 0; k--) {
+                    const m = mammoths[k]
+                    const dx = sp.x - m.x
+                    const dy = sp.y - m.y
+                    if (dx * dx + dy * dy < 40 * 40) {
+                        for (let p = 0; p < 18; p++) {
+                            const angle = Math.random() * TAU
+                            const speed = 1.2 + Math.random() * 4.5
+                            particles.push({
+                                x: m.x,
+                                y: m.y,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: 3 + Math.random() * 7,
+                                opacity: 1,
+                                color: ['#8B4513', '#A0522D', '#C07040'][Math.floor(Math.random() * 3)],
+                                gravity: 0.05,
+                                fade: 0.022,
+                                shrink: 0.985,
+                            })
+                        }
+                        mammoths[k] = makeMammoth(w, h)
+                        hu.spears.splice(j, 1)
+                        hit = true
+                        break
+                    }
+                }
+
+                if (!hit) {
+                    // Draw spear in flight
+                    const angle = Math.atan2(sp.vy, sp.vx)
+                    ctx.save()
+                    ctx.translate(sp.x, sp.y)
+                    ctx.rotate(angle)
+                    ctx.strokeStyle = '#5C3D11'
+                    ctx.lineWidth = 2.5
+                    ctx.lineCap = 'round'
+                    ctx.beginPath()
+                    ctx.moveTo(-12, 0)
+                    ctx.lineTo(8, 0)
+                    ctx.stroke()
+                    ctx.fillStyle = '#9E9E9E'
+                    ctx.beginPath()
+                    ctx.moveTo(8, 0)
+                    ctx.lineTo(4, -3.5)
+                    ctx.lineTo(4, 3.5)
+                    ctx.closePath()
+                    ctx.fill()
+                    ctx.restore()
+                }
+            }
+
+            drawHunter(ctx, hu)
+        }
+
+        // ── particles ───────────────────────────────────
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i]
+            p.x += p.vx
+            p.y += p.vy
+            p.vy += p.gravity ?? 0.05
+            p.opacity -= p.fade ?? 0.018
+            p.size *= p.shrink ?? 0.985
+            if (p.opacity <= 0 || p.size < 0.5) {
+                particles.splice(i, 1)
+                continue
+            }
+            ctx.globalAlpha = p.opacity
+            ctx.fillStyle = p.color
+            ctx.beginPath()
+            ctx.arc(p.x, p.y, p.size, 0, TAU)
+            ctx.fill()
+        }
+
+        ctx.globalAlpha = 1
+        requestAnimationFrame(tick)
+    }
+
+    requestAnimationFrame(tick)
+
+    return () => {
+        cancelled = true
+        window.removeEventListener('resize', onResize)
+    }
+}
+
+// ─── theme control ───────────────────────────────────────────────────────────
+
+type AnimationTheme = 'angels' | 'mammoths' | 'off'
+
+let cancelCurrent: (() => void) | null = null
+
+function applyTheme(theme: AnimationTheme) {
     const canvas = document.querySelector<HTMLCanvasElement>('#crazy-bg')
     if (!canvas) return
+
+    cancelCurrent?.()
+    cancelCurrent = null
+
+    canvas.dataset.theme = theme
+
+    if (theme === 'off') {
+        canvas.style.display = 'none'
+        const ctx2d = canvas.getContext('2d')
+        if (ctx2d) ctx2d.clearRect(0, 0, canvas.width, canvas.height)
+        return
+    }
+
+    canvas.style.display = ''
+
+    // In test mode (E2E), skip the animation loop — only the data-theme attribute matters.
+    if (window.__noCrazyBackground) return
+
+    const ctx2d = canvas.getContext('2d')
+    if (!ctx2d) return
+
+    cancelCurrent = theme === 'mammoths' ? startMammoths(canvas, ctx2d) : startAngels()
+}
+
+// Always register so React can call it even in test mode.
+window.__setAnimationTheme = (theme: AnimationTheme) => {
+    localStorage.setItem('animation-theme', theme)
+    applyTheme(theme)
+}
+
+// ─── bootstrap ───────────────────────────────────────────────────────────────
+
+{
+    const saved = localStorage.getItem('animation-theme') as AnimationTheme | null
+    const initial: AnimationTheme = saved === 'mammoths' || saved === 'off' ? saved : 'angels'
+    applyTheme(initial)
+}
+
+function startAngels(): () => void {
+    let rafId: number
+
+    const canvas = document.querySelector<HTMLCanvasElement>('#crazy-bg')
+    if (!canvas) return () => {}
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    if (!ctx) return () => {}
 
     let w = 0
     let h = 0
@@ -1028,8 +1443,13 @@ function start() {
             glow: 'rgba(255, 255, 255, 0.36)',
         })
 
-        requestAnimationFrame(tick)
+        rafId = requestAnimationFrame(tick)
     }
 
-    requestAnimationFrame(tick)
+    rafId = requestAnimationFrame(tick)
+
+    return () => {
+        cancelAnimationFrame(rafId)
+        window.removeEventListener('resize', resize)
+    }
 }

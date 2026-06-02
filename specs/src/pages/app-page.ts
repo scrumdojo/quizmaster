@@ -1,0 +1,23 @@
+import { expect, type Page } from '@playwright/test'
+
+export class AppPage {
+    constructor(private page: Page) {}
+
+    private settingsPanel = () => this.page.locator('[data-testid="animation-settings"]')
+    private canvas = () => this.page.locator('#crazy-bg')
+
+    openAnimationSettings = () => this.settingsPanel().hover()
+
+    turnOffAnimation = async () => {
+        await this.openAnimationSettings()
+        await this.page.getByRole('button', { name: 'Turn off' }).click()
+    }
+
+    switchToMammoths = async () => {
+        await this.openAnimationSettings()
+        await this.page.getByRole('button', { name: 'Mammoths' }).click()
+    }
+
+    expectAnimationHidden = () => expect(this.canvas()).toBeHidden()
+    expectAnimationTheme = (theme: string) => expect(this.canvas()).toHaveAttribute('data-theme', theme)
+}
