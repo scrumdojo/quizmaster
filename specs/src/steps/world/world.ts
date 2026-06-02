@@ -37,7 +37,7 @@ export class QuizmasterWorld {
         this.quizScorePage = new QuizScorePage(this.page)
         this.workspacePage = new WorkspacePage(this.page)
         this.quizCreatePage = new QuizCreatePage(this.page)
-        this.quizNicknamePage = new QuizNicknamePage()
+        this.quizNicknamePage = new QuizNicknamePage(this.page)
         this.homePage = new HomePage(this.page)
     }
 

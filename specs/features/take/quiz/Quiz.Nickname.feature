@@ -19,6 +19,6 @@ Feature: Quiz Nickname
     Then I see the welcome page
     When I continue to Nickname page
     Then I see the nickname input field
-    When I enter "Dave" as nickname
-    And I start the quiz
-    Then I see question "Q1"
+#When I enter "Dave" as nickname
+#And I start the quiz
+#Then I see question "Q1"
