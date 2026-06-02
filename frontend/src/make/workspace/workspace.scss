@@ -329,6 +329,12 @@
 }
 
 .quiz-item {
+    .question-index {
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
     .question-text {
         flex: 1;
         min-width: 0;

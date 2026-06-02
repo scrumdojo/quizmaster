@@ -32,6 +32,7 @@ export function WorkspacePage() {
     const [questionTotalElements, setQuestionTotalElements] = useState(0)
     const [quizzes, setQuizzes] = useState<readonly QuizListItem[]>([])
     const [quizPage, setQuizPage] = useState(0)
+    const [quizPageSize, setQuizPageSize] = useState(0)
     const [quizTotalPages, setQuizTotalPages] = useState(1)
     const [quizToDelete, setQuizToDelete] = useState<{ id: number; title: string } | null>(null)
     const [activeTab, setActiveTab] = useState<'quizzes' | 'questions'>(initialTab)
@@ -54,6 +55,7 @@ export function WorkspacePage() {
             const result = await fetchWorkspaceQuizzes(workspaceId, page)
             setQuizzes(result.content)
             setQuizTotalPages(result.totalPages)
+            setQuizPageSize(result.size)
             setQuizPage(result.number)
         },
         [workspaceId],
@@ -195,10 +197,11 @@ export function WorkspacePage() {
                         }
                     >
                         {hasQuizzes ? (
-                            quizzes.map(quiz => (
+                            quizzes.map((quiz, index) => (
                                 <QuizItem
                                     key={quiz.id}
                                     quiz={quiz}
+                                    orderNumber={quizPage * quizPageSize + index + 1}
                                     onDeleteClick={q => setQuizToDelete({ id: q, title: quiz.title })}
                                 />
                             ))

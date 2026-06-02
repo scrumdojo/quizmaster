@@ -81,7 +81,9 @@ public class WorkspaceQuizController {
             .map(quiz -> new QuizListItem(quiz.getId(), quiz.getTitle()))
             .toList();
 
-        return ResponseEntity.ok(new QuizPageResponse(items, quizPage.getTotalPages(), quizPage.getNumber()));
+        return ResponseEntity.ok(
+            new QuizPageResponse(items, quizPage.getTotalPages(), quizPage.getSize(), quizPage.getNumber())
+        );
     }
 
     @GetMapping("/{id}")

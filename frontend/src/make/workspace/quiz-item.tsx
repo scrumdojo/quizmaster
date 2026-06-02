@@ -4,13 +4,15 @@ import { urls, useWorkspaceId } from '#fe/urls.ts'
 
 interface Props {
     readonly quiz: QuizListItem
+    readonly orderNumber: number
     readonly onDeleteClick: (id: number) => void
 }
 
-export const QuizItem = ({ quiz, onDeleteClick }: Props) => {
+export const QuizItem = ({ quiz, orderNumber, onDeleteClick }: Props) => {
     const workspaceId = useWorkspaceId()
     return (
         <div className="quiz-item question-item">
+            <span className="question-index">#{orderNumber}</span>
             <span className="question-text">{quiz.title}</span>
             <LinkButton label="Edit" to={`${urls.workspaceQuizEdit(workspaceId, quiz.id)}?tab=quizzes`} />
             <LinkButton label="Take" to={urls.quizWelcome(quiz.id)} />

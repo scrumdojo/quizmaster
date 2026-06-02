@@ -151,6 +151,10 @@ Then('I do not see quiz {string} in the workspace', async function (quizName: st
     await this.workspacePage.expectQuizNotVisible(quizName)
 })
 
+Then('I see quiz {string} with order number {int}', async function (quizName: string, order: number) {
+    await this.workspacePage.expectQuizOrderNumber(quizName, order)
+})
+
 Then('I see {int} quiz(zes) on the page', async function (count: number) {
     await this.workspacePage.expectQuizCount(count)
 })

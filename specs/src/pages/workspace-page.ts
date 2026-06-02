@@ -197,6 +197,11 @@ export class WorkspacePage {
         await expect(this.quizLocator(quiz)).not.toBeVisible()
     }
 
+    expectQuizOrderNumber = async (quiz: string, order: number) => {
+        await this.showQuizzes()
+        await expect(this.quizLocator(quiz).locator('.question-index')).toHaveText(`#${order}`)
+    }
+
     // ── Quiz pagination ──────────────────────────────
 
     private quizPaginationLocator = () => this.page.locator('.quiz-pagination')
