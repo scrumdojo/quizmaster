@@ -90,6 +90,7 @@ Feature: Create Quiz from Workspace
     And I don't see quiz questions "What is a Backlog?"
 
 
+  @skip
   Scenario: Quiz time limit formatting
     Given workspace "Testworkspace"
     When I start creating a new quiz

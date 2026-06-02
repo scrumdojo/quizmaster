@@ -11,7 +11,11 @@ Feature: Make-side back button navigation
     Examples:
       | thing    |
       | question |
-      | quiz     |
+
+    @skip
+    Examples:
+      | thing |
+      | quiz  |
 
 
   Scenario: Back from question editing

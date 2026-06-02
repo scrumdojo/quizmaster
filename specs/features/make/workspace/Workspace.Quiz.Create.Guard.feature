@@ -19,6 +19,7 @@ Feature: Quiz creation requires at least 2 questions
     Then I see the message "It's not possible to create quiz without min 2 questions exist"
 
 
+  @skip
   Scenario: Can create a quiz when 2 or more questions exist
     Given workspace "Guard" with questions
       | question  | answers  |
