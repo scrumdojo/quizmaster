@@ -279,7 +279,11 @@ export function WorkspacePage() {
                         }
                     >
                         {quizCreateMessage && <p className="workspace-info-message">{quizCreateMessage}</p>}
-                        <form className="workspace-quiz-filter" role="search" onSubmit={event => event.preventDefault()}>
+                        <form
+                            className="workspace-quiz-filter"
+                            role="search"
+                            onSubmit={event => event.preventDefault()}
+                        >
                             <label htmlFor="workspace-quiz-filter-input">Filter quizzes</label>
                             <input
                                 id="workspace-quiz-filter-input"
