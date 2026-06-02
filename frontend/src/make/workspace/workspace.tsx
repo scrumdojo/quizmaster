@@ -34,6 +34,8 @@ export function WorkspacePage() {
     const [questionTotalPages, setQuestionTotalPages] = useState(1)
     const [questionTotalElements, setQuestionTotalElements] = useState(0)
     const [quizzes, setQuizzes] = useState<readonly QuizListItem[]>([])
+    const [quizFilter, setQuizFilter] = useState('')
+    const [debouncedQuizFilter, setDebouncedQuizFilter] = useState('')
     const [quizPage, setQuizPage] = useState(0)
     const [quizPageSize, setQuizPageSize] = useState(0)
     const [quizTotalPages, setQuizTotalPages] = useState(1)
@@ -51,6 +53,16 @@ export function WorkspacePage() {
             window.clearTimeout(timeout)
         }
     }, [questionFilter])
+
+    useEffect(() => {
+        const timeout = window.setTimeout(() => {
+            setDebouncedQuizFilter(quizFilter.trim())
+        }, 300)
+
+        return () => {
+            window.clearTimeout(timeout)
+        }
+    }, [quizFilter])
 
     const loadQuestionPage = useCallback(
         async (page: number, query = '') => {
@@ -75,8 +87,8 @@ export function WorkspacePage() {
     }, [workspaceId])
 
     const loadQuizPage = useCallback(
-        async (page: number) => {
-            const result = await fetchWorkspaceQuizzes(workspaceId, page)
+        async (page: number, query = '') => {
+            const result = await fetchWorkspaceQuizzes(workspaceId, page, query)
             setQuizzes(result.content)
             setQuizTotalPages(result.totalPages)
             setQuizPageSize(result.size)
@@ -98,8 +110,8 @@ export function WorkspacePage() {
     }, [debouncedQuestionFilter, loadQuestionPage])
 
     useEffect(() => {
-        void loadQuizPage(0)
-    }, [loadQuizPage])
+        void loadQuizPage(0, debouncedQuizFilter)
+    }, [debouncedQuizFilter, loadQuizPage])
 
     const onDeleteQuestion = async (id: number) => {
         await deleteQuestion(workspaceId, String(id))
@@ -113,7 +125,7 @@ export function WorkspacePage() {
         if (!quizToDelete) return
         await deleteQuiz(workspaceId, String(quizToDelete.id))
         setQuizToDelete(null)
-        await loadQuizPage(quizPage)
+        await loadQuizPage(quizPage, debouncedQuizFilter)
         await loadQuestionPage(questionPage, debouncedQuestionFilter)
     }
 
@@ -267,6 +279,17 @@ export function WorkspacePage() {
                         }
                     >
                         {quizCreateMessage && <p className="workspace-info-message">{quizCreateMessage}</p>}
+                        <form className="workspace-quiz-filter" role="search" onSubmit={event => event.preventDefault()}>
+                            <label htmlFor="workspace-quiz-filter-input">Filter quizzes</label>
+                            <input
+                                id="workspace-quiz-filter-input"
+                                type="search"
+                                value={quizFilter}
+                                placeholder="Type to filter quizzes"
+                                onChange={event => setQuizFilter(event.target.value)}
+                            />
+                        </form>
+
                         {hasQuizzes ? (
                             quizzes.map((quiz, index) => (
                                 <QuizItem
@@ -276,6 +299,11 @@ export function WorkspacePage() {
                                     onDeleteClick={q => setQuizToDelete({ id: q, title: quiz.title })}
                                 />
                             ))
+                        ) : debouncedQuizFilter.length > 0 ? (
+                            <div className="workspace-empty-state workspace-empty-state--quizzes">
+                                <h3>No matching quizzes</h3>
+                                <p>Try a different filter phrase.</p>
+                            </div>
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--quizzes">
                                 <h3>
@@ -299,7 +327,7 @@ export function WorkspacePage() {
                                     className={`workspace-pagination__page${i === quizPage ? ' workspace-pagination__page--active' : ''}`}
                                     aria-label={`Page ${i + 1}`}
                                     aria-current={i === quizPage ? 'page' : undefined}
-                                    onClick={() => void loadQuizPage(i)}
+                                    onClick={() => void loadQuizPage(i, debouncedQuizFilter)}
                                 >
                                     {i + 1}
                                 </button>

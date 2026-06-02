@@ -50,3 +50,17 @@ Given('workspace {string} with questions', async function (name: string, data: D
     // Re-load the workspace page so its question/quiz lists reflect REST-inserted data.
     await this.page.goto(`/workspace/${this.workspaceGuid}`)
 })
+
+Given('workspace {string} with quizzes', async function (name: string, data: DataTable) {
+    await createWorkspace(this, name)
+
+    for (const row of data.hashes()) {
+        await createQuizViaRest(this, this.workspaceGuid, {
+            name: `${row.quiz}`,
+            questions: [],
+        })
+    }
+
+    // Re-load the workspace page so its question/quiz lists reflect REST-inserted data.
+    await this.page.goto(`/workspace/${this.workspaceGuid}`)
+})

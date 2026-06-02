@@ -16,6 +16,12 @@ public interface QuizRepository extends JpaRepository<Quiz, Integer> {
         org.springframework.data.domain.Pageable pageable
     );
 
+    org.springframework.data.domain.Page<Quiz> findByWorkspaceGuidAndTitleContainingIgnoreCaseOrderByIdDesc(
+        String workspaceGuid,
+        String query,
+        org.springframework.data.domain.Pageable pageable
+    );
+
     Optional<Quiz> findByIdAndWorkspaceGuid(Integer id, String workspaceGuid);
 
     @Query(value = "SELECT COUNT(*) > 0 FROM quiz WHERE ? = ANY(questions)", nativeQuery = true)

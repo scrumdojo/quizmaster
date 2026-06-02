@@ -156,3 +156,25 @@ Feature: Workspace page management
       | scrum | What is a Sprint?     | What is a Backlog? |
       | zoo   |                       | What is a Sprint?  |
       | ikea  | Jaký nábytek má Ikea? | What is a Sprint?  |
+
+
+  Scenario: Filter quizzes in workspace
+    Given workspace "Workspace" with quizzes
+      | quiz        |
+      | first quiz  |
+      | second quiz |
+      | third quiz  |
+      | fourth quiz |
+    When I filter quizzes in workspace by "<filter>"
+    Then I see quiz "<visibleQuiz1>" in workspace
+    And I see quiz "<visibleQuiz2>" in workspace
+    And I don't see quiz "<hiddenQuiz1>" in workspace
+    And I don't see quiz "<hiddenQuiz2>" in workspace
+
+    Examples:
+      | filter | visibleQuiz1 | visibleQuiz2 | hiddenQuiz1 | hiddenQuiz2 |
+      | first  | first quiz   |              | second quiz | third quiz  |
+      | th     | third quiz   | fourth quiz  | first quiz  | second quiz |
+      | aaa    |              |              | first quiz  | second quiz |
+      | t      | first quiz   | third quiz   | second quiz |             |
+      | quiz   | first quiz   | second quiz  |             |             |

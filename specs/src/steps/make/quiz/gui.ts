@@ -21,6 +21,22 @@ When("I don't see quiz questions {string} in workspace", async function (title: 
     await this.workspacePage.expectQuestionNotVisible(title)
 })
 
+When('I filter quizzes in workspace by {string}', async function (s: string) {
+    await this.workspacePage.enterQuizFilterString(s)
+})
+
+When('I see quiz {string} in workspace', async function (title: string) {
+    if (title.trim()) {
+        await this.workspacePage.expectQuizVisible(title)
+    }
+})
+
+When("I don't see quiz {string} in workspace", async function (title: string) {
+    if (title.trim()) {
+        await this.workspacePage.expectQuizNotVisible(title)
+    }
+})
+
 Then('I see the quiz creation page', async function () {
     await this.page.waitForSelector('#create-quiz-page')
     const isVisible = await this.page.locator('#create-quiz-page').isVisible()

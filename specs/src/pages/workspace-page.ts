@@ -256,7 +256,7 @@ export class WorkspacePage {
     }
     expectQuizNotVisible = async (quiz: string) => {
         await this.showQuizzes()
-        await expect(this.quizLocator(quiz)).not.toBeVisible()
+        await expect(this.quizLocator(quiz)).toHaveCount(0)
     }
 
     expectQuizOrderNumber = async (quiz: string, order: number) => {
@@ -339,6 +339,17 @@ export class WorkspacePage {
         const filterInput = this.page.locator('#workspace-question-filter-input')
         await expect(filterInput).toBeVisible()
         await filterInput.fill(filter)
+        // Wait for debounce and API call to complete
+        await this.page.waitForLoadState('networkidle')
+    }
+
+    enterQuizFilterString = async (filter: string) => {
+        await this.showQuizzes()
+        const filterInput = this.page.locator('#workspace-quiz-filter-input')
+        await expect(filterInput).toBeVisible()
+        await filterInput.fill(filter)
+        // Wait for debounce and API call to complete
+        await this.page.waitForLoadState('networkidle')
     }
 
     getQuestion = (question: string) => this.page.locator('.question-item', { hasText: question })
