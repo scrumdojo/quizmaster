@@ -1,5 +1,5 @@
 import './workspace.scss'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { deleteQuestion } from '#fe/make/api/question.ts'
 import { deleteQuiz } from '#fe/make/api/quiz.ts'
@@ -21,12 +21,27 @@ export function WorkspacePage() {
     const [workspace, setWorkspace] = useState<Workspace>({ guid: workspaceId, title: '' })
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
     const [quizzes, setQuizzes] = useState<readonly QuizListItem[]>([])
+    const [quizPage, setQuizPage] = useState(0)
+    const [quizTotalPages, setQuizTotalPages] = useState(1)
     const [quizToDelete, setQuizToDelete] = useState<{ id: number; title: string } | null>(null)
     const [activeTab, setActiveTab] = useState<'quizzes' | 'questions'>('quizzes')
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
     const refreshQuestions = useApi(workspaceId, fetchWorkspaceQuestions, setQuestions)
-    useApi(workspaceId, fetchWorkspaceQuizzes, setQuizzes)
+
+    const loadQuizPage = useCallback(
+        async (page: number) => {
+            const result = await fetchWorkspaceQuizzes(workspaceId, page)
+            setQuizzes(result.content)
+            setQuizTotalPages(result.totalPages)
+            setQuizPage(result.number)
+        },
+        [workspaceId],
+    )
+
+    useEffect(() => {
+        void loadQuizPage(0)
+    }, [loadQuizPage])
 
     const onDeleteQuestion = async (id: number) => {
         await deleteQuestion(workspaceId, String(id))
@@ -37,7 +52,7 @@ export function WorkspacePage() {
         if (!quizToDelete) return
         await deleteQuiz(workspaceId, String(quizToDelete.id))
         setQuizToDelete(null)
-        setQuizzes(await fetchWorkspaceQuizzes(workspaceId))
+        await loadQuizPage(quizPage)
         setQuestions(await fetchWorkspaceQuestions(workspaceId))
     }
 
@@ -156,6 +171,23 @@ export function WorkspacePage() {
                             </div>
                         )}
                     </ItemList>
+
+                    {quizTotalPages > 1 && (
+                        <nav className="quiz-pagination" aria-label="Quiz pages">
+                            {Array.from({ length: quizTotalPages }, (_, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    className={`quiz-pagination__page${i === quizPage ? ' quiz-pagination__page--active' : ''}`}
+                                    aria-label={`Page ${i + 1}`}
+                                    aria-current={i === quizPage ? 'page' : undefined}
+                                    onClick={() => void loadQuizPage(i)}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                        </nav>
+                    )}
                 </section>
             )}
             {quizToDelete && (

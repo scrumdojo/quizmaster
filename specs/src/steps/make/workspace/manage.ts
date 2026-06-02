@@ -151,6 +151,22 @@ Then('I do not see quiz {string} in the workspace', async function (quizName: st
     await this.workspacePage.expectQuizNotVisible(quizName)
 })
 
+Then('I see {int} quiz(zes) on the page', async function (count: number) {
+    await this.workspacePage.expectQuizCount(count)
+})
+
+Then('I see quiz page link {int}', async function (pageNum: number) {
+    await this.workspacePage.expectQuizPageLinkVisible(pageNum)
+})
+
+Then('I do not see quiz page links', async function () {
+    await this.workspacePage.expectQuizPageLinksHidden()
+})
+
+When('I go to quiz page {int}', async function (pageNum: number) {
+    await this.workspacePage.goToQuizPage(pageNum)
+})
+
 Then('I see quizzes in order: {string}, {string}, {string}', async function (a: string, b: string, c: string) {
     await this.workspacePage.expectQuizzesInOrder([a, b, c])
 })

@@ -11,6 +11,11 @@ import org.springframework.data.repository.query.Param;
 public interface QuizRepository extends JpaRepository<Quiz, Integer> {
     List<Quiz> findByWorkspaceGuidOrderByIdDesc(String workspaceGuid);
 
+    org.springframework.data.domain.Page<Quiz> findByWorkspaceGuidOrderByIdDesc(
+        String workspaceGuid,
+        org.springframework.data.domain.Pageable pageable
+    );
+
     Optional<Quiz> findByIdAndWorkspaceGuid(Integer id, String workspaceGuid);
 
     @Query(value = "SELECT COUNT(*) > 0 FROM quiz WHERE ? = ANY(questions)", nativeQuery = true)

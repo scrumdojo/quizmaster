@@ -194,6 +194,32 @@ export class WorkspacePage {
         await expect(this.quizLocator(quiz)).not.toBeVisible()
     }
 
+    // ── Quiz pagination ──────────────────────────────
+
+    private quizPaginationLocator = () => this.page.locator('.quiz-pagination')
+    private quizPageLinkLocator = (pageNum: number) =>
+        this.page.locator('.quiz-pagination').getByRole('button', { name: `Page ${pageNum}` })
+
+    expectQuizCount = async (count: number) => {
+        await this.showQuizzes()
+        await expect(this.page.locator('.quiz-item')).toHaveCount(count)
+    }
+
+    expectQuizPageLinkVisible = async (pageNum: number) => {
+        await this.showQuizzes()
+        await expect(this.quizPageLinkLocator(pageNum)).toBeVisible()
+    }
+
+    expectQuizPageLinksHidden = async () => {
+        await this.showQuizzes()
+        await expect(this.quizPaginationLocator()).toBeHidden()
+    }
+
+    goToQuizPage = async (pageNum: number) => {
+        await this.showQuizzes()
+        await this.quizPageLinkLocator(pageNum).click()
+    }
+
     expectQuizzesInOrder = async (titles: string[]) => {
         await this.showQuizzes()
         const items = this.page.locator('.quiz-item')

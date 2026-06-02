@@ -56,16 +56,11 @@ public class WorkspaceQuizControllerTest {
         mockMvc
             .perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
             .andExpect(status().isOk())
-            .andExpect(
-                content().json(
-                    """
-                    [
-                        {"id": %d, "title": "Test Quiz"},
-                        {"id": %d, "title": "Test Quiz"}
-                    ]
-                    """.formatted(quiz1.getId(), quiz2.getId())
-                )
-            );
+            .andExpect(jsonPath("$.totalPages").value(1))
+            .andExpect(jsonPath("$.number").value(0))
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.content[0].id").value(quiz2.getId()))
+            .andExpect(jsonPath("$.content[1].id").value(quiz1.getId()));
     }
 
     @Test

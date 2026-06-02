@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,19 +63,25 @@ public class WorkspaceQuizController {
         this.clock = clock;
     }
 
+    private static final int PAGE_SIZE = 10;
+
     @Transactional(readOnly = true)
     @GetMapping
-    public ResponseEntity<List<QuizListItem>> getWorkspaceQuizzes(@PathVariable String workspaceGuid) {
+    public ResponseEntity<QuizPageResponse> getWorkspaceQuizzes(
+        @PathVariable String workspaceGuid,
+        @RequestParam(defaultValue = "0") int page
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        List<Quiz> quizzes = quizRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid);
+        var quizPage = quizRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid, PageRequest.of(page, PAGE_SIZE));
 
-        var items = quizzes
+        var items = quizPage
+            .getContent()
             .stream()
             .map(quiz -> new QuizListItem(quiz.getId(), quiz.getTitle()))
             .toList();
 
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(new QuizPageResponse(items, quizPage.getTotalPages(), quizPage.getNumber()));
     }
 
     @GetMapping("/{id}")
