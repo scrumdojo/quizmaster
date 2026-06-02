@@ -162,6 +162,18 @@ export class WorkspacePage {
         await this.showQuestions()
         await expect(this.questionUsedBadgeLocator(question)).not.toBeVisible()
     }
+    expectQuestionInQuizTag = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionLocator(question).getByText('In Quiz')).toBeVisible()
+    }
+    expectQuestionInQuizTagButtonStyle = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionUsedBadgeLocator(question)).toHaveClass(/link-button/)
+    }
+    expectQuestionInQuizTagAbsent = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionLocator(question).getByText('In Quiz')).not.toBeVisible()
+    }
 
     // ── Create new question / quiz ───────────────────
 

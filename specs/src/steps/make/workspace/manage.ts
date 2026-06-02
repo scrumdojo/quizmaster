@@ -127,6 +127,18 @@ Then('I do not see tag badge for question {string}', async function (question: s
     await this.workspacePage.expectQuestionTagBadgeNotVisible(question)
 })
 
+Then('I see "In Quiz" tag on question {string}', async function (question: string) {
+    await this.workspacePage.expectQuestionInQuizTag(question)
+})
+
+Then('the "In Quiz" tag on question {string} uses button styling', async function (question: string) {
+    await this.workspacePage.expectQuestionInQuizTagButtonStyle(question)
+})
+
+Then('I do not see "In Quiz" tag on question {string}', async function (question: string) {
+    await this.workspacePage.expectQuestionInQuizTagAbsent(question)
+})
+
 Then('I see image thumbnail for question {string}', async function (question: string) {
     await this.workspacePage.expectQuestionThumbnailVisible(question)
 })

@@ -33,7 +33,7 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                     />
                     <LinkButton label="Take" to={urls.questionTake(question.id)} />
                     {question.isInAnyQuiz ? (
-                        <span className="question-used-badge">Used</span>
+                        <span className="question-used-badge link-button">In Quiz</span>
                     ) : (
                         <Button className="link-button" onClick={onDeleteQuestion}>
                             Delete
