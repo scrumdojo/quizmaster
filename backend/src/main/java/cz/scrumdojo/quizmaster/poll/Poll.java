@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster.poll;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,5 +13,5 @@ public class Poll {
     private Integer id;
     private String workspaceGuid;
     private String question;
-    private String[] answers;
+    private List<PollAnswer> answers;
 }

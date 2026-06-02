@@ -85,11 +85,16 @@ quick opinion gathering rather than scoring.
 A poll contains:
 
 - One **question** text.
-- A list of **answers** from which a learner selects exactly one option.
+- A list of **answers** from which a learner selects exactly one option. Each
+  answer has its own backend-generated id plus the answer text.
 
-In the first implementation slice, the backend supports creating polls through
-workspace-scoped authoring API, and poll data is stored in memory for the
-duration of the running application process.
+The backend supports creating polls through workspace-scoped authoring API and
+submitting anonymous votes through a public take API using the selected
+answer's id. Poll definitions and submitted votes are stored in memory for the
+duration of the running application process. The author can fetch aggregated
+results for a poll through a workspace-scoped results endpoint; the response
+contains every answer with its id, text, and current vote count, including
+answers that still have zero votes.
 
 ## Taking a quiz: Attempt
 

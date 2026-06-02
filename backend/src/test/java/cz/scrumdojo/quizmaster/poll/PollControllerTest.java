@@ -46,6 +46,15 @@ public class PollControllerTest {
         return JsonPath.read(result.getResponse().getContentAsString(), "$.id");
     }
 
+    private Integer getAnswerId(String workspaceGuid, Integer pollId, int answerIndex) throws Exception {
+        var result = mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}", workspaceGuid, pollId))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        return JsonPath.read(result.getResponse().getContentAsString(), "$.answers[%d].id".formatted(answerIndex));
+    }
+
     @Test
     public void getPollDetailInWorkspace() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
@@ -56,9 +65,12 @@ public class PollControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(pollId))
             .andExpect(jsonPath("$.question").value("How often do you run retrospectives?"))
-            .andExpect(jsonPath("$.answers[0]").value("Weekly"))
-            .andExpect(jsonPath("$.answers[1]").value("Bi-weekly"))
-            .andExpect(jsonPath("$.answers[2]").value("Monthly"));
+            .andExpect(jsonPath("$.answers[0].id").isNumber())
+            .andExpect(jsonPath("$.answers[0].text").value("Weekly"))
+            .andExpect(jsonPath("$.answers[1].id").isNumber())
+            .andExpect(jsonPath("$.answers[1].text").value("Bi-weekly"))
+            .andExpect(jsonPath("$.answers[2].id").isNumber())
+            .andExpect(jsonPath("$.answers[2].text").value("Monthly"));
     }
 
     @Test
@@ -78,6 +90,69 @@ public class PollControllerTest {
 
         mockMvc
             .perform(get("/api/workspaces/{guid}/polls/{id}", workspace.getGuid(), 999_999))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getPollResultsWithoutVotesReturnsZeroCounts() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Integer pollId = createPoll(workspace.getGuid());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}/results", workspace.getGuid(), pollId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.pollId").value(pollId))
+            .andExpect(jsonPath("$.answers[0].answerId").isNumber())
+            .andExpect(jsonPath("$.answers[0].text").value("Weekly"))
+            .andExpect(jsonPath("$.answers[0].voteCount").value(0))
+            .andExpect(jsonPath("$.answers[1].text").value("Bi-weekly"))
+            .andExpect(jsonPath("$.answers[1].voteCount").value(0))
+            .andExpect(jsonPath("$.answers[2].text").value("Monthly"))
+            .andExpect(jsonPath("$.answers[2].voteCount").value(0));
+    }
+
+    @Test
+    public void getPollResultsAggregatesVotesPerAnswer() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Integer pollId = createPoll(workspace.getGuid());
+        Integer firstAnswerId = getAnswerId(workspace.getGuid(), pollId, 0);
+        Integer secondAnswerId = getAnswerId(workspace.getGuid(), pollId, 1);
+
+        vote(pollId, firstAnswerId);
+        vote(pollId, firstAnswerId);
+        vote(pollId, secondAnswerId);
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}/results", workspace.getGuid(), pollId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.pollId").value(pollId))
+            .andExpect(jsonPath("$.answers[0].answerId").value(firstAnswerId))
+            .andExpect(jsonPath("$.answers[0].text").value("Weekly"))
+            .andExpect(jsonPath("$.answers[0].voteCount").value(2))
+            .andExpect(jsonPath("$.answers[1].answerId").value(secondAnswerId))
+            .andExpect(jsonPath("$.answers[1].text").value("Bi-weekly"))
+            .andExpect(jsonPath("$.answers[1].voteCount").value(1))
+            .andExpect(jsonPath("$.answers[2].text").value("Monthly"))
+            .andExpect(jsonPath("$.answers[2].voteCount").value(0));
+    }
+
+    @Test
+    public void getPollResultsFromWrongWorkspaceReturns404() throws Exception {
+        Workspace workspace1 = fixtures.save(fixtures.workspace());
+        Workspace workspace2 = fixtures.save(fixtures.workspace());
+        Integer pollId = createPoll(workspace1.getGuid());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}/results", workspace2.getGuid(), pollId))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getPollResultsForMissingPollReturns404() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}/results", workspace.getGuid(), 999_999))
             .andExpect(status().isNotFound());
     }
 
@@ -185,5 +260,21 @@ public class PollControllerTest {
                     )
             )
             .andExpect(status().isNotFound());
+    }
+
+    private void vote(Integer pollId, Integer answerId) throws Exception {
+        mockMvc
+            .perform(
+                post("/api/poll/{id}/submit", pollId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            \"selectedAnswerId\": %d
+                        }
+                        """.formatted(answerId)
+                    )
+            )
+            .andExpect(status().isNoContent());
     }
 }

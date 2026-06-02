@@ -4,6 +4,7 @@ import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceGuard;
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,18 @@ public class PollController {
         );
     }
 
+    @GetMapping("/{id}/results")
+    public ResponseEntity<PollResultsResponse> getPollResults(
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id
+    ) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        return ResponseHelper.okOrNotFound(
+            pollRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).map(this::toPollResultsResponse)
+        );
+    }
+
     @PostMapping
     public ResponseEntity<IdResponse> createPoll(
         @PathVariable String workspaceGuid,
@@ -42,5 +55,21 @@ public class PollController {
 
         Poll created = pollRepository.save(request.toEntity(workspaceGuid));
         return ResponseEntity.ok(new IdResponse(created.getId()));
+    }
+
+    private PollResultsResponse toPollResultsResponse(Poll poll) {
+        Map<Integer, Integer> voteCounts = pollRepository.getVoteCounts(poll.getId());
+        var results = poll
+            .getAnswers()
+            .stream()
+            .map(answer ->
+                new PollResultsResponse.PollResultItem(
+                    answer.id(),
+                    answer.text(),
+                    voteCounts.getOrDefault(answer.id(), 0)
+                )
+            )
+            .toList();
+        return new PollResultsResponse(poll.getId(), results);
     }
 }

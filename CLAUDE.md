@@ -101,11 +101,12 @@ Endpoints live under `/api/`. Two flavors:
 
 - **Authoring** is workspace-scoped: `/api/workspaces/{guid}/...` for
   questions, quizzes, polls, and AI drafting. Shared by FE and MCP. Includes
-  `GET /api/workspaces/{guid}/polls/{id}` for poll detail and
+  `GET /api/workspaces/{guid}/polls/{id}` for poll detail,
+  `GET /api/workspaces/{guid}/polls/{id}/results` for poll results, and
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/quiz/{id}/leaderboard`,
-  `/api/question/{id}`, `/api/attempt/...`.
+  `/api/question/{id}`, `/api/poll/{id}/submit`, `/api/attempt/...`.
 - Plus `GET /api/feature-flag`.
 
 Controllers are the source of truth: workspace authoring lives in
