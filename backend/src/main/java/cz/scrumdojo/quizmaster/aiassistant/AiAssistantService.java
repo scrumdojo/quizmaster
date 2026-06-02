@@ -16,12 +16,14 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Service
 public class AiAssistantService {
 
@@ -177,6 +179,7 @@ public class AiAssistantService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                log.error("OpenRouter request failed: status={}", response.statusCode());
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant request failed.");
             }
 
@@ -186,6 +189,7 @@ public class AiAssistantService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
+            log.error("OpenRouter request failed", e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant request failed.");
         }
     }
