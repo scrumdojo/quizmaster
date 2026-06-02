@@ -20,4 +20,7 @@ export class AppPage {
 
     expectAnimationHidden = () => expect(this.canvas()).toBeHidden()
     expectAnimationTheme = (theme: string) => expect(this.canvas()).toHaveAttribute('data-theme', theme)
+
+    expectMammothButtonSpearCursor = () =>
+        expect(this.page.getByRole('button', { name: 'Mammoths' })).toHaveAttribute('style', /cursor:.*url\(/)
 }

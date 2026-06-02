@@ -15,3 +15,11 @@ When('I switch the animation to the mammoths theme', async function () {
 Then('the background animation shows the mammoths theme', async function () {
     await this.appPage.expectAnimationTheme('mammoths')
 })
+
+When('I hover over the mammoth animation option', async function () {
+    await this.appPage.openAnimationSettings()
+})
+
+Then('the cursor changes to a spear', async function () {
+    await this.appPage.expectMammothButtonSpearCursor()
+})

@@ -16,10 +16,17 @@ import { ROUTES } from '#fe/urls.ts'
 
 type AnimationTheme = 'angels' | 'mammoths' | 'off'
 
-const THEME_OPTIONS: { value: AnimationTheme; label: string }[] = [
-    { value: 'off', label: 'Turn off' },
-    { value: 'angels', label: 'Angels & Devils' },
-    { value: 'mammoths', label: 'Mammoths' },
+const SPEAR_CURSOR = `url("data:image/svg+xml;base64,${btoa(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">' +
+        '<line x1="30" y1="30" x2="10" y2="10" stroke="#8B6914" stroke-width="3" stroke-linecap="round"/>' +
+        '<polygon points="4,4 9,16 16,9" fill="silver" stroke="gray" stroke-width="0.5"/>' +
+        '</svg>',
+)}") 4 4, auto`
+
+const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] = [
+    { value: 'off', label: 'Turn off', cursor: 'pointer' },
+    { value: 'angels', label: 'Angels & Devils', cursor: 'pointer' },
+    { value: 'mammoths', label: 'Mammoths', cursor: SPEAR_CURSOR },
 ]
 
 const AnimationSettings = () => {
@@ -56,7 +63,7 @@ const AnimationSettings = () => {
         >
             {open && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-                    {THEME_OPTIONS.map(({ value, label }) => (
+                    {THEME_OPTIONS.map(({ value, label, cursor }) => (
                         <button
                             key={value}
                             type="button"
@@ -69,7 +76,7 @@ const AnimationSettings = () => {
                                 background: theme === value ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.72)',
                                 fontWeight: theme === value ? 600 : 400,
                                 fontSize: 12,
-                                cursor: 'pointer',
+                                cursor,
                                 whiteSpace: 'nowrap',
                                 color: '#10233f',
                             }}

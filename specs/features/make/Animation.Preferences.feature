@@ -10,3 +10,9 @@ Feature: Background animation preferences
     Given I am on the home page
     When I switch the animation to the mammoths theme
     Then the background animation shows the mammoths theme
+
+
+  Scenario: Mammoth button shows a spear cursor
+    Given I am on the home page
+    When I hover over the mammoth animation option
+    Then the cursor changes to a spear
