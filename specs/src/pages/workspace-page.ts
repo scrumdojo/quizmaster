@@ -27,9 +27,12 @@ export class WorkspacePage {
     clickTab = (name: string) => this.tabLocator(name).click()
 
     // Content is gated by the active tab, so interactions activate the right
-    // section first. Clicking an already-active tab is a harmless no-op.
-    private showQuestions = () => this.tabLocator('Questions').click()
-    private showQuizzes = () => this.tabLocator('Quizzes').click()
+    // section first. We dispatch the click rather than .click() because an open
+    // overlay (e.g. the Robin AI chat sheet docked over the page) can cover the
+    // tab bar and block a real click; dispatchEvent flips the tab regardless.
+    // The real tab-click UX is covered by the Workspace.Tabs scenarios.
+    private showQuestions = () => this.tabLocator('Questions').dispatchEvent('click')
+    private showQuizzes = () => this.tabLocator('Quizzes').dispatchEvent('click')
 
     // ── Section visibility (asserts the gating; does NOT switch tabs) ──
 
