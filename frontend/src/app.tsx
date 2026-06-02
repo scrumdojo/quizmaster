@@ -23,6 +23,8 @@ const SPEAR_CURSOR = `url("data:image/svg+xml;base64,${btoa(
         '</svg>',
 )}") 4 4, auto`
 
+document.documentElement.style.setProperty('--cursor-spear', SPEAR_CURSOR)
+
 const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] = [
     { value: 'off', label: 'Turn off', cursor: 'pointer' },
     { value: 'angels', label: 'Angels & Devils', cursor: 'pointer' },
@@ -30,7 +32,6 @@ const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] 
 ]
 
 const AnimationSettings = () => {
-    const [open, setOpen] = useState(false)
     const [theme, setTheme] = useState<AnimationTheme>(() => {
         const v = localStorage.getItem('animation-theme')
         return v === 'mammoths' || v === 'off' ? v : 'angels'
@@ -39,74 +40,53 @@ const AnimationSettings = () => {
     const select = (t: AnimationTheme) => {
         window.__setAnimationTheme?.(t)
         setTheme(t)
-        setOpen(false)
     }
 
     return (
         <div
             data-testid="animation-settings"
-            onMouseEnter={() => setOpen(true)}
-            onMouseLeave={() => setOpen(false)}
             style={{
                 position: 'fixed',
-                right: 0,
-                bottom: 0,
-                zIndex: 3,
-                padding: 14,
+                right: 16,
+                bottom: 16,
+                zIndex: 10,
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                justifyContent: 'flex-end',
-                minWidth: 72,
-                minHeight: 72,
+                background: 'rgba(255,255,255,0.92)',
+                borderRadius: 999,
+                border: '2px solid rgba(37,99,235,0.18)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.14)',
+                padding: 4,
+                gap: 2,
+                backdropFilter: 'blur(8px)',
             }}
         >
-            {open && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-                    {THEME_OPTIONS.map(({ value, label, cursor }) => (
-                        <button
-                            key={value}
-                            type="button"
-                            aria-label={label}
-                            onClick={() => select(value)}
-                            style={{
-                                padding: '3px 10px',
-                                borderRadius: 12,
-                                border: '1px solid rgba(16, 35, 63, 0.24)',
-                                background: theme === value ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.72)',
-                                fontWeight: theme === value ? 600 : 400,
-                                fontSize: 12,
-                                cursor,
-                                whiteSpace: 'nowrap',
-                                color: '#10233f',
-                            }}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
-            )}
-            <button
-                type="button"
-                aria-label="Animation settings"
-                onBlur={() => setOpen(false)}
-                onFocus={() => setOpen(true)}
-                style={{
-                    width: 26,
-                    height: 26,
-                    border: '1px solid rgba(16, 35, 63, 0.24)',
-                    borderRadius: '50%',
-                    background: 'rgba(255, 255, 255, 0.82)',
-                    color: '#10233f',
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    lineHeight: 1,
-                    opacity: open ? 0.88 : 0,
-                    transition: 'opacity 0.18s ease',
-                }}
-            >
-                🎬
-            </button>
+            {THEME_OPTIONS.map(({ value, label, cursor }) => (
+                <button
+                    key={value}
+                    type="button"
+                    aria-label={label}
+                    aria-pressed={theme === value}
+                    onClick={() => select(value)}
+                    style={{
+                        padding: '10px 20px',
+                        borderRadius: 999,
+                        border: 'none',
+                        background:
+                            theme === value
+                                ? 'linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 60%, #4338ca 100%)'
+                                : 'transparent',
+                        fontWeight: 700,
+                        fontSize: 15,
+                        cursor,
+                        whiteSpace: 'nowrap',
+                        color: theme === value ? '#fff' : '#10233f',
+                        boxShadow: theme === value ? '0 2px 8px rgba(37,99,235,0.28)' : 'none',
+                        transition: 'background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease',
+                    }}
+                >
+                    {label}
+                </button>
+            ))}
         </div>
     )
 }

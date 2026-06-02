@@ -139,6 +139,7 @@
         transform: translateY(-1px) scale(1.05);
         box-shadow: var(--shadow-md);
         animation: mammoth-signal 2.4s ease-out 1;
+        cursor: var(--cursor-spear, pointer);
 
         // 🦣 The active tab summons a mammoth that trumpets in and sways its trunk.
         &::after {

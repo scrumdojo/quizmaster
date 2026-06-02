@@ -749,7 +749,7 @@ function makeHunter(_w: number, h: number): Hunter {
         t: 0,
         flip: false,
         spears: [],
-        shootCooldown: 80 + Math.floor(Math.random() * 120),
+        shootCooldown: 20 + Math.floor(Math.random() * 30),
     }
 }
 
@@ -966,17 +966,41 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                 continue
             }
 
-            // Shoot spear
+            // Shoot spear — aim at nearest mammoth when possible
             hu.shootCooldown--
             if (hu.shootCooldown <= 0) {
-                hu.shootCooldown = 100 + Math.floor(Math.random() * 140)
-                const dir = hu.flip ? -1 : 1
-                hu.spears.push({
-                    x: hu.x + dir * 20,
-                    y: hu.y - 12,
-                    vx: dir * (3.8 + Math.random() * 2),
-                    vy: (Math.random() - 0.5) * 1.2,
-                })
+                hu.shootCooldown = 18 + Math.floor(Math.random() * 22)
+                let nearestMammoth: Mammoth | null = null
+                let nearestDist = Infinity
+                for (const m of mammoths) {
+                    const ddx = m.x - hu.x
+                    const ddy = m.y - hu.y
+                    const dist = Math.sqrt(ddx * ddx + ddy * ddy)
+                    if (dist < nearestDist) {
+                        nearestDist = dist
+                        nearestMammoth = m
+                    }
+                }
+                const speed = 5 + Math.random() * 2
+                if (nearestMammoth) {
+                    const ddx = nearestMammoth.x - hu.x
+                    const ddy = nearestMammoth.y - hu.y
+                    const dist = Math.max(nearestDist, 1)
+                    hu.spears.push({
+                        x: hu.x + (ddx / dist) * 22,
+                        y: hu.y - 12,
+                        vx: (ddx / dist) * speed,
+                        vy: (ddy / dist) * speed,
+                    })
+                } else {
+                    const dir = hu.flip ? -1 : 1
+                    hu.spears.push({
+                        x: hu.x + dir * 22,
+                        y: hu.y - 12,
+                        vx: dir * speed,
+                        vy: (Math.random() - 0.5) * 1.2,
+                    })
+                }
             }
 
             // Update spears

@@ -21,6 +21,8 @@ export class WorkspacePage {
     private tabLocator = (name: string) => this.page.getByRole('tab', { name })
 
     expectTabVisible = (name: string) => expect(this.tabLocator(name)).toBeVisible()
+    expectActiveTabSpearCursor = () =>
+        expect(this.page.getByRole('tab', { selected: true })).toHaveCSS('cursor', /url\(/)
 
     expectTabSelected = (name: string) => expect(this.page.getByRole('tab', { name, selected: true })).toBeVisible()
 

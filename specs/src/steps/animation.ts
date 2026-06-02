@@ -28,6 +28,18 @@ Then('the Satans scoreboard is on the {word} side', async function (side: string
     await this.appPage.expectSatanScoreboardSide(side)
 })
 
+Then('the active workspace tab has a spear cursor', async function () {
+    await this.workspacePage.expectActiveTabSpearCursor()
+})
+
+Then('the animation settings control is visible', async function () {
+    await this.appPage.expectAnimationSettingsAlwaysVisible()
+})
+
+Then('I see all animation options without hovering', async function () {
+    await this.appPage.expectAnimationSettingsAlwaysVisible()
+})
+
 When('I hover over the mammoth animation option', async function () {
     await this.appPage.openAnimationSettings()
 })
