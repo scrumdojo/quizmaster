@@ -1094,6 +1094,14 @@ function applyTheme(theme: AnimationTheme) {
 
     canvas.dataset.theme = theme
 
+    if (theme === 'angels') {
+        canvas.dataset.angelScoreboardSide = 'left'
+        canvas.dataset.satanScoreboardSide = 'right'
+    } else {
+        delete canvas.dataset.angelScoreboardSide
+        delete canvas.dataset.satanScoreboardSide
+    }
+
     if (theme === 'off') {
         canvas.style.display = 'none'
         const ctx2d = canvas.getContext('2d')
@@ -1420,27 +1428,27 @@ function startAngels(): () => void {
             x: 18,
             y: 18,
             width: panelWidth,
-            label: 'Certici',
-            score: satanScore,
-            align: 'left',
-            background: 'rgba(17, 24, 39, 0.78)',
-            border: 'rgba(248, 113, 113, 0.62)',
-            labelColor: '#fca5a5',
-            scoreColor: '#fff7ed',
-            glow: 'rgba(127, 29, 29, 0.45)',
-        })
-        drawScorePanel(ctx!, {
-            x: stackedPanels ? 18 : Math.max(18, w - panelWidth - 18),
-            y: stackedPanels ? 92 : 18,
-            width: panelWidth,
             label: 'Andilci',
             score: angelScore,
-            align: 'right',
+            align: 'left',
             background: 'rgba(255, 255, 255, 0.74)',
             border: 'rgba(255, 228, 168, 0.96)',
             labelColor: '#7c3aed',
             scoreColor: '#1f2937',
             glow: 'rgba(255, 255, 255, 0.36)',
+        })
+        drawScorePanel(ctx!, {
+            x: stackedPanels ? 18 : Math.max(18, w - panelWidth - 18),
+            y: stackedPanels ? 92 : 18,
+            width: panelWidth,
+            label: 'Certici',
+            score: satanScore,
+            align: 'right',
+            background: 'rgba(17, 24, 39, 0.78)',
+            border: 'rgba(248, 113, 113, 0.62)',
+            labelColor: '#fca5a5',
+            scoreColor: '#fff7ed',
+            glow: 'rgba(127, 29, 29, 0.45)',
         })
 
         rafId = requestAnimationFrame(tick)

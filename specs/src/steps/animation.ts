@@ -16,6 +16,18 @@ Then('the background animation shows the mammoths theme', async function () {
     await this.appPage.expectAnimationTheme('mammoths')
 })
 
+When('I switch the animation to Angels & Devils', async function () {
+    await this.appPage.switchToAngels()
+})
+
+Then('the Angels scoreboard is on the {word} side', async function (side: string) {
+    await this.appPage.expectAngelScoreboardSide(side)
+})
+
+Then('the Satans scoreboard is on the {word} side', async function (side: string) {
+    await this.appPage.expectSatanScoreboardSide(side)
+})
+
 When('I hover over the mammoth animation option', async function () {
     await this.appPage.openAnimationSettings()
 })

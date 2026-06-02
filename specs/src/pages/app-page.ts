@@ -18,8 +18,17 @@ export class AppPage {
         await this.page.getByRole('button', { name: 'Mammoths' }).click()
     }
 
+    switchToAngels = async () => {
+        await this.openAnimationSettings()
+        await this.page.getByRole('button', { name: 'Angels & Devils' }).click()
+    }
+
     expectAnimationHidden = () => expect(this.canvas()).toBeHidden()
     expectAnimationTheme = (theme: string) => expect(this.canvas()).toHaveAttribute('data-theme', theme)
+    expectAngelScoreboardSide = (side: string) =>
+        expect(this.canvas()).toHaveAttribute('data-angel-scoreboard-side', side)
+    expectSatanScoreboardSide = (side: string) =>
+        expect(this.canvas()).toHaveAttribute('data-satan-scoreboard-side', side)
 
     expectMammothButtonSpearCursor = () =>
         expect(this.page.getByRole('button', { name: 'Mammoths' })).toHaveAttribute('style', /cursor:.*url\(/)
