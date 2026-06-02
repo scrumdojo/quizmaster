@@ -1,5 +1,6 @@
 import './workspace.scss'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
 
 import { deleteQuestion } from '#fe/make/api/question.ts'
 import { deleteQuiz } from '#fe/make/api/quiz.ts'
@@ -17,6 +18,12 @@ import { WorkspaceRobinAiHelper } from './workspace-robin-ai-helper.tsx'
 
 export function WorkspacePage() {
     const workspaceId = useWorkspaceId()
+    const [searchParams] = useSearchParams()
+    const initialTab = useMemo(
+        () => (searchParams.get('tab') === 'questions' ? 'questions' : 'quizzes') as 'questions' | 'quizzes',
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on mount
+        [],
+    )
 
     const [workspace, setWorkspace] = useState<Workspace>({ guid: workspaceId, title: '' })
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
@@ -27,7 +34,7 @@ export function WorkspacePage() {
     const [quizPage, setQuizPage] = useState(0)
     const [quizTotalPages, setQuizTotalPages] = useState(1)
     const [quizToDelete, setQuizToDelete] = useState<{ id: number; title: string } | null>(null)
-    const [activeTab, setActiveTab] = useState<'quizzes' | 'questions'>('quizzes')
+    const [activeTab, setActiveTab] = useState<'quizzes' | 'questions'>(initialTab)
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
 

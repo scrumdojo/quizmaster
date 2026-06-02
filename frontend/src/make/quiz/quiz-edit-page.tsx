@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { postQuiz, fetchWorkspaceQuiz, putQuiz } from '#fe/make/api/quiz.ts'
 import { fetchWorkspaceQuestions } from '#fe/make/api/workspace.ts'
@@ -17,6 +17,9 @@ export const QuizEditPage = () => {
     const workspaceId = useWorkspaceId()
     const navigate = useNavigate()
     const { id: quizId } = useParams()
+    const [searchParams] = useSearchParams()
+    const returnTab = searchParams.get('tab') === 'questions' ? 'questions' : 'quizzes'
+    const workspaceUrl = urls.workspace(workspaceId, returnTab)
 
     const [workspaceQuestions, setWorkspaceQuestions] = useState<readonly QuestionListItem[]>([])
     const [quiz, setQuiz] = useState<Quiz | undefined>(undefined)
@@ -32,7 +35,7 @@ export const QuizEditPage = () => {
             } else {
                 await postQuiz(data, workspaceId)
             }
-            navigate(urls.workspace(workspaceId))
+            navigate(workspaceUrl)
         })
 
     const isEdit = quizId !== undefined
@@ -40,7 +43,7 @@ export const QuizEditPage = () => {
     const pageId = isEdit ? 'edit-quiz-page' : 'create-quiz-page'
 
     return (
-        <Page title={title} id={pageId} back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}>
+        <Page title={title} id={pageId} back={{ to: workspaceUrl, label: 'Back to workspace' }}>
             {(!isEdit || quiz) && (
                 <QuizEditForm key={quiz?.id} quiz={quiz} questions={workspaceQuestions} onSubmit={onSubmit} />
             )}

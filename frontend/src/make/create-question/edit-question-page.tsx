@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { fetchWorkspaceQuestion, type QuestionRequest, updateQuestion } from '#fe/make/api/question.ts'
 import { useApi } from '#fe/shared/api/hooks.ts'
@@ -18,17 +18,20 @@ export function EditQuestionPage() {
 
     useApi(questionId, id => fetchWorkspaceQuestion(workspaceId, id), setQuestion)
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const returnTab = searchParams.get('tab') === 'questions' ? 'questions' : undefined
+    const workspaceUrl = urls.workspace(workspaceId, returnTab ?? 'questions')
 
     const handleSubmit = (questionData: QuestionRequest) => {
         updateQuestion(workspaceId, question?.id ?? 0, questionData).then(() => {
-            navigate(urls.workspace(workspaceId))
+            navigate(workspaceUrl)
         })
     }
 
     return (
         <Page
             title="Edit Question"
-            back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
+            back={{ to: workspaceUrl, label: 'Back to workspace' }}
             subtitle="Tune the prompt, answers, and explanations until the question reads clearly and scores fairly."
             id="edit-question-page"
         >

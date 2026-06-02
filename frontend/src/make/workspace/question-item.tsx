@@ -27,7 +27,10 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                 )}
                 <div className="question-main-row">
                     <span className="question-text">{question.question}</span>
-                    <LinkButton label="Edit" to={urls.workspaceQuestionEdit(workspaceId, question.id)} />
+                    <LinkButton
+                        label="Edit"
+                        to={`${urls.workspaceQuestionEdit(workspaceId, question.id)}?tab=questions`}
+                    />
                     <LinkButton label="Take" to={urls.questionTake(question.id)} />
                     {!question.isInAnyQuiz && (
                         <Button className="link-button" onClick={onDeleteQuestion}>

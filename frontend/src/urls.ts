@@ -26,7 +26,8 @@ export const urls = {
     questionTake: (id: number | string) => `/question/${id}`,
 
     workspaceNew: () => '/workspace/new',
-    workspace: (workspaceId: string) => `/workspace/${workspaceId}`,
+    workspace: (workspaceId: string, tab?: 'questions' | 'quizzes') =>
+        `/workspace/${workspaceId}${tab ? `?tab=${tab}` : ''}`,
     workspaceQuestionNew: (workspaceId: string) => `/workspace/${workspaceId}/question/new`,
     workspaceQuestionEdit: (workspaceId: string, id: number | string) =>
         `/workspace/${workspaceId}/question/${id}/edit`,

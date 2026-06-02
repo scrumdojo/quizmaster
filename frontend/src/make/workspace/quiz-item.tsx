@@ -12,7 +12,7 @@ export const QuizItem = ({ quiz, onDeleteClick }: Props) => {
     return (
         <div className="quiz-item question-item">
             <span className="question-text">{quiz.title}</span>
-            <LinkButton label="Edit" to={urls.workspaceQuizEdit(workspaceId, quiz.id)} />
+            <LinkButton label="Edit" to={`${urls.workspaceQuizEdit(workspaceId, quiz.id)}?tab=quizzes`} />
             <LinkButton label="Take" to={urls.quizWelcome(quiz.id)} />
             <LinkButton label="Share" to={urls.workspaceQuizShare(workspaceId, quiz.id)} />
             <LinkButton label="Dry run" to={urls.workspaceQuizDryRun(workspaceId, quiz.id)} />
