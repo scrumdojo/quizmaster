@@ -176,7 +176,11 @@ export function WorkspacePage() {
                             />
                         }
                     >
-                        <form className="workspace-question-filter" role="search" onSubmit={event => event.preventDefault()}>
+                        <form
+                            className="workspace-question-filter"
+                            role="search"
+                            onSubmit={event => event.preventDefault()}
+                        >
                             <label htmlFor="workspace-question-filter-input">Filter questions</label>
                             <input
                                 id="workspace-question-filter-input"

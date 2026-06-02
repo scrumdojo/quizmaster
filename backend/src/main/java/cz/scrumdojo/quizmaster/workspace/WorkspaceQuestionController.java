@@ -54,10 +54,10 @@ public class WorkspaceQuestionController {
         var questionPage = normalizedQuery.isEmpty()
             ? questionRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid, PageRequest.of(page, PAGE_SIZE))
             : questionRepository.findByWorkspaceGuidAndQuestionContainingIgnoreCaseOrderByIdDesc(
-                workspaceGuid,
-                normalizedQuery,
-                PageRequest.of(page, PAGE_SIZE)
-            );
+                  workspaceGuid,
+                  normalizedQuery,
+                  PageRequest.of(page, PAGE_SIZE)
+              );
         Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
 
         var items = questionPage
