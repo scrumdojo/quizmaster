@@ -21,6 +21,7 @@ export const deleteQuiz = async (workspaceGuid: string, quizId: string) =>
 
 export type CohortCreateError = 'empty-cohort-name' | 'duplicate-cohort-name'
 export type CohortCreateResult = { ok: true; cohort: QuizCohort } | { ok: false; error: CohortCreateError }
+export type CohortMutationResult = { ok: true; cohort: QuizCohort } | { ok: false; error: CohortCreateError }
 
 export const createCohort = async (
     workspaceGuid: string,
@@ -38,3 +39,24 @@ export const createCohort = async (
     const body = (await response.json()) as { error: CohortCreateError }
     return { ok: false, error: body.error }
 }
+
+export const updateCohort = async (
+    workspaceGuid: string,
+    quizId: number | string,
+    cohortGuid: string,
+    name: string,
+): Promise<CohortMutationResult> => {
+    const response = await fetch(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/cohorts/${cohortGuid}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+    })
+    if (response.ok) {
+        return { ok: true, cohort: (await response.json()) as QuizCohort }
+    }
+    const body = (await response.json()) as { error: CohortCreateError }
+    return { ok: false, error: body.error }
+}
+
+export const deleteCohort = async (workspaceGuid: string, quizId: number | string, cohortGuid: string) =>
+    await callDelete(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/cohorts/${cohortGuid}`)

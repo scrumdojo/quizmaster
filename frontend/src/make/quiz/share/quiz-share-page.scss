@@ -1,0 +1,157 @@
+#share-page {
+    section {
+        margin-bottom: 1.5rem;
+    }
+
+    h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-strong);
+    }
+}
+
+#cohort-list {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0;
+    list-style: none;
+}
+
+.cohort-row {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: var(--shadow-sm);
+}
+
+.cohort-name {
+    font-weight: 700;
+}
+
+.share-link-source {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.cohort-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.share-actions,
+.cohort-management {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.cohort-edit,
+.cohort-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+
+.share-qr-code {
+    display: inline-flex;
+    padding: 0.75rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: #ffffff;
+}
+
+.share-qr-modal {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+}
+
+.share-qr-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.72);
+}
+
+.share-qr-dialog {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1.5rem;
+    width: min(92vw, 680px);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    background: #ffffff;
+    box-shadow: var(--shadow-lg);
+}
+
+.share-qr-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+        margin: 0;
+    }
+}
+
+.share-qr-dialog .share-qr-code {
+    justify-content: center;
+    padding: 1.25rem;
+}
+
+.share-qr-dialog .share-qr-code svg {
+    width: min(72vmin, 520px);
+    height: auto;
+}
+
+.cohort-edit {
+    margin-top: 0;
+}
+
+.cohort-edit-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.cohort-inline-error {
+    flex: 1 1 14rem;
+    min-width: min(100%, 14rem);
+    animation: cohort-error-appear 160ms ease-out;
+
+    .alert {
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+    }
+}
+
+@keyframes cohort-error-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-0.25rem) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

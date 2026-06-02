@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster.quiz;
 
+import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
@@ -14,15 +15,18 @@ public class QuizService {
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
     private final CohortRepository cohortRepository;
+    private final AttemptRepository attemptRepository;
 
     public QuizService(
         QuestionRepository questionRepository,
         QuizRepository quizRepository,
-        CohortRepository cohortRepository
+        CohortRepository cohortRepository,
+        AttemptRepository attemptRepository
     ) {
         this.questionRepository = questionRepository;
         this.quizRepository = quizRepository;
         this.cohortRepository = cohortRepository;
+        this.attemptRepository = attemptRepository;
     }
 
     public Optional<Quiz> findById(Integer id) {
@@ -52,7 +56,7 @@ public class QuizService {
         QuizCohortResponse[] cohorts = cohortRepository
             .findByQuizIdOrderByName(quiz.getId())
             .stream()
-            .map(QuizCohortResponse::from)
+            .map(cohort -> QuizCohortResponse.from(cohort, canDelete(cohort)))
             .toArray(QuizCohortResponse[]::new);
 
         return new QuizResponse(
@@ -69,6 +73,10 @@ public class QuizService {
             quiz.getRandomQuestionCount(),
             cohorts
         );
+    }
+
+    public boolean canDelete(Cohort cohort) {
+        return !attemptRepository.existsByQuizIdAndCohortGuid(cohort.getQuiz().getId(), cohort.getGuid());
     }
 
     public List<Question> drawQuestions(Quiz quiz) {

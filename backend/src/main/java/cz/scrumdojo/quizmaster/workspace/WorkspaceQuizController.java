@@ -173,7 +173,67 @@ public class WorkspaceQuizController {
         }
 
         Cohort saved = cohortRepository.save(Cohort.builder().name(name).quiz(quiz).build());
-        return ResponseEntity.ok(QuizCohortResponse.from(saved));
+        return ResponseEntity.ok(QuizCohortResponse.from(saved, quizService.canDelete(saved)));
+    }
+
+    @Transactional
+    @PutMapping("/{id}/cohorts/{cohortGuid}")
+    public ResponseEntity<?> updateCohort(
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id,
+        @PathVariable String cohortGuid,
+        @RequestBody CohortCreateRequest request
+    ) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        Quiz quiz = quizRepository
+            .findByIdAndWorkspaceGuid(id, workspaceGuid)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Cohort cohort = cohortRepository
+            .findByGuidAndQuizId(cohortGuid, quiz.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        String name = request == null ? null : request.name();
+        if (name == null || name.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "empty-cohort-name"));
+        }
+        boolean duplicate = cohortRepository
+            .findByQuizIdOrderByName(quiz.getId())
+            .stream()
+            .anyMatch(c -> !c.getGuid().equals(cohortGuid) && c.getName().equals(name));
+        if (duplicate) {
+            return ResponseEntity.badRequest().body(Map.of("error", "duplicate-cohort-name"));
+        }
+
+        cohort.setName(name);
+        Cohort saved = cohortRepository.save(cohort);
+        return ResponseEntity.ok(QuizCohortResponse.from(saved, quizService.canDelete(saved)));
+    }
+
+    @Transactional
+    @DeleteMapping("/{id}/cohorts/{cohortGuid}")
+    public ResponseEntity<?> deleteCohort(
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id,
+        @PathVariable String cohortGuid
+    ) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        Quiz quiz = quizRepository
+            .findByIdAndWorkspaceGuid(id, workspaceGuid)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Cohort cohort = cohortRepository
+            .findByGuidAndQuizId(cohortGuid, quiz.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!quizService.canDelete(cohort)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "cohort-has-attempts"));
+        }
+
+        cohortRepository.delete(cohort);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/dry-runs")

@@ -1,15 +1,18 @@
 import type { DataTable } from '@cucumber/cucumber'
+import { expect } from '@playwright/test'
 
-import { Then, When } from '#steps/fixture.ts'
+import { Given, Then, When } from '#steps/fixture.ts'
 import {
     expectCohortRowsInOrder,
     expectQuizTakeLinkFor,
     expectShareScreenError,
     expectUniqueTakeLinks,
 } from '#steps/make/quiz/expects.ts'
+import { seedFinishedCohortAttemptViaUI } from '#steps/make/quiz/ops.ts'
 import { fetchWorkspaceQuizViaRest } from '#steps/shared/api.ts'
 
 When('I navigate to share quiz {string}', async function (quizName: string) {
+    await this.workspacePage.goto(this.workspaceGuid)
     await this.workspacePage.shareQuiz(quizName)
 })
 
@@ -45,4 +48,97 @@ Then('I see a unique quiz take link for each cohort', async function () {
 
 Then('I see error {string} on the share screen', async function (testId: string) {
     await expectShareScreenError(this.quizSharePage, testId)
+})
+
+When('I show the QR code for the quiz take link', async function () {
+    await this.quizSharePage.showQuizTakeQr()
+})
+
+When('I hide the QR code for the quiz take link', async function () {
+    await this.quizSharePage.hideQuizTakeQr()
+})
+
+Then('I see the QR code for the quiz take link', async function () {
+    await this.quizSharePage.expectQuizTakeQrVisible()
+})
+
+Then('I do not see the QR code for the quiz take link', async function () {
+    await this.quizSharePage.expectQuizTakeQrHidden()
+})
+
+Then('the QR code value matches the quiz take link', async function () {
+    expect(await this.quizSharePage.quizTakeQrValue()).toBe(await this.quizSharePage.takeLink())
+})
+
+When('I show the QR code for cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.showCohortQr(cohortName)
+})
+
+Then('I see the QR code for cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.expectCohortQrVisible(cohortName)
+})
+
+Then('I do not see the QR code for cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.expectCohortQrHidden(cohortName)
+})
+
+Then('the QR code value matches the take link for cohort {string}', async function (cohortName: string) {
+    expect(await this.quizSharePage.cohortQrValue()).toBe(await this.quizSharePage.cohortLink(cohortName))
+})
+
+When('I copy the quiz take link', async function () {
+    await this.quizSharePage.copyQuizTakeLink()
+})
+
+Then('the clipboard contains the quiz take link', async function () {
+    expect(await this.quizSharePage.clipboardText()).toBe(await this.quizSharePage.takeLink())
+})
+
+Then('I see that the quiz take link was copied', async function () {
+    await this.quizSharePage.expectQuizTakeCopied()
+})
+
+When('I copy the take link for cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.copyCohortLink(cohortName)
+})
+
+Then('the clipboard contains the take link for cohort {string}', async function (cohortName: string) {
+    expect(await this.quizSharePage.clipboardText()).toBe(await this.quizSharePage.cohortLink(cohortName))
+})
+
+Then('the clipboard does not contain the take link for cohort {string}', async function (cohortName: string) {
+    expect(await this.quizSharePage.clipboardText()).not.toBe(await this.quizSharePage.cohortLink(cohortName))
+})
+
+Then('I see that the take link for cohort {string} was copied', async function (cohortName: string) {
+    await this.quizSharePage.expectCohortCopied(cohortName)
+})
+
+When('I rename cohort {string} to {string}', async function (from: string, to: string) {
+    this.rememberedCohortLink = await this.quizSharePage.cohortLink(from)
+    await this.quizSharePage.renameCohort(from, to)
+})
+
+When('I start renaming cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.startRenameCohort(cohortName)
+})
+
+When('I cancel renaming cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.cancelRenameCohort(cohortName)
+})
+
+Then('the take link for cohort {string} uses the same cohort guid as before', async function (cohortName: string) {
+    expect(await this.quizSharePage.cohortLink(cohortName)).toBe(this.rememberedCohortLink)
+})
+
+When('I delete cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.deleteCohort(cohortName)
+})
+
+Given('cohort {string} has an attempt for quiz {string}', async function (cohortName: string, quizName: string) {
+    await seedFinishedCohortAttemptViaUI(this, quizName, cohortName, 1)
+})
+
+Then('I cannot delete cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.expectDeleteDisabled(cohortName)
 })

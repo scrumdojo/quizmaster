@@ -128,7 +128,8 @@ public class WorkspaceQuizControllerTest {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.guid").isString())
-            .andExpect(jsonPath("$.name").value("Alpha"));
+            .andExpect(jsonPath("$.name").value("Alpha"))
+            .andExpect(jsonPath("$.canDelete").value(true));
 
         assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
             .extracting(cohort -> cohort.getName())
@@ -252,6 +253,210 @@ public class WorkspaceQuizControllerTest {
                     )
             )
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getQuizMarksCohortsWithAttemptsAsNotDeletable() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build(), Cohort.builder().name("Beta").build()))
+                .build()
+        );
+        List<Cohort> cohorts = cohortRepository.findByQuizIdOrderByName(quiz.getId());
+        fixtures.save(fixtures.attempt(quiz).cohortGuid(cohorts.get(0).getGuid()));
+
+        mockMvc
+            .perform(get("/api/workspaces/{wid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.cohorts[0].name").value("Alpha"))
+            .andExpect(jsonPath("$.cohorts[0].canDelete").value(false))
+            .andExpect(jsonPath("$.cohorts[1].name").value("Beta"))
+            .andExpect(jsonPath("$.cohorts[1].canDelete").value(true));
+    }
+
+    @Test
+    public void updateCohortRenamesCohort() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+                .build()
+        );
+        Cohort cohort = cohortRepository.findByQuizIdOrderByName(quiz.getId()).getFirst();
+        String guid = cohort.getGuid();
+
+        mockMvc
+            .perform(
+                put("/api/workspaces/{wid}/quizzes/{id}/cohorts/{cohortGuid}", workspace.getGuid(), quiz.getId(), guid)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "Ladies"}
+                        """
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.guid").value(guid))
+            .andExpect(jsonPath("$.name").value("Ladies"))
+            .andExpect(jsonPath("$.canDelete").value(true));
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
+            .extracting(Cohort::getName)
+            .containsExactly("Ladies");
+    }
+
+    @Test
+    public void updateCohortRejectsBlankName() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+                .build()
+        );
+        Cohort cohort = cohortRepository.findByQuizIdOrderByName(quiz.getId()).getFirst();
+
+        mockMvc
+            .perform(
+                put(
+                    "/api/workspaces/{wid}/quizzes/{id}/cohorts/{cohortGuid}",
+                    workspace.getGuid(),
+                    quiz.getId(),
+                    cohort.getGuid()
+                )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "   "}
+                        """
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("empty-cohort-name"));
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
+            .extracting(Cohort::getName)
+            .containsExactly("Alpha");
+    }
+
+    @Test
+    public void updateCohortRejectsDuplicateName() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build(), Cohort.builder().name("Beta").build()))
+                .build()
+        );
+        Cohort alpha = cohortRepository.findByQuizIdOrderByName(quiz.getId()).getFirst();
+
+        mockMvc
+            .perform(
+                put(
+                    "/api/workspaces/{wid}/quizzes/{id}/cohorts/{cohortGuid}",
+                    workspace.getGuid(),
+                    quiz.getId(),
+                    alpha.getGuid()
+                )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "Beta"}
+                        """
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("duplicate-cohort-name"));
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
+            .extracting(Cohort::getName)
+            .containsExactly("Alpha", "Beta");
+    }
+
+    @Test
+    public void updateCohortMissingQuizReturns404() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc
+            .perform(
+                put("/api/workspaces/{wid}/quizzes/{id}/cohorts/{cohortGuid}", workspace.getGuid(), -1, "missing")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "Ladies"}
+                        """
+                    )
+            )
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteCohortRemovesCohortWithoutAttempts() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+                .build()
+        );
+        Cohort cohort = cohortRepository.findByQuizIdOrderByName(quiz.getId()).getFirst();
+
+        mockMvc
+            .perform(
+                delete(
+                    "/api/workspaces/{wid}/quizzes/{id}/cohorts/{cohortGuid}",
+                    workspace.getGuid(),
+                    quiz.getId(),
+                    cohort.getGuid()
+                )
+            )
+            .andExpect(status().isNoContent());
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId())).isEmpty();
+    }
+
+    @Test
+    public void deleteCohortRejectsCohortWithAttempts() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+                .build()
+        );
+        Cohort cohort = cohortRepository.findByQuizIdOrderByName(quiz.getId()).getFirst();
+        fixtures.save(fixtures.attempt(quiz).cohortGuid(cohort.getGuid()));
+
+        mockMvc
+            .perform(
+                delete(
+                    "/api/workspaces/{wid}/quizzes/{id}/cohorts/{cohortGuid}",
+                    workspace.getGuid(),
+                    quiz.getId(),
+                    cohort.getGuid()
+                )
+            )
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error").value("cohort-has-attempts"));
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
+            .extracting(Cohort::getName)
+            .containsExactly("Alpha");
     }
 
     @Test

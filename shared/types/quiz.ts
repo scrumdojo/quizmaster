@@ -17,6 +17,7 @@ export interface QuizRequest {
 export interface QuizCohort {
     readonly guid: string
     readonly name: string
+    readonly canDelete: boolean
 }
 
 export interface Quiz {
