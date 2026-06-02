@@ -25,6 +25,16 @@ public class InMemoryPollRepository implements PollRepository {
     }
 
     @Override
+    public List<Poll> findByWorkspaceGuid(String workspaceGuid) {
+        return polls
+            .values()
+            .stream()
+            .filter(poll -> workspaceGuid.equals(poll.getWorkspaceGuid()))
+            .sorted((left, right) -> Integer.compare(right.getId(), left.getId()))
+            .toList();
+    }
+
+    @Override
     public Optional<Poll> findById(Integer id) {
         return Optional.ofNullable(polls.get(id));
     }

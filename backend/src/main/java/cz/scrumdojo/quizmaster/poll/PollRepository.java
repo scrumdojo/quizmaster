@@ -1,10 +1,13 @@
 package cz.scrumdojo.quizmaster.poll;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public interface PollRepository {
     Poll save(Poll poll);
+
+    List<Poll> findByWorkspaceGuid(String workspaceGuid);
 
     Optional<Poll> findById(Integer id);
 

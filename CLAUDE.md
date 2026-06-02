@@ -101,6 +101,7 @@ Endpoints live under `/api/`. Two flavors:
 
 - **Authoring** is workspace-scoped: `/api/workspaces/{guid}/...` for
   questions, quizzes, polls, and AI drafting. Shared by FE and MCP. Includes
+  `GET /api/workspaces/{guid}/polls` for poll list,
   `GET /api/workspaces/{guid}/polls/{id}` for poll detail,
   `GET /api/workspaces/{guid}/polls/{id}/results` for poll results, and
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.

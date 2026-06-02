@@ -4,6 +4,7 @@ import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceGuard;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,14 @@ public class PollController {
     public PollController(WorkspaceGuard workspaceGuard, PollRepository pollRepository) {
         this.workspaceGuard = workspaceGuard;
         this.pollRepository = pollRepository;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PollListResponse>> getPolls(@PathVariable String workspaceGuid) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        var polls = pollRepository.findByWorkspaceGuid(workspaceGuid).stream().map(PollListResponse::from).toList();
+        return ResponseEntity.ok(polls);
     }
 
     @GetMapping("/{id}")

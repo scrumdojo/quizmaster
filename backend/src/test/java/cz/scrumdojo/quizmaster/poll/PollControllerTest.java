@@ -74,6 +74,41 @@ public class PollControllerTest {
     }
 
     @Test
+    public void getPollsInWorkspace() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        createPoll(workspace.getGuid());
+        createPoll(workspace.getGuid());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls", workspace.getGuid()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").isNumber())
+            .andExpect(jsonPath("$[0].question").value("How often do you run retrospectives?"))
+            .andExpect(jsonPath("$[0].answers").doesNotExist())
+            .andExpect(jsonPath("$[1].id").isNumber())
+            .andExpect(jsonPath("$[1].question").value("How often do you run retrospectives?"))
+            .andExpect(jsonPath("$[1].answers").doesNotExist());
+    }
+
+    @Test
+    public void getPollsInWorkspaceDoesNotIncludePollsFromOtherWorkspace() throws Exception {
+        Workspace workspace1 = fixtures.save(fixtures.workspace());
+        Workspace workspace2 = fixtures.save(fixtures.workspace());
+        createPoll(workspace1.getGuid());
+        createPoll(workspace2.getGuid());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls", workspace1.getGuid()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    public void getPollsInNonExistentWorkspaceReturns404() throws Exception {
+        mockMvc.perform(get("/api/workspaces/{guid}/polls", "non-existent-guid")).andExpect(status().isNotFound());
+    }
+
+    @Test
     public void getPollDetailFromWrongWorkspaceReturns404() throws Exception {
         Workspace workspace1 = fixtures.save(fixtures.workspace());
         Workspace workspace2 = fixtures.save(fixtures.workspace());
