@@ -2,6 +2,10 @@ import { When, Then } from '#steps/fixture.ts'
 
 // ── Navigation ──────────────────────────────────────────
 
+Then('I am at the top of the page', async function () {
+    await this.workspacePage.expectScrolledToTop()
+})
+
 When('I open the workspace', async function () {
     await this.workspacePage.goto(this.workspaceGuid)
     await this.workspacePage.waitForUrl(this.workspaceGuid)

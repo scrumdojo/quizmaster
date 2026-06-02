@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router'
 
 import { CreateQuestionPage } from '#fe/make/create-question/create-question-page.tsx'
 import { EditQuestionPage } from '#fe/make/create-question/edit-question-page.tsx'
@@ -66,11 +66,20 @@ const PiCornerToggle = ({ animationOnly, onToggle }: PiCornerToggleProps) => {
     )
 }
 
+const ScrollToTop = () => {
+    const { pathname, search } = useLocation()
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [pathname, search])
+    return null
+}
+
 export const App = () => {
     const [animationOnly, setAnimationOnly] = useState(false)
 
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <div style={{ display: animationOnly ? 'none' : undefined, position: 'relative', zIndex: 1 }}>
                 <Routes>
                     <Route path={ROUTES.home} element={<HomePage />} />

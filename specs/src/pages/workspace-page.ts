@@ -8,6 +8,8 @@ export class WorkspacePage {
     goto = (guid: string) => this.page.goto(`/workspace/${guid}`, { waitUntil: 'networkidle' })
     waitForUrl = (guid: string) => this.page.waitForURL(`**/workspace/${guid}`)
 
+    expectScrolledToTop = () => this.page.waitForFunction('scrollY === 0', { timeout: 5000 })
+
     // ── Workspace name ───────────────────────────────
 
     private workspaceNameLocator = () => this.page.getByTestId('workspace-title')
