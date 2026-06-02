@@ -72,7 +72,9 @@ public class WorkspaceQuestionControllerTest {
         Question matchingQuestion = fixtures.save(
             fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum", "agile" }).build()
         );
-        fixtures.save(fixtures.questionIn(workspace).question("Capital of Italy?").tags(new String[] { "geography" }).build());
+        fixtures.save(
+            fixtures.questionIn(workspace).question("Capital of Italy?").tags(new String[] { "geography" }).build()
+        );
 
         mockMvc
             .perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()).queryParam("query", "scrum"))
