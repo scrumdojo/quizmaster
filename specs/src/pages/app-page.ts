@@ -61,7 +61,8 @@ export class AppPage {
 
     expectGiantMammothStomp = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-stomp', 'true')
 
-    expectGiantMammothThrowsStones = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-throws-stones', 'true')
+    expectGiantMammothThrowsStones = () =>
+        expect(this.canvas()).toHaveAttribute('data-giant-mammoth-throws-stones', 'true')
 
     expectMammothSpriteSpearCursor = () => expect(this.canvas()).toHaveAttribute('data-mammoth-hover-spear', 'true')
 
