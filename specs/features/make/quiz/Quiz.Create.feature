@@ -128,3 +128,14 @@ Feature: Create Quiz from Workspace
       | 2026-04-14T10:00 | 2026-04-14T23:00 |
       | 2026-04-14T10:00 |                  |
       |                  | 2026-04-14T23:00 |
+
+
+  Scenario: Create a new question from within the quiz form and continue editing
+    Given workspace "Quiz Creation"
+    When I start creating a new quiz
+    And I click create new question in quiz form
+    Then I see the inline question creation modal
+    When I fill in the inline question "3 * 3 = ?" with answer "9"
+    And I save the inline question
+    Then I am back on the quiz creation form
+    And I see question "3 * 3 = ?" in the quiz question list

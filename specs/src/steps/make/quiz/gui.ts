@@ -184,6 +184,32 @@ When('I navigate to edit quiz {string}', async function (quizName: string) {
     await this.workspacePage.editQuiz(quizName)
 })
 
+// ── Inline question creation ──────────────────────────────────────────────────
+
+When('I click create new question in quiz form', async function () {
+    await this.quizCreatePage.clickCreateNewQuestion()
+})
+
+Then('I see the inline question creation modal', async function () {
+    await this.quizCreatePage.expectInlineQuestionModalVisible()
+})
+
+When('I fill in the inline question {string} with answer {string}', async function (question: string, answer: string) {
+    await this.quizCreatePage.fillInlineQuestion(question, answer)
+})
+
+When('I save the inline question', async function () {
+    await this.quizCreatePage.saveInlineQuestion()
+})
+
+Then('I am back on the quiz creation form', async function () {
+    await this.quizCreatePage.expectOnQuizCreationForm()
+})
+
+Then('I see question {string} in the quiz question list', async function (question: string) {
+    await this.quizCreatePage.expectQuestionInList(question)
+})
+
 // ── Cohorts ──────────────────────────────────────────
 
 When('I create a new cohort {string}', async function (cohortName: string) {

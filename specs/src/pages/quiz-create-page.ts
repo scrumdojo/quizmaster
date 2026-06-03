@@ -80,4 +80,30 @@ export class QuizCreatePage {
         expect(this.questionTagBadgeLocator(question)).toHaveText(tag)
     expectQuestionTagBadgeNotVisible = (question: string) =>
         expect(this.questionTagBadgeLocator(question)).not.toBeVisible()
+
+    // ── Inline question creation modal ────────────────────────────────────────
+
+    clickCreateNewQuestion = () => this.page.locator('#quiz-create-new-question').click()
+
+    expectInlineQuestionModalVisible = () => expect(this.page.locator('#inline-question-modal')).toBeVisible()
+
+    fillInlineQuestion = async (questionText: string, answerText: string) => {
+        const modal = this.page.locator('#inline-question-modal')
+        await modal.locator('#question-text').fill(questionText)
+        // Fill first answer as correct, second as wrong
+        const answerInputs = modal.locator('.answer-row input.text, .answer-row .text input')
+        await answerInputs.first().fill(answerText)
+        await modal.locator('.answer-row input[type="radio"], .answer-row input[type="checkbox"]').first().check()
+        await answerInputs.nth(1).fill('wrong answer')
+    }
+
+    saveInlineQuestion = async () => {
+        await this.page.locator('#inline-question-modal').locator('button[type="submit"]').click()
+        await this.page.waitForLoadState('networkidle')
+    }
+
+    expectOnQuizCreationForm = () => expect(this.page.locator('#create-quiz-page')).toBeVisible()
+
+    expectQuestionInList = (question: string) =>
+        expect(this.page.locator('.question-item', { hasText: question })).toBeVisible()
 }

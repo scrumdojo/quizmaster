@@ -118,6 +118,50 @@ body {
     }
 }
 
+// ── Inline question creation modal ───────────────────────────────────────────
+
+#inline-question-modal {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    background: #fff;
+    z-index: 1000;
+
+    &::backdrop {
+        background: rgba(15, 23, 42, 0.45);
+    }
+
+    h2 {
+        margin: 0 0 1.2rem;
+        font-size: 1.25rem;
+        color: var(--text-strong);
+    }
+}
+
+.inline-question-modal__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--text-soft);
+    line-height: 1;
+    padding: 4px 8px;
+
+    &:hover {
+        color: var(--text-strong);
+    }
+}
+
 // ── Background game FAB ───────────────────────────────────────────────────────
 
 .bg-game-fab {

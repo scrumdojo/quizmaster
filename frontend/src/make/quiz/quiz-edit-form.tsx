@@ -20,8 +20,9 @@ interface QuizEditFormProps {
     readonly questions: readonly QuestionListItem[]
     readonly onSubmit: (data: QuizEditFormData) => void
     readonly quiz?: Quiz
+    readonly onCreateNewQuestion?: () => void
 }
-export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) => {
+export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }: QuizEditFormProps) => {
     const state = useQuizFormState(questions, quiz)
     const [timeLimitText, setTimeLimitText] = useState(`${state.timeLimit}s`)
 
@@ -103,6 +104,16 @@ export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) =
             <div className="label">Select quiz questions</div>
             <Field label="Search questions">
                 <TextInput id="question-filter" value={state.filter} onChange={state.setFilter} />
+                {onCreateNewQuestion && (
+                    <button
+                        type="button"
+                        id="quiz-create-new-question"
+                        className="quiz-create-new-question"
+                        onClick={onCreateNewQuestion}
+                    >
+                        + Create new question
+                    </button>
+                )}
             </Field>
             <QuestionSelect
                 questions={state.filteredQuestions}
