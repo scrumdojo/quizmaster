@@ -87,19 +87,23 @@ public class AiAssistantService {
     ) {
         validatePromptAndToken(prompt);
         String resolvedType = resolveType(questionType);
+        List<String> allQuestionTexts = questionEmbeddingService.workspaceQuestionTexts(
+            workspaceGuid,
+            excludedQuestionId
+        );
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
             questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, excludedQuestionId);
 
         AssistantResponse assistantResponse = generateCandidate(prompt, resolvedType, existingEmbeddings, null);
         validateForType(assistantResponse, resolvedType);
-        DuplicateMatch duplicate = findDuplicate(assistantResponse.question(), existingEmbeddings);
+        DuplicateMatch duplicate = findDuplicate(assistantResponse.question(), allQuestionTexts, existingEmbeddings);
         if (duplicate == null) {
             return toDraftResponse(assistantResponse, normalizeExplanations(assistantResponse), resolvedType);
         }
 
         AssistantResponse retryResponse = generateCandidate(prompt, resolvedType, existingEmbeddings, duplicate);
         validateForType(retryResponse, resolvedType);
-        DuplicateMatch retryDuplicate = findDuplicate(retryResponse.question(), existingEmbeddings);
+        DuplicateMatch retryDuplicate = findDuplicate(retryResponse.question(), allQuestionTexts, existingEmbeddings);
         if (retryDuplicate == null) {
             return toDraftResponse(retryResponse, normalizeExplanations(retryResponse), resolvedType);
         }
@@ -212,8 +216,17 @@ public class AiAssistantService {
 
     private DuplicateMatch findDuplicate(
         String generatedQuestion,
+        List<String> allQuestionTexts,
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
     ) {
+        // Exact-text check — works even when embeddings haven't been stored yet
+        String normalizedGenerated = normalizeForExactMatch(generatedQuestion);
+        for (String existingText : allQuestionTexts) {
+            if (normalizeForExactMatch(existingText).equals(normalizedGenerated)) {
+                return new DuplicateMatch(generatedQuestion, existingText, 1.0);
+            }
+        }
+
         if (existingEmbeddings.isEmpty()) {
             return null;
         }
@@ -330,6 +343,10 @@ public class AiAssistantService {
         return Arrays.stream(responses)
             .map(response -> toDraftResponse(response, normalizeExplanations(response), resolvedType))
             .toArray(QuestionResponse[]::new);
+    }
+
+    private static String normalizeForExactMatch(String text) {
+        return text.trim().toLowerCase().replaceAll("[^\\p{L}\\p{N}]+", " ").replaceAll("\\s+", " ").trim();
     }
 
     private static ResponseStatusException duplicateGenerationFailure() {

@@ -79,12 +79,15 @@ export class QuizSharePage {
         const cohortPut = this.page.waitForResponse(
             response => /\/cohorts\/[^/]+$/.test(response.url()) && response.request().method() === 'PUT',
         )
+        const quizGet = this.page.waitForResponse(
+            response => /\/quizzes\/\d+$/.test(response.url()) && response.request().method() === 'GET',
+        )
         await row.getByRole('button', { name: 'Save' }).click()
         const putResponse = await cohortPut
         if (putResponse.ok()) {
-            await this.page.waitForResponse(
-                response => /\/quizzes\/\d+$/.test(response.url()) && response.request().method() === 'GET',
-            )
+            await quizGet
+        } else {
+            void quizGet.catch(() => {})
         }
     }
 
@@ -94,12 +97,15 @@ export class QuizSharePage {
         const cohortDelete = this.page.waitForResponse(
             response => /\/cohorts\/[^/]+$/.test(response.url()) && response.request().method() === 'DELETE',
         )
+        const quizGet = this.page.waitForResponse(
+            response => /\/quizzes\/\d+$/.test(response.url()) && response.request().method() === 'GET',
+        )
         await this.cohortRowLocator(name).getByRole('button', { name: 'Delete' }).click()
         const deleteResponse = await cohortDelete
         if (deleteResponse.ok()) {
-            await this.page.waitForResponse(
-                response => /\/quizzes\/\d+$/.test(response.url()) && response.request().method() === 'GET',
-            )
+            await quizGet
+        } else {
+            void quizGet.catch(() => {})
         }
     }
 
@@ -108,12 +114,15 @@ export class QuizSharePage {
         const cohortPost = this.page.waitForResponse(
             response => response.url().endsWith('/cohorts') && response.request().method() === 'POST',
         )
+        const quizGet = this.page.waitForResponse(
+            response => /\/quizzes\/\d+$/.test(response.url()) && response.request().method() === 'GET',
+        )
         await this.page.locator('#add-cohort-button').click()
         const postResponse = await cohortPost
         if (postResponse.ok()) {
-            await this.page.waitForResponse(
-                response => /\/quizzes\/\d+$/.test(response.url()) && response.request().method() === 'GET',
-            )
+            await quizGet
+        } else {
+            void quizGet.catch(() => {})
         }
     }
 

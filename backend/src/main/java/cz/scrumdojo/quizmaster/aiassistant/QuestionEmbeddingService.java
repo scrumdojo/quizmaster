@@ -103,6 +103,18 @@ public class QuestionEmbeddingService {
         return Objects.equals(question.getEmbeddingTextHash(), QuestionEmbeddingText.hash(question.getQuestion()));
     }
 
+    public List<String> workspaceQuestionTexts(String workspaceGuid, Integer excludedQuestionId) {
+        if (workspaceGuid == null || workspaceGuid.isBlank()) {
+            return List.of();
+        }
+        return questionRepository
+            .findByWorkspaceGuidOrderByIdDesc(workspaceGuid.strip())
+            .stream()
+            .filter(question -> excludedQuestionId == null || !excludedQuestionId.equals(question.getId()))
+            .map(Question::getQuestion)
+            .toList();
+    }
+
     public List<UsableQuestionEmbedding> usableWorkspaceEmbeddings(String workspaceGuid, Integer excludedQuestionId) {
         if (workspaceGuid == null || workspaceGuid.isBlank()) {
             return List.of();
