@@ -191,8 +191,8 @@ Then(/I see explanations are (enabled|disabled)/, async function (value: string)
     }
 })
 
-Then(/the question is (single|multiple|numerical) choice/, async function (value: string) {
-    const expectedType = value === 'numerical' ? 'numerical' : value === 'multiple' ? 'multiple' : 'single'
+Then(/the question is (single choice|multiple choice|numerical)/, async function (value: string) {
+    const expectedType = value === 'numerical' ? 'numerical' : value === 'multiple choice' ? 'multiple' : 'single'
     await this.questionEditPage.expectQuestionType(expectedType)
 })
 
@@ -663,10 +663,10 @@ Then('I see the previous generated version', async function () {
     await this.questionEditPage.expectQuestionValue(this.rememberedAiQuestion)
 })
 
-When(/I mark the question as (single|multiple|numerical) choice/, async function (choice: string) {
-    if (choice === 'single') {
+When(/I mark the question as (single choice|multiple choice|numerical)/, async function (choice: string) {
+    if (choice === 'single choice') {
         await this.questionEditPage.setSingleChoice()
-    } else if (choice === 'multiple') {
+    } else if (choice === 'multiple choice') {
         await this.questionEditPage.setMultipleChoice()
     } else {
         await this.questionEditPage.setNumericalChoice()

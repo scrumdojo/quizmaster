@@ -135,12 +135,12 @@ Feature: Edit question form
       | Berlin |   | No  |
     * saved and bookmarked as "Cities"
     When I start editing question "Cities"
-    And I mark the question as numerical choice
+    And I mark the question as numerical
     And I enter numerical correct answer "14"
     And I submit the question
     And I refresh the page
     And I start editing question "Cities"
-    Then the question is numerical choice
+    Then the question is numerical
     And I see numerical correct answer "14"
     And I do not see answer fields
     And I do not see Add Answer button

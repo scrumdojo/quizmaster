@@ -158,7 +158,7 @@ Feature: Create question - validations
   Scenario: Numerical question validates number format
     Given I start creating a new question
     * I enter question "How many regions does Czechia have?"
-    * I mark the question as numerical choice
+    * I mark the question as numerical
 
     When I attempt to submit the question
     Then I see error messages

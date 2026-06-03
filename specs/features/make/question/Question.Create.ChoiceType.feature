@@ -109,8 +109,8 @@ Feature: Create question - single/multiple choice
     * I enter answers
       | 13 |   |
       | 14 | * |
-    When I mark the question as numerical choice
-    Then the question is numerical choice
+    When I mark the question as numerical
+    Then the question is numerical
     And I see numerical answer field
     And I do not see answer fields
     And I do not see Add Answer button
@@ -129,8 +129,8 @@ Feature: Create question - single/multiple choice
     * I enter answers
       | 13 | * |
       | 14 | * |
-    When I mark the question as numerical choice
-    Then the question is numerical choice
+    When I mark the question as numerical
+    Then the question is numerical
     And I see numerical answer field
 
     And I do not see answer fields
@@ -145,7 +145,7 @@ Feature: Create question - single/multiple choice
 
 
   Scenario: Add tolerance to numerical question
-    When I mark the question as numerical choice
+    When I mark the question as numerical
     When I enter question "How many regions does Czechia have?"
     When I enter numerical correct answer "14"
     When I set tolerance to "3"
@@ -156,7 +156,7 @@ Feature: Create question - single/multiple choice
 
 
   Scenario: Create numerical question with decimal answer
-    When I mark the question as numerical choice
+    When I mark the question as numerical
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"
     * I submit the question
@@ -166,7 +166,7 @@ Feature: Create question - single/multiple choice
 
 
   Scenario: Add decimal tolerance to numerical question
-    When I mark the question as numerical choice
+    When I mark the question as numerical
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"
     * I set tolerance to "0.5"
@@ -177,14 +177,14 @@ Feature: Create question - single/multiple choice
 
 
   Scenario: Create numerical question with 2 decimal digits
-    When I mark the question as numerical choice
+    When I mark the question as numerical
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"
     Then I see note "2 decimal digits will be required in the answer."
 
 
   Scenario: Edit numerical question with 2 decimal digits
-    When I mark the question as numerical choice
+    When I mark the question as numerical
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"
     * I submit the question
@@ -194,7 +194,7 @@ Feature: Create question - single/multiple choice
 
 
   Scenario: Modify number of decimal digits
-    When I mark the question as numerical choice
+    When I mark the question as numerical
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"
     * I submit the question

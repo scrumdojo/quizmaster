@@ -10,7 +10,7 @@ Feature: Generate numerical question using AI
     And I ask AI for numerical question:
       | Generate a numerical question about basic arithmetic |
     Then Question field is not empty
-    And the question is numerical choice
+    And the question is numerical
     And I see numerical answer field
     And I see non-empty numerical correct answer
     And I see tolerance "0"
@@ -27,7 +27,7 @@ Feature: Generate numerical question using AI
       | Generate a numerical question about a physics calculation |
       | and include tolerance                                     |
     Then Question field is not empty
-    And the question is numerical choice
+    And the question is numerical
     And I see non-empty numerical correct answer
     And I see non-empty tolerance
 
@@ -40,7 +40,7 @@ Feature: Generate numerical question using AI
       | Generate a numerical question about geometry |
       | and include question explanation             |
     Then Question field is not empty
-    And the question is numerical choice
+    And the question is numerical
     And I see non-empty numerical correct answer
     And I see non-empty question explanation
 
@@ -55,7 +55,7 @@ Feature: Generate numerical question using AI
       | with correct answer <answer>  |
       | and include tolerance         |
     Then Question field is not empty
-    And the question is numerical choice
+    And the question is numerical
     And I see numerical correct answer <answer>
     And tolerance is greater than "0"
     And tolerance is less than <answer-magnitude>
