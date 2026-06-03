@@ -32,13 +32,19 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
     const onStart = async () => {
         if (!quiz || !canStart) return
 
+        if (!isDryRun) {
+            const target = cohortGuid ? urls.quizNicknameWithCohort(quiz.id, cohortGuid) : urls.quizNickname(quiz.id)
+            navigate(target)
+            return
+        }
+
         setIsStarting(true)
         storeQuizAnswers(null)
 
         try {
             const { attemptId, questions } = isDryRun
                 ? await createDryRun(workspaceId, quiz.id)
-                : await createAttempt(quiz.id, cohortGuid)
+                : await createAttempt(quiz.id, { cohortGuid })
             const playableQuiz: QuizTake = { ...quiz, questions }
             setQuizRun(attemptId, quiz.id)
             const target = isDryRun ? urls.workspaceQuizDryRunTake(workspaceId, quiz.id) : urls.quizTake(quiz.id)

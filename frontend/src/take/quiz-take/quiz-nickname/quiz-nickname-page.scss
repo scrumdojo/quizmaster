@@ -1,0 +1,26 @@
+.quiz-nickname-card {
+    display: grid;
+    gap: 1.5rem;
+
+    &__form {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    &__hint {
+        margin: 0;
+        color: var(--text-secondary);
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .quiz-nickname-card__actions {
+        flex-direction: column-reverse;
+    }
+}

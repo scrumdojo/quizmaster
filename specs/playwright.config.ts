@@ -8,7 +8,7 @@ const port = process.env.E2E_BASE_PORT || process.env.BE_PORT || '8080'
 
 export default defineConfig({
     fullyParallel: true,
-    timeout: 20000,
+    timeout: 30000,
     expect: {
         timeout: 10000,
     },

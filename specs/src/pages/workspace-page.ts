@@ -5,7 +5,11 @@ export class WorkspacePage {
 
     // ── Navigation ───────────────────────────────────
 
-    goto = (guid: string) => this.page.goto(`/workspace/${guid}`, { waitUntil: 'domcontentloaded' })
+    goto = async (guid: string) => {
+        await this.page.goto(`/workspace/${guid}`, { waitUntil: 'domcontentloaded' })
+        await this.tabLocator('Quizzes').waitFor({ state: 'visible' })
+    }
+
     waitForUrl = (guid: string) => this.page.waitForURL(`**/workspace/${guid}`)
 
     expectScrolledToTop = () => this.page.waitForFunction('scrollY === 0', { timeout: 5000 })
@@ -35,8 +39,19 @@ export class WorkspacePage {
     // overlay (e.g. the Robin AI chat sheet docked over the page) can cover the
     // tab bar and block a real click; dispatchEvent flips the tab regardless.
     // The real tab-click UX is covered by the Workspace.Tabs scenarios.
-    private showQuestions = () => this.tabLocator('Questions').dispatchEvent('click')
-    private showQuizzes = () => this.tabLocator('Quizzes').dispatchEvent('click')
+    private activateTab = async (name: 'Questions' | 'Quizzes') => {
+        const tab = this.tabLocator(name)
+        await expect(tab).toBeVisible()
+
+        const isSelected = await tab.getAttribute('aria-selected')
+        if (isSelected === 'true') return
+
+        await tab.dispatchEvent('click')
+        await expect(tab).toHaveAttribute('aria-selected', 'true')
+    }
+
+    private showQuestions = () => this.activateTab('Questions')
+    private showQuizzes = () => this.activateTab('Quizzes')
 
     // ── Section visibility (asserts the gating; does NOT switch tabs) ──
 

@@ -311,6 +311,34 @@ public class QuizTakeControllerTest {
     }
 
     @Test
+    public void createAttemptPersistsTrimmedNickname() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+
+        var result = mockMvc
+            .perform(
+                post("/api/quiz/{id}/attempts", quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "nickname": "  Quiz Falcon  "
+                        }
+                        """
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.attemptId").isNumber())
+            .andReturn();
+
+        Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
+        var attempt = attemptRepository.findById(attemptId).orElseThrow();
+
+        assertThat(attempt.getNickname()).isEqualTo("Quiz Falcon");
+    }
+
+    @Test
     public void recordTimeoutStampsServerSideTimestamp() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));

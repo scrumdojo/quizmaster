@@ -130,7 +130,7 @@ public class AttemptServiceTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).randomQuestionCount(null));
         LocalDateTime now = LocalDateTime.of(2026, 5, 14, 10, 0);
 
-        AttemptStart started = service.start(quiz, null, false, now);
+        AttemptStart started = service.start(quiz, null, null, false, now);
 
         assertThat(started.attempt().getStartedAt()).isEqualTo(now);
         assertThat(started.drawnQuestions()).extracting(Question::getId).containsExactly(q1.getId(), q2.getId());
@@ -150,7 +150,7 @@ public class AttemptServiceTest {
         Question q3 = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2));
 
-        AttemptStart started = service.start(quiz, null, false, LocalDateTime.now());
+        AttemptStart started = service.start(quiz, null, null, false, LocalDateTime.now());
 
         assertThat(started.drawnQuestions()).hasSize(2);
         assertThat(attemptQuestionRepository.findByAttemptIdOrderByPosition(started.attempt().getId())).hasSize(2);
@@ -168,7 +168,7 @@ public class AttemptServiceTest {
         );
         Cohort cohort = quiz.getCohorts().getFirst();
 
-        AttemptStart started = service.start(quiz, cohort, false, LocalDateTime.now());
+        AttemptStart started = service.start(quiz, cohort, null, false, LocalDateTime.now());
 
         assertThat(started.attempt().getCohortGuid()).isEqualTo(cohort.getGuid());
     }
@@ -178,7 +178,7 @@ public class AttemptServiceTest {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question).randomQuestionCount(null));
 
-        AttemptStart started = service.start(quiz, null, false, LocalDateTime.now());
+        AttemptStart started = service.start(quiz, null, null, false, LocalDateTime.now());
 
         assertThat(started.attempt().getCohortGuid()).isNull();
     }
@@ -188,8 +188,18 @@ public class AttemptServiceTest {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question).randomQuestionCount(null));
 
-        AttemptStart started = service.start(quiz, null, true, LocalDateTime.now());
+        AttemptStart started = service.start(quiz, null, null, true, LocalDateTime.now());
 
         assertThat(started.attempt().getIsDryRun()).isTrue();
+    }
+
+    @Test
+    public void startWithNicknamePersistsNickname() {
+        Question question = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(question).randomQuestionCount(null));
+
+        AttemptStart started = service.start(quiz, null, "Quiz Falcon", false, LocalDateTime.now());
+
+        assertThat(started.attempt().getNickname()).isEqualTo("Quiz Falcon");
     }
 }

@@ -15,10 +15,13 @@ export const fetchQuizLeaderboard = async (quizId: string) =>
 export const fetchQuizAttempt = async (quizId: number, attemptId: number) =>
     await fetchJson<QuizTake>(`/api/quiz/${quizId}/attempts/${attemptId}`)
 
-export const createAttempt = async (quizId: number, cohortGuid?: string): Promise<QuizAttemptStartResponse> =>
+export const createAttempt = async (
+    quizId: number,
+    request?: QuizAttemptStartRequest,
+): Promise<QuizAttemptStartResponse> =>
     await postJson<QuizAttemptStartRequest | undefined, QuizAttemptStartResponse>(
         `/api/quiz/${quizId}/attempts`,
-        cohortGuid ? { cohortGuid } : undefined,
+        request,
     )
 
 export const createDryRun = async (workspaceGuid: string, quizId: number): Promise<QuizAttemptStartResponse> =>

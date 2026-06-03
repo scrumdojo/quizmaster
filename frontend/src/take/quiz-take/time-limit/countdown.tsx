@@ -7,12 +7,13 @@ interface CountdownProps {
 }
 
 const LOW_TIME_THRESHOLD_MS = 60_000
+const getNow = () => window.__quizClockNow ?? Date.now()
 
 export const Countdown = ({ onTimeLimit, timeLimit }: CountdownProps) => {
     const durationMs = (timeLimit || 120) * 1000
 
     const [timeLeft, setTimeLeft] = useState(durationMs)
-    const endTimeRef = useRef(Date.now() + durationMs)
+    const endTimeRef = useRef(getNow() + durationMs)
     const onTimeLimitRef = useRef(onTimeLimit)
     const timeoutTriggeredRef = useRef(false)
 
@@ -21,24 +22,32 @@ export const Countdown = ({ onTimeLimit, timeLimit }: CountdownProps) => {
     }, [onTimeLimit])
 
     useEffect(() => {
-        endTimeRef.current = Date.now() + durationMs
+        endTimeRef.current = getNow() + durationMs
         timeoutTriggeredRef.current = false
         setTimeLeft(durationMs)
     }, [durationMs])
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            const next = Math.max(0, endTimeRef.current - Date.now())
+        const updateTimeLeft = () => {
+            const next = Math.max(0, endTimeRef.current - getNow())
             setTimeLeft(next)
 
             if (next <= 0) {
-                clearInterval(interval)
                 if (!timeoutTriggeredRef.current) {
                     timeoutTriggeredRef.current = true
                     onTimeLimitRef.current()
                 }
             }
-        }, 250)
+        }
+
+        if (window.__advanceQuizClock) {
+            const handleTick = () => updateTimeLeft()
+            window.addEventListener('quiz-clock-tick', handleTick)
+            updateTimeLeft()
+            return () => window.removeEventListener('quiz-clock-tick', handleTick)
+        }
+
+        const interval = setInterval(updateTimeLeft, 250)
         return () => clearInterval(interval)
     }, [durationMs])
 

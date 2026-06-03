@@ -90,4 +90,5 @@ export interface QuizAttemptStartResponse {
 
 export interface QuizAttemptStartRequest {
     readonly cohortGuid?: string
+    readonly nickname?: string
 }

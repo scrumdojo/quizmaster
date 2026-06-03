@@ -20,6 +20,7 @@ export const ROUTES = {
     quizWelcomeWithCohort: '/quiz/:id/cohort/:cohortGuid',
     quizTake: '/quiz/:id/questions/:questionId?',
     quizNickname: '/quiz/:id/nickname',
+    quizNicknameWithCohort: '/quiz/:id/cohort/:cohortGuid/nickname',
 } as const
 
 export const urls = {
@@ -45,6 +46,7 @@ export const urls = {
     quizWelcomeWithCohort: (id: number | string, cohortGuid: string) => `/quiz/${id}/cohort/${cohortGuid}`,
     quizTake: (id: number | string) => `/quiz/${id}/questions`,
     quizNickname: (id: number | string) => `/quiz/${id}/nickname`,
+    quizNicknameWithCohort: (id: number | string, cohortGuid: string) => `/quiz/${id}/cohort/${cohortGuid}/nickname`,
 }
 
 export const useWorkspaceId = () => {

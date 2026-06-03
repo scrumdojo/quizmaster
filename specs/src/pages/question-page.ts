@@ -19,8 +19,12 @@ export class QuestionPage {
         this.page.locator(`[data-testid="delete-bookmark-${title}"]`)
 
     private progressBarLocator = () => this.page.locator('#progress-bar')
-    progressCurrent = async () => Number.parseInt((await this.progressBarLocator().getAttribute('value')) ?? '')
-    progressMax = async () => Number.parseInt((await this.progressBarLocator().getAttribute('max')) ?? '')
+    private progressBarAttribute = async (name: 'value' | 'max') => {
+        await this.progressBarLocator().waitFor({ state: 'visible' })
+        return this.progressBarLocator().getAttribute(name)
+    }
+    progressCurrent = async () => Number.parseInt((await this.progressBarAttribute('value')) ?? '')
+    progressMax = async () => Number.parseInt((await this.progressBarAttribute('max')) ?? '')
 
     back = () => this.backButtonLocator().click()
     bookmark = () => this.bookmarkQuestionButtonLocator().click()

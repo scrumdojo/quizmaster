@@ -29,19 +29,19 @@ Desktop.
 - **Workspaces** — top-level folders that group everything for one
   course; questions and quizzes live inside exactly one workspace.
 - **Questions** with three types:
-  - *Single-choice* — exactly one right answer.
-  - *Multiple-choice* — two or more right answers; an optional "easy"
-    mark reveals the count of correct answers to the taker.
-  - *Numerical* — a typed number, with an optional tolerance band.
-  Questions can carry an image (via URL), a single tag, per-answer
-  explanations, and a question-level explanation.
+    - _Single-choice_ — exactly one right answer.
+    - _Multiple-choice_ — two or more right answers; an optional "easy"
+      mark reveals the count of correct answers to the taker.
+    - _Numerical_ — a typed number, with an optional tolerance band.
+      Questions can carry an image (via URL), a single tag, per-answer
+      explanations, and a question-level explanation.
 - **Quizzes** assembled by picking questions from the workspace, with:
-  - *Exam* vs *Learning* mode (end-of-quiz feedback vs. after each
-    answer; learning mode allows retakes).
-  - *Difficulty* override (easy / hard / keep per-question setting).
-  - *Pass score*, *time limit*, optional *random subset* of N
-    questions, and an optional *availability window* (start/end
-    dates).
+    - _Exam_ vs _Learning_ mode (end-of-quiz feedback vs. after each
+      answer; learning mode allows retakes).
+    - _Difficulty_ override (easy / hard / keep per-question setting).
+    - _Pass score_, _time limit_, optional _random subset_ of N
+      questions, and an optional _availability window_ (start/end
+      dates).
 - **Cohorts** — per-quiz groupings with their own shareable link, used
   to track a class or team separately on the cohort leaderboard.
 - **Dry run** — maker preview of their own quiz that bypasses the
@@ -92,8 +92,10 @@ Desktop.
   cohort-link gating) are specified but skipped — security is a
   pending foundation, not an existing one.
 - **Taker identity is anonymous.** Attempts are not linked to a person,
-  so no individual learner history, no "your weak areas," no spaced
-  repetition. Leaderboards are cohort-aggregate only.
+  so there is no login-backed learner history, no "your weak areas," and no
+  spaced repetition. A taker may enter a nickname when starting a quiz, but it
+  remains a display label rather than an account identity. Leaderboards are
+  still cohort-aggregate today.
 - **No team / multi-workspace sharing.** A workspace belongs to
   whoever has its URL. Questions cannot be moved or copied between
   workspaces; there is no shared question bank.

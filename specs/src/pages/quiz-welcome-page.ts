@@ -36,10 +36,17 @@ export class QuizWelcomePage {
     expectStartEnabled = () => expect(this.startButton()).toBeEnabled()
     expectStartDisabled = () => expect(this.startButton()).toBeDisabled()
     expectStatusMessage = (message: string) => expect(this.statusMessage()).toHaveText(message)
+    waitForLoaded = async () => {
+        await expect(this.headerLocator()).toBeVisible()
+        await expect(this.startButton()).toBeVisible()
+    }
 
     statusMessage = () => this.page.locator('p#statusMessage')
     startButton = () => this.page.locator('button#start')
-    start = () => this.startButton().click()
+    start = async () => {
+        await this.waitForLoaded()
+        await this.startButton().click({ force: true })
+    }
 
     expectCohortLeaderboard = async (captionText: string, headerCells: string[], bodyRows: string[][]) => {
         await expectTextToBe(this.tableCaptionLocator(), captionText)

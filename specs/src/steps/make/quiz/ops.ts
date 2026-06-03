@@ -1,5 +1,5 @@
 import { ensureWorkspaceGuid } from '#steps/make/workspace/ops.ts'
-import { answerNth } from '#steps/quiz/ops.ts'
+import { answerNth, continueQuizStart } from '#steps/quiz/ops.ts'
 import { createQuizViaRest } from '#steps/shared/api.ts'
 import type { QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
@@ -33,7 +33,7 @@ export const seedFinishedCohortAttemptViaUI = async (
     await world.workspacePage.shareQuiz(quizBookmark)
     const cohortHref = await world.quizSharePage.cohortLink(cohortName)
     await world.page.goto(cohortHref)
-    await world.quizWelcomePage.start()
+    await continueQuizStart(world, `Cohort ${cohortName}`)
     const totalQuestions = await world.questionPage.progressMax()
     for (let i = 0; i < totalQuestions; i++) {
         await answerNth(world, i < correctAnswers ? 0 : 1)
@@ -44,15 +44,14 @@ export const seedFinishedCohortAttemptViaUI = async (
 export const seedFinishedIndividualAttemptViaUI = async (
     world: QuizmasterWorld,
     quizBookmark: string,
+    nickname: string,
     correctAnswers: number,
 ) => {
     await world.workspacePage.goto(world.workspaceGuid)
     await world.workspacePage.shareQuiz(quizBookmark)
     const takeHref = await world.quizSharePage.takeLink()
     await world.page.goto(takeHref)
-    await world.quizWelcomePage.start()
-
-    // TODO jako individual jdu vyplnit kviz, tzn. nekde vyplnim nickname a zodpovim otazky
+    await continueQuizStart(world, nickname)
 
     const totalQuestions = await world.questionPage.progressMax()
     for (let i = 0; i < totalQuestions; i++) {

@@ -8,21 +8,52 @@ export const openQuiz = async (world: QuizmasterWorld, quizBookmark: string) => 
     await world.page.goto(quizUrl)
 }
 
-export const ensureFakeClockInstalled = async (world: QuizmasterWorld) => {
-    if (!world.clockInstalled) {
-        await world.page.clock.install({ time: new Date() })
-        world.clockInstalled = true
-    }
+const DEFAULT_NICKNAME = 'Spec Runner'
+
+const waitForQuizStartTransition = async (world: QuizmasterWorld) => {
+    await world.page.waitForURL(url => {
+        const path = url.pathname
+        return (
+            /\/quiz\/\d+(?:\/cohort\/[^/]+)?\/nickname$/.test(path) ||
+            /\/quiz\/\d+\/questions(?:\/\d+)?$/.test(path) ||
+            /\/workspace\/[^/]+\/quiz\/\d+\/dry-run\/questions(?:\/\d+)?$/.test(path)
+        )
+    })
 }
 
-export const startQuiz = async (world: QuizmasterWorld, quizBookmark: string) => {
-    await ensureFakeClockInstalled(world)
-    await openQuiz(world, quizBookmark)
-    const browserNow = await world.page.evaluate(() => Date.now())
-    await world.page.clock.pauseAt(browserNow + 60_000)
-    await world.quizWelcomePage.start()
-    world.activeQuizBookmark = quizBookmark
+const waitForQuizQuestions = async (world: QuizmasterWorld) => {
+    await world.page.waitForURL(url => {
+        const path = url.pathname
+        return /\/quiz\/\d+\/questions(?:\/\d+)?$/.test(path) || /\/workspace\/[^/]+\/quiz\/\d+\/dry-run\/questions(?:\/\d+)?$/.test(path)
+    })
+}
+
+const isQuizWelcomePath = (path: string) => /\/quiz\/\d+(?:\/cohort\/[^/]+)?$/.test(path)
+
+export const continueQuizStart = async (world: QuizmasterWorld, nickname = DEFAULT_NICKNAME) => {
+    const currentPath = new URL(world.page.url()).pathname
+
+    if (isQuizWelcomePath(currentPath)) {
+        await world.quizWelcomePage.waitForLoaded()
+        await world.quizWelcomePage.start()
+        await waitForQuizStartTransition(world)
+    }
+
+    if (new URL(world.page.url()).pathname.includes('/nickname')) {
+        await world.quizNicknamePage.waitForLoaded()
+        await world.quizNicknamePage.fillNickname(nickname)
+        await world.quizNicknamePage.startQuiz()
+        await waitForQuizQuestions(world)
+    }
+
+    await world.takeQuestionPage.waitForLoaded()
     world.lastAnsweredTitle = undefined
+}
+
+export const startQuiz = async (world: QuizmasterWorld, quizBookmark: string, nickname = DEFAULT_NICKNAME) => {
+    await openQuiz(world, quizBookmark)
+    world.activeQuizBookmark = quizBookmark
+    await continueQuizStart(world, nickname)
 }
 
 const isQuizQuestionSubmitResponse = (response: PlaywrightResponse) => {
@@ -34,29 +65,25 @@ const isQuizQuestionSubmitResponse = (response: PlaywrightResponse) => {
     )
 }
 
-const waitForAnswerSettled = async (world: QuizmasterWorld, progressBefore: number, progressMax: number) => {
+const waitForAnswerSettled = async (world: QuizmasterWorld, questionTextBefore: string) => {
     const signals = [
         world.takeQuestionPage.questionFeedbackLocator().waitFor({ state: 'visible' }),
         world.questionPage.evaluateButtonLocator().waitFor({ state: 'visible' }),
+        world.takeQuestionPage.expectQuestionTextNotToBe(questionTextBefore),
     ]
-
-    if (progressBefore < progressMax) {
-        signals.push(world.questionPage.expectProgress(progressBefore + 1, progressMax))
-    }
 
     await Promise.any(signals)
 }
 
 export const answerNth = async (world: QuizmasterWorld, n: number) => {
     await world.takeQuestionPage.waitForLoaded()
-    const progressBefore = await world.questionPage.progressCurrent()
-    const progressMax = await world.questionPage.progressMax()
+    const questionTextBefore = (await world.takeQuestionPage.questionText()) ?? ''
     const submitResponse = world.page.waitForResponse(isQuizQuestionSubmitResponse)
 
     await world.takeQuestionPage.selectAnswerNth(n)
     await world.takeQuestionPage.submit()
     await submitResponse
-    await waitForAnswerSettled(world, progressBefore, progressMax)
+    await waitForAnswerSettled(world, questionTextBefore)
 }
 
 export const answerCorrectly = async (world: QuizmasterWorld) => answerNth(world, 0)
@@ -68,7 +95,6 @@ export const repeatAsync = async (n: number, fn: () => Promise<void>) => {
 
 export const finishQuizInSeconds = async (world: QuizmasterWorld, seconds: number) => {
     await advanceServerClock(world, seconds)
-    await world.page.clock.fastForward(seconds * 1000)
     await world.questionPage.evaluateButtonLocator().click()
     await world.workspacePage.goto(world.workspaceGuid)
 }
@@ -97,12 +123,12 @@ export const progressThroughQuestions = async (world: QuizmasterWorld) => {
             world.correctAnswersCounts[bookmark] = '-'
         }
 
+        const questionTextBefore = questionText
+
         await world.takeQuestionPage.selectAnswerNth(0)
-        const progressBefore = await world.questionPage.progressCurrent()
-        const progressMax = await world.questionPage.progressMax()
         const submitResponse = world.page.waitForResponse(isQuizQuestionSubmitResponse)
         await world.takeQuestionPage.submit()
         await submitResponse
-        await waitForAnswerSettled(world, progressBefore, progressMax)
+        await waitForAnswerSettled(world, questionTextBefore)
     }
 }
