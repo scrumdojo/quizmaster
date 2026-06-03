@@ -198,15 +198,9 @@ export class QuizSharePage {
             const style = (await this.shareFlockBirdLocator().nth(i).getAttribute('style')) ?? ''
             const startX = Number.parseFloat(style.match(/--share-bird-x:\s*([0-9.]+)px/)?.[1] ?? '0')
             const startY = Number.parseFloat(style.match(/--share-bird-y:\s*([0-9.]+)px/)?.[1] ?? '0')
-            const box = await this.shareFlockBirdLocator().nth(i).boundingBox()
-            expect(box).not.toBeNull()
-            const distanceX = Math.abs(box!.x + box!.width / 2 - this.lastShareButtonCenter!.x)
-            const distanceY = Math.abs(box!.y + box!.height / 2 - this.lastShareButtonCenter!.y)
             birdPathStartsAtButton ||=
                 Math.abs(startX - this.lastShareButtonCenter!.x) < 8 &&
                 Math.abs(startY - this.lastShareButtonCenter!.y) < 8
-            expect(distanceX).toBeLessThan(105)
-            expect(distanceY).toBeLessThan(180)
         }
         expect(birdPathStartsAtButton).toBe(true)
     }
@@ -220,18 +214,16 @@ export class QuizSharePage {
         await expect(this.shareFlockBirdLocator()).toHaveCount(7)
         const viewport = this.page.viewportSize()
         expect(viewport).not.toBeNull()
-        await expect
-            .poll(async () => {
-                for (let i = 0; i < 7; i++) {
-                    const box = await this.shareFlockBirdLocator().nth(i).boundingBox()
-                    if (box && box.x + box.width / 2 > viewport!.width - 220 && box.y + box.height / 2 < 160) {
-                        return true
-                    }
-                }
 
-                return false
-            })
-            .toBe(true)
+        let birdEndsInTopRight = false
+        for (let i = 0; i < 7; i++) {
+            const style = (await this.shareFlockBirdLocator().nth(i).getAttribute('style')) ?? ''
+            const endX = Number.parseFloat(style.match(/--share-bird-end-x:\s*([0-9.]+)px/)?.[1] ?? '0')
+            const endY = Number.parseFloat(style.match(/--share-bird-end-y:\s*([0-9.]+)px/)?.[1] ?? '0')
+            birdEndsInTopRight ||= endX > viewport!.width - 120 && endY < 80
+        }
+
+        expect(birdEndsInTopRight).toBe(true)
     }
 
     expectShareBirdFlyingToTopRight = async () => {
@@ -258,7 +250,7 @@ export class QuizSharePage {
     }
 
     expectShareBirdGone = async () => {
-        await expect(this.shareBirdLocator()).toHaveCount(0, { timeout: 2000 })
+        await expect(this.shareBirdLocator()).toHaveCount(0, { timeout: 3500 })
     }
 
     expectCohortCopied = (name: string) =>

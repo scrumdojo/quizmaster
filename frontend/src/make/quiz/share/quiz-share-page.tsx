@@ -214,7 +214,7 @@ export const QuizSharePage = () => {
                     sizeRem: offset.size,
                 }
             })
-            setShareBirds(current => [...current, ...flock])
+            setShareBirds(flock)
             scheduleShareBirdRemoval(
                 flock.map(flockBird => flockBird.id),
                 SHARE_FLOCK_REMOVE_DELAY_MS,
