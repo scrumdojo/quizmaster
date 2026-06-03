@@ -139,11 +139,7 @@ export function WorkspacePage() {
 
     const hasQuestions = questions.length > 0
     const hasQuizzes = quizzes.length > 0
-    const [quizCreateMessage, setQuizCreateMessage] = useState<string | null>(null)
     const hasActiveQuestionFilters = debouncedQuestionFilter.length > 0 || selectedQuestionTags.length > 0
-    const handleCreateQuizBlocked = () => {
-        setQuizCreateMessage("It's not possible to create quiz without min 2 questions exist")
-    }
     const toggleQuestionTag = (tag: string) => {
         setSelectedQuestionTags(current =>
             current.includes(tag) ? current.filter(currentTag => currentTag !== tag) : [...current, tag],
@@ -276,7 +272,9 @@ export function WorkspacePage() {
                                     className={`workspace-pagination__page${i === questionPage ? ' workspace-pagination__page--active' : ''}`}
                                     aria-label={`Page ${i + 1}`}
                                     aria-current={i === questionPage ? 'page' : undefined}
-                                    onClick={() => void loadQuestionPage(i, debouncedQuestionFilter, selectedQuestionTags)}
+                                    onClick={() =>
+                                        void loadQuestionPage(i, debouncedQuestionFilter, selectedQuestionTags)
+                                    }
                                 >
                                     {i + 1}
                                 </button>
