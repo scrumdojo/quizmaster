@@ -8,7 +8,6 @@ import cz.scrumdojo.quizmaster.question.QuestionRequest;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import jakarta.validation.Valid;
-import java.util.Set;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,12 +53,15 @@ public class WorkspaceQuestionController {
                   normalizedQuery,
                   PageRequest.of(page, PAGE_SIZE)
               );
-        Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
-
         var items = questionPage
             .getContent()
             .stream()
-            .map(q -> QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId())))
+            .map(q ->
+                QuestionListItem.from(
+                    q,
+                    quizRepository.findQuizTitlesByWorkspaceGuidAndQuestionId(workspaceGuid, q.getId())
+                )
+            )
             .toList();
 
         return ResponseEntity.ok(

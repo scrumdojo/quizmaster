@@ -1,3 +1,32 @@
+.question-used-wrapper {
+    position: relative;
+
+    .in-quiz-list {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        z-index: 10;
+        min-width: 14rem;
+        margin: 0;
+        padding: 0.5rem 0;
+        list-style: none;
+        background: #fff;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+
+        li {
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+            color: var(--text-strong);
+        }
+
+        li + li {
+            border-top: 1px solid var(--border-subtle);
+        }
+    }
+}
+
 .workspace-page {
     max-width: 980px;
     margin: 1.4rem auto 2rem;

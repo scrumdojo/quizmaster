@@ -139,6 +139,15 @@ Then('I do not see "In Quiz" tag on question {string}', async function (question
     await this.workspacePage.expectQuestionInQuizTagAbsent(question)
 })
 
+When('I click the "In Quiz" tag on question {string}', async function (question: string) {
+    this.lastClickedInQuizQuestion = question
+    await this.workspacePage.clickQuestionInQuizTag(question)
+})
+
+Then('I see quiz {string} in the "In Quiz" list', async function (quizTitle: string) {
+    await this.workspacePage.expectInQuizListContains(this.lastClickedInQuizQuestion, quizTitle)
+})
+
 Then('I see image thumbnail for question {string}', async function (question: string) {
     await this.workspacePage.expectQuestionThumbnailVisible(question)
 })

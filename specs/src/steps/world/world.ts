@@ -108,6 +108,7 @@ export class QuizmasterWorld {
     }
     rememberedWorkspaceQuestionCount?: number
     rememberedCohortLink = ''
+    lastClickedInQuizQuestion = ''
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())

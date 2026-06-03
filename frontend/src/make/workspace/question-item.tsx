@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import { tagToColor } from '#fe/make/model/tag.ts'
 import { Button, LinkButton } from '#fe/shared'
@@ -11,6 +13,7 @@ interface Props {
 
 export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
     const workspaceId = useWorkspaceId()
+    const [showQuizList, setShowQuizList] = useState(false)
     return (
         <div className="question-item">
             <div className="question-content">
@@ -35,7 +38,22 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                     />
                     <LinkButton label="Take" to={urls.questionTake(question.id)} />
                     {question.isInAnyQuiz ? (
-                        <span className="question-used-badge link-button link-button--secondary">In Quiz</span>
+                        <div className="question-used-wrapper">
+                            <button
+                                type="button"
+                                className="question-used-badge link-button link-button--secondary"
+                                onClick={() => setShowQuizList(v => !v)}
+                            >
+                                In Quiz
+                            </button>
+                            {showQuizList && (
+                                <ul className="in-quiz-list">
+                                    {question.quizTitles.map(title => (
+                                        <li key={title}>{title}</li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
                     ) : (
                         <Button className="link-button" onClick={onDeleteQuestion}>
                             Delete

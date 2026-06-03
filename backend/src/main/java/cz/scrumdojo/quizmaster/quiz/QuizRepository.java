@@ -30,6 +30,12 @@ public interface QuizRepository extends JpaRepository<Quiz, Integer> {
     @Query(value = "SELECT DISTINCT unnest(questions) FROM quiz WHERE workspace_guid = ?", nativeQuery = true)
     Set<Integer> findQuestionIdsInQuizzesByWorkspaceGuid(String workspaceGuid);
 
+    @Query(
+        value = "SELECT title FROM quiz WHERE workspace_guid = ? AND ? = ANY(questions) ORDER BY id DESC",
+        nativeQuery = true
+    )
+    List<String> findQuizTitlesByWorkspaceGuidAndQuestionId(String workspaceGuid, int questionId);
+
     @Modifying
     @Query("DELETE FROM Quiz q WHERE q.id = :id AND q.workspaceGuid = :workspaceGuid")
     int deleteByIdAndWorkspaceGuid(@Param("id") Integer id, @Param("workspaceGuid") String workspaceGuid);

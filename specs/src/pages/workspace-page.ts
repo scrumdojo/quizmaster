@@ -180,6 +180,15 @@ export class WorkspacePage {
         await this.showQuestions()
         await expect(this.questionLocator(question).getByText('In Quiz')).not.toBeVisible()
     }
+    clickQuestionInQuizTag = async (question: string) => {
+        await this.showQuestions()
+        await this.questionUsedBadgeLocator(question).click()
+    }
+    expectInQuizListContains = async (question: string, quizTitle: string) => {
+        const list = this.questionLocator(question).locator('.in-quiz-list')
+        await expect(list).toBeVisible()
+        await expect(list.getByText(quizTitle)).toBeVisible()
+    }
 
     // ── Create new question / quiz ───────────────────
 
