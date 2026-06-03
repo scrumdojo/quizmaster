@@ -80,6 +80,14 @@ Then('mammoths can attack and kill hunters', async function () {
     await this.appPage.expectMammothsAttackHunters()
 })
 
+Then('each hunter carries 10 spears', async function () {
+    await this.appPage.expectHunterSpears()
+})
+
+Then('hunters return to base to resupply when out of spears', async function () {
+    await this.appPage.expectHunterResupply()
+})
+
 When('I select battle only mode', async function () {
     await this.appPage.selectBattleOnly()
 })

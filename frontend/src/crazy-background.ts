@@ -741,6 +741,8 @@ type GiantMammoth = Mammoth & {
 const MAMMOTH_HEALTH = 10
 const MAMMOTH_DODGE_CHANCE = 0.35
 const GIANT_MAMMOTH_HEALTH = 100
+const HUNTER_SPEAR_COUNT = 10
+const HUNTER_BASE_X = 30
 const GIANT_MAMMOTH_SCALE = 2.5
 const GIANT_MAMMOTH_MIN_DELAY_MS = 20000
 const GIANT_MAMMOTH_MAX_DELAY_MS = 45000
@@ -773,6 +775,7 @@ type Hunter = {
     flip: boolean
     spears: Array<{ x: number; y: number; vx: number; vy: number }>
     shootCooldown: number
+    spearsLeft: number
 }
 
 function makeMammoth(w: number, h: number): Mammoth {
@@ -797,6 +800,7 @@ function makeHunter(_w: number, h: number): Hunter {
         flip: false,
         spears: [],
         shootCooldown: 20 + Math.floor(Math.random() * 30),
+        spearsLeft: HUNTER_SPEAR_COUNT,
     }
 }
 
@@ -1371,17 +1375,41 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
         for (let i = hunters.length - 1; i >= 0; i--) {
             const hu = hunters[i]
             hu.t++
-            hu.x += hu.vx
+
+            if (hu.spearsLeft > 0) {
+                // Armed — advance into battle
+                hu.x += hu.vx
+                hu.flip = false
+                if (hu.x > w + 80) {
+                    hunters[i] = makeHunter(w, h)
+                    continue
+                }
+            } else {
+                // Out of spears — retreat to base to resupply
+                hu.x -= hu.vx + 0.6
+                hu.flip = true
+                if (hu.x <= HUNTER_BASE_X) {
+                    hu.x = HUNTER_BASE_X
+                    hu.flip = false
+                    hu.spearsLeft = HUNTER_SPEAR_COUNT
+                    floatingTexts.push({
+                        x: hu.x,
+                        y: hu.y - 24,
+                        vy: -1.4,
+                        text: 'RELOAD!',
+                        opacity: 1,
+                        color: '#d97706',
+                        size: 13,
+                    })
+                }
+            }
             hu.y += hu.vy + Math.sin(hu.t * 0.026) * 0.3
 
-            if (hu.x > w + 80) {
-                hunters[i] = makeHunter(w, h)
-                continue
+            // Shoot spear — aim at nearest mammoth when possible (only while armed)
+            if (hu.spearsLeft > 0) {
+                hu.shootCooldown--
             }
-
-            // Shoot spear — aim at nearest mammoth when possible
-            hu.shootCooldown--
-            if (hu.shootCooldown <= 0) {
+            if (hu.spearsLeft > 0 && hu.shootCooldown <= 0) {
                 hu.shootCooldown = 18 + Math.floor(Math.random() * 22)
                 let nearestMammoth: Mammoth | null = null
                 let nearestDist = Infinity
@@ -1414,6 +1442,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                         vy: (Math.random() - 0.5) * 1.2,
                     })
                 }
+                hu.spearsLeft--
             }
 
             // Update spears
@@ -1684,6 +1713,8 @@ function applyTheme(theme: AnimationTheme) {
             canvas.dataset.mammothDodge = 'true'
             canvas.dataset.mammothDodgeVisual = 'true'
             canvas.dataset.battleAudio = 'cave_throat_singing'
+            canvas.dataset.hunterSpears = String(HUNTER_SPEAR_COUNT)
+            canvas.dataset.hunterResupply = 'true'
         } else {
             delete canvas.dataset.mammothAttacksHunters
             delete canvas.dataset.hunterScoreboardSide
@@ -1700,6 +1731,8 @@ function applyTheme(theme: AnimationTheme) {
             delete canvas.dataset.mammothDodge
             delete canvas.dataset.mammothDodgeVisual
             delete canvas.dataset.battleAudio
+            delete canvas.dataset.hunterSpears
+            delete canvas.dataset.hunterResupply
         }
     }
 

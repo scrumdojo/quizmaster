@@ -82,6 +82,10 @@ export class AppPage {
 
     expectMammothsAttackHunters = () => expect(this.canvas()).toHaveAttribute('data-mammoth-attacks-hunters', 'true')
 
+    expectHunterSpears = () => expect(this.canvas()).toHaveAttribute('data-hunter-spears', '10')
+
+    expectHunterResupply = () => expect(this.canvas()).toHaveAttribute('data-hunter-resupply', 'true')
+
     expectHunterClickKill = () => expect(this.canvas()).toHaveAttribute('data-hunter-click-kill', 'true')
 
     expectMammothClickKill = () => expect(this.canvas()).toHaveAttribute('data-mammoth-click-kill', 'true')

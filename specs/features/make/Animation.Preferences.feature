@@ -31,6 +31,13 @@ Feature: Background animation preferences
     Then mammoths can attack and kill hunters
 
 
+  Scenario: Hunters carry ten spears and return to base to resupply
+    Given I am on the home page
+    When I switch the animation to the mammoths theme
+    Then each hunter carries 10 spears
+    And hunters return to base to resupply when out of spears
+
+
   Scenario: Clicking a hunter instantly kills it with a footprint effect
     Given I am on the home page
     When I switch the animation to the mammoths theme
