@@ -147,6 +147,9 @@ export class WorkspacePage {
 
     private questionTagBadgeLocator = (question: string) =>
         this.questionLocator(question).locator('.question-tag-badge')
+    private questionTagFilterLocator = () => this.page.locator('[data-testid="workspace-question-tag-filter"]')
+    private questionTagFilterButtonLocator = (tag: string) =>
+        this.questionTagFilterLocator().getByRole('button', { name: tag, exact: true })
     expectQuestionTagBadge = async (question: string, tag: string) => {
         await this.showQuestions()
         await expect(this.questionTagBadgeLocator(question)).toHaveText(tag)
@@ -154,6 +157,22 @@ export class WorkspacePage {
     expectQuestionTagBadgeNotVisible = async (question: string) => {
         await this.showQuestions()
         await expect(this.questionTagBadgeLocator(question)).not.toBeVisible()
+    }
+    expectAvailableQuestionTags = async (tags: string[]) => {
+        await this.showQuestions()
+        const locator = this.questionTagFilterLocator().locator('.workspace-question-tag-filter__button')
+        await expect(this.questionTagFilterLocator()).toBeVisible()
+        await expect.poll(async () => (await locator.allTextContents()).map(tag => tag.trim()).sort()).toEqual(tags.sort())
+    }
+    selectQuestionTags = async (tags: string[]) => {
+        await this.showQuestions()
+        for (const tag of tags.filter(tag => tag.trim().length > 0)) {
+            const button = this.questionTagFilterButtonLocator(tag)
+            await expect(button).toBeVisible()
+            await button.click()
+            await expect(button).toHaveAttribute('aria-pressed', 'true')
+            await this.page.waitForLoadState('networkidle')
+        }
     }
 
     // ── Question used-in-quiz badge ──────────────────

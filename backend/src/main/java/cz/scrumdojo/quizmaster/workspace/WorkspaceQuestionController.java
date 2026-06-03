@@ -8,6 +8,7 @@ import cz.scrumdojo.quizmaster.question.QuestionRequest;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,18 +42,34 @@ public class WorkspaceQuestionController {
     public ResponseEntity<QuestionPageResponse> getWorkspaceQuestions(
         @PathVariable String workspaceGuid,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(required = false) String query
+        @RequestParam(required = false) String query,
+        @RequestParam(name = "tag", required = false) List<String> tags
     ) {
         workspaceGuard.requireExists(workspaceGuid);
 
         String normalizedQuery = query == null ? "" : query.trim();
+        String[] normalizedTags = tags == null
+            ? new String[0]
+            : tags.stream().map(String::trim).filter(tag -> !tag.isEmpty()).map(String::toLowerCase).distinct().toArray(String[]::new);
+
+        var pageRequest = PageRequest.of(page, PAGE_SIZE);
         var questionPage = normalizedQuery.isEmpty()
-            ? questionRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid, PageRequest.of(page, PAGE_SIZE))
-            : questionRepository.searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCase(
-                  workspaceGuid,
-                  normalizedQuery,
-                  PageRequest.of(page, PAGE_SIZE)
-              );
+            ? (normalizedTags.length == 0
+                  ? questionRepository.findByWorkspaceGuidOrderByIdDesc(workspaceGuid, pageRequest)
+                  : questionRepository.findByWorkspaceGuidAndAnySelectedTag(workspaceGuid, normalizedTags, pageRequest))
+            : (normalizedTags.length == 0
+                  ? questionRepository.searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCase(
+                      workspaceGuid,
+                      normalizedQuery,
+                      pageRequest
+                  )
+                  : questionRepository.searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCaseAndAnySelectedTag(
+                      workspaceGuid,
+                      normalizedQuery,
+                      normalizedTags,
+                      pageRequest
+                  ));
+        List<String> availableTags = questionRepository.findDistinctTagsByWorkspaceGuid(workspaceGuid);
         var items = questionPage
             .getContent()
             .stream()
@@ -67,6 +84,7 @@ public class WorkspaceQuestionController {
         return ResponseEntity.ok(
             new QuestionPageResponse(
                 items,
+                availableTags,
                 questionPage.getTotalPages(),
                 questionPage.getTotalElements(),
                 questionPage.getSize(),

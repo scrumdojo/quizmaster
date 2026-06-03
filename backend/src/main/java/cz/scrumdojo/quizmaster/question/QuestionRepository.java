@@ -17,6 +17,18 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
 
     @Query(
         value = """
+        SELECT DISTINCT tag
+        FROM question q
+        CROSS JOIN LATERAL unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
+        WHERE q.workspace_guid = :workspaceGuid
+        ORDER BY tag
+        """,
+        nativeQuery = true
+    )
+    List<String> findDistinctTagsByWorkspaceGuid(@Param("workspaceGuid") String workspaceGuid);
+
+    @Query(
+        value = """
         SELECT *
         FROM question q
         WHERE q.workspace_guid = :workspaceGuid
@@ -52,6 +64,87 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
     Page<Question> searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCase(
         @Param("workspaceGuid") String workspaceGuid,
         @Param("query") String query,
+        Pageable pageable
+    );
+
+    @Query(
+        value = """
+        SELECT *
+        FROM question q
+        WHERE q.workspace_guid = :workspaceGuid
+          AND EXISTS (
+              SELECT 1
+              FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
+              WHERE lower(tag) = ANY(cast(:selectedTags as text[]))
+          )
+        ORDER BY q.id DESC
+        """,
+        countQuery = """
+        SELECT count(*)
+        FROM question q
+        WHERE q.workspace_guid = :workspaceGuid
+          AND EXISTS (
+              SELECT 1
+              FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
+              WHERE lower(tag) = ANY(cast(:selectedTags as text[]))
+          )
+        """,
+        nativeQuery = true
+    )
+    Page<Question> findByWorkspaceGuidAndAnySelectedTag(
+        @Param("workspaceGuid") String workspaceGuid,
+        @Param("selectedTags") String[] selectedTags,
+        Pageable pageable
+    );
+
+    @Query(
+        value = """
+        SELECT *
+        FROM question q
+        WHERE q.workspace_guid = :workspaceGuid
+          AND NOT EXISTS (
+              SELECT 1
+              FROM regexp_split_to_table(lower(:query), '\\s+') AS word
+              WHERE lower(q.question) NOT LIKE concat('%', word, '%')
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
+                    WHERE lower(tag) LIKE concat('%', word, '%')
+                )
+          )
+          AND EXISTS (
+              SELECT 1
+              FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
+              WHERE lower(tag) = ANY(cast(:selectedTags as text[]))
+          )
+        ORDER BY q.id DESC
+        """,
+        countQuery = """
+        SELECT count(*)
+        FROM question q
+        WHERE q.workspace_guid = :workspaceGuid
+          AND NOT EXISTS (
+              SELECT 1
+              FROM regexp_split_to_table(lower(:query), '\\s+') AS word
+              WHERE lower(q.question) NOT LIKE concat('%', word, '%')
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
+                    WHERE lower(tag) LIKE concat('%', word, '%')
+                )
+          )
+          AND EXISTS (
+              SELECT 1
+              FROM unnest(coalesce(q.tags, ARRAY[]::text[])) AS tag
+              WHERE lower(tag) = ANY(cast(:selectedTags as text[]))
+          )
+        """,
+        nativeQuery = true
+    )
+    Page<Question> searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCaseAndAnySelectedTag(
+        @Param("workspaceGuid") String workspaceGuid,
+        @Param("query") String query,
+        @Param("selectedTags") String[] selectedTags,
         Pageable pageable
     );
 

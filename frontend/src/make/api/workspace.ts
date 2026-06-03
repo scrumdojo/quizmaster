@@ -13,11 +13,19 @@ export const postWorkspace = async (workspace: WorkspaceRequest) =>
 
 export const fetchWorkspace = async (guid: string) => await fetchJson<Workspace>(`/api/workspaces/${guid}`)
 
-export const fetchWorkspaceQuestions = async (guid: string, page = 0, query = ''): Promise<QuestionPage> => {
+export const fetchWorkspaceQuestions = async (
+    guid: string,
+    page = 0,
+    query = '',
+    selectedTags: readonly string[] = [],
+): Promise<QuestionPage> => {
     const searchParams = new URLSearchParams({ page: String(page) })
     const normalizedQuery = query.trim()
     if (normalizedQuery.length > 0) {
         searchParams.set('query', normalizedQuery)
+    }
+    for (const tag of selectedTags.map(tag => tag.trim()).filter(Boolean)) {
+        searchParams.append('tag', tag)
     }
 
     return await fetchJson<QuestionPage>(`/api/workspaces/${guid}/questions?${searchParams.toString()}`)

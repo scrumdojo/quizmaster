@@ -39,6 +39,7 @@ public class WorkspaceQuestionControllerTest {
         mockMvc
             .perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.availableTags.length()").value(0))
             .andExpect(jsonPath("$.totalPages").value(1))
             .andExpect(jsonPath("$.totalElements").value(2))
             .andExpect(jsonPath("$.number").value(0))
@@ -85,6 +86,73 @@ public class WorkspaceQuestionControllerTest {
             .andExpect(jsonPath("$.content.length()").value(1))
             .andExpect(jsonPath("$.content[0].id").value(matchingQuestion.getId()))
             .andExpect(jsonPath("$.content[0].question").value("What is a Sprint?"));
+    }
+
+    @Test
+    public void getWorkspaceQuestionsReturnsAvailableTags() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        fixtures.save(fixtures.questionIn(workspace).tags(new String[] { "scrum", "agile" }).build());
+        fixtures.save(fixtures.questionIn(workspace).tags(new String[] { "ikea", "scrum" }).build());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.availableTags.length()").value(3))
+            .andExpect(jsonPath("$.availableTags[0]").value("agile"))
+            .andExpect(jsonPath("$.availableTags[1]").value("ikea"))
+            .andExpect(jsonPath("$.availableTags[2]").value("scrum"));
+    }
+
+    @Test
+    public void getWorkspaceQuestionsFilteredBySelectedTags() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question sprintQuestion = fixtures.save(
+            fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum" }).build()
+        );
+        Question mixedQuestion = fixtures.save(
+            fixtures.questionIn(workspace)
+                .question("What is sprint planning meeting?")
+                .tags(new String[] { "scrum", "agile" })
+                .build()
+        );
+        fixtures.save(fixtures.questionIn(workspace).question("What is a Backlog?").build());
+
+        mockMvc
+            .perform(
+                get("/api/workspaces/{guid}/questions", workspace.getGuid()).queryParam("tag", "scrum").queryParam(
+                    "tag",
+                    "agile"
+                )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.content[0].id").value(mixedQuestion.getId()))
+            .andExpect(jsonPath("$.content[1].id").value(sprintQuestion.getId()));
+    }
+
+    @Test
+    public void getWorkspaceQuestionsFilteredByQueryAndSelectedTags() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question matchingQuestion = fixtures.save(
+            fixtures.questionIn(workspace)
+                .question("What is sprint planning meeting?")
+                .tags(new String[] { "scrum", "agile" })
+                .build()
+        );
+        fixtures.save(fixtures.questionIn(workspace).question("What is velocity?").tags(new String[] { "agile" }).build());
+        fixtures.save(fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum" }).build());
+
+        mockMvc
+            .perform(
+                get("/api/workspaces/{guid}/questions", workspace.getGuid())
+                    .queryParam("query", "planning")
+                    .queryParam("tag", "agile")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(1))
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].id").value(matchingQuestion.getId()));
     }
 
     @Test

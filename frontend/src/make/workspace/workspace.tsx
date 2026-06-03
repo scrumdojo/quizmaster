@@ -27,8 +27,10 @@ export function WorkspacePage() {
 
     const [workspace, setWorkspace] = useState<Workspace>({ guid: workspaceId, title: '' })
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
+    const [availableQuestionTags, setAvailableQuestionTags] = useState<readonly string[]>([])
     const [questionFilter, setQuestionFilter] = useState('')
     const [debouncedQuestionFilter, setDebouncedQuestionFilter] = useState('')
+    const [selectedQuestionTags, setSelectedQuestionTags] = useState<readonly string[]>([])
     const [questionPage, setQuestionPage] = useState(0)
     const [questionPageSize, setQuestionPageSize] = useState(0)
     const [questionTotalPages, setQuestionTotalPages] = useState(1)
@@ -65,16 +67,17 @@ export function WorkspacePage() {
     }, [quizFilter])
 
     const loadQuestionPage = useCallback(
-        async (page: number, query = '') => {
-            const result = await fetchWorkspaceQuestions(workspaceId, page, query)
+        async (page: number, query = '', selectedTags: readonly string[] = []) => {
+            const result = await fetchWorkspaceQuestions(workspaceId, page, query, selectedTags)
             setQuestions(result.content)
+            setAvailableQuestionTags(result.availableTags)
             setQuestionTotalPages(result.totalPages)
             setQuestionTotalElements(result.totalElements)
             setQuestionPageSize(result.size)
             setQuestionPage(result.number)
 
             // Keep workspace-level counters stable while user is filtering.
-            if (query.length === 0) {
+            if (query.length === 0 && selectedTags.length === 0) {
                 setQuestionTotalElements(result.totalElements)
             }
         },
@@ -84,6 +87,7 @@ export function WorkspacePage() {
     const refreshQuestionTotals = useCallback(async () => {
         const result = await fetchWorkspaceQuestions(workspaceId, 0)
         setQuestionTotalElements(result.totalElements)
+        setAvailableQuestionTags(result.availableTags)
     }, [workspaceId])
 
     const loadQuizPage = useCallback(
@@ -99,15 +103,19 @@ export function WorkspacePage() {
 
     // Stable reference used by WorkspaceRobinAiHelper to refresh questions after AI generation.
     const refreshQuestions = useCallback(async () => {
-        await loadQuestionPage(0, debouncedQuestionFilter)
-        if (debouncedQuestionFilter.length > 0) {
+        await loadQuestionPage(0, debouncedQuestionFilter, selectedQuestionTags)
+        if (debouncedQuestionFilter.length > 0 || selectedQuestionTags.length > 0) {
             await refreshQuestionTotals()
         }
-    }, [debouncedQuestionFilter, loadQuestionPage, refreshQuestionTotals])
+    }, [debouncedQuestionFilter, loadQuestionPage, refreshQuestionTotals, selectedQuestionTags])
 
     useEffect(() => {
-        void loadQuestionPage(0, debouncedQuestionFilter)
-    }, [debouncedQuestionFilter, loadQuestionPage])
+        void loadQuestionPage(0, debouncedQuestionFilter, selectedQuestionTags)
+    }, [debouncedQuestionFilter, loadQuestionPage, selectedQuestionTags])
+
+    useEffect(() => {
+        setSelectedQuestionTags(current => current.filter(tag => availableQuestionTags.includes(tag)))
+    }, [availableQuestionTags])
 
     useEffect(() => {
         void loadQuizPage(0, debouncedQuizFilter)
@@ -115,8 +123,8 @@ export function WorkspacePage() {
 
     const onDeleteQuestion = async (id: number) => {
         await deleteQuestion(workspaceId, String(id))
-        await loadQuestionPage(questionPage, debouncedQuestionFilter)
-        if (debouncedQuestionFilter.length > 0) {
+        await loadQuestionPage(questionPage, debouncedQuestionFilter, selectedQuestionTags)
+        if (debouncedQuestionFilter.length > 0 || selectedQuestionTags.length > 0) {
             await refreshQuestionTotals()
         }
     }
@@ -126,11 +134,21 @@ export function WorkspacePage() {
         await deleteQuiz(workspaceId, String(quizToDelete.id))
         setQuizToDelete(null)
         await loadQuizPage(quizPage, debouncedQuizFilter)
-        await loadQuestionPage(questionPage, debouncedQuestionFilter)
+        await loadQuestionPage(questionPage, debouncedQuestionFilter, selectedQuestionTags)
     }
 
     const hasQuestions = questions.length > 0
     const hasQuizzes = quizzes.length > 0
+    const [quizCreateMessage, setQuizCreateMessage] = useState<string | null>(null)
+    const hasActiveQuestionFilters = debouncedQuestionFilter.length > 0 || selectedQuestionTags.length > 0
+    const handleCreateQuizBlocked = () => {
+        setQuizCreateMessage("It's not possible to create quiz without min 2 questions exist")
+    }
+    const toggleQuestionTag = (tag: string) => {
+        setSelectedQuestionTags(current =>
+            current.includes(tag) ? current.filter(currentTag => currentTag !== tag) : [...current, tag],
+        )
+    }
 
     return (
         <div className="workspace-page">
@@ -202,6 +220,28 @@ export function WorkspacePage() {
                             />
                         </form>
 
+                        {availableQuestionTags.length > 0 && (
+                            <div className="workspace-question-tag-filter" data-testid="workspace-question-tag-filter">
+                                <span className="workspace-question-tag-filter__label">Tags</span>
+                                <div className="workspace-question-tag-filter__list">
+                                    {availableQuestionTags.map(tag => {
+                                        const isSelected = selectedQuestionTags.includes(tag)
+                                        return (
+                                            <button
+                                                key={tag}
+                                                type="button"
+                                                className={`workspace-question-tag-filter__button${isSelected ? ' workspace-question-tag-filter__button--selected' : ''}`}
+                                                aria-pressed={isSelected}
+                                                onClick={() => toggleQuestionTag(tag)}
+                                            >
+                                                {tag}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         {hasQuestions ? (
                             questions.map((q, index) => (
                                 <QuestionItem
@@ -211,7 +251,7 @@ export function WorkspacePage() {
                                     onDeleteQuestion={() => onDeleteQuestion(q.id)}
                                 />
                             ))
-                        ) : debouncedQuestionFilter.length > 0 ? (
+                        ) : hasActiveQuestionFilters ? (
                             <div className="workspace-empty-state workspace-empty-state--questions">
                                 <h3>No matching questions</h3>
                                 <p>Try a different filter phrase.</p>
@@ -236,7 +276,7 @@ export function WorkspacePage() {
                                     className={`workspace-pagination__page${i === questionPage ? ' workspace-pagination__page--active' : ''}`}
                                     aria-label={`Page ${i + 1}`}
                                     aria-current={i === questionPage ? 'page' : undefined}
-                                    onClick={() => void loadQuestionPage(i, debouncedQuestionFilter)}
+                                    onClick={() => void loadQuestionPage(i, debouncedQuestionFilter, selectedQuestionTags)}
                                 >
                                     {i + 1}
                                 </button>

@@ -185,3 +185,30 @@ Feature: Workspace page management
       | aaa    |              |              | first quiz  | second quiz |
       | t      | first quiz   | third quiz   | second quiz |             |
       | quiz   | first quiz   | second quiz  |             |             |
+
+
+  Scenario Outline: Filter questions in workspace by selecting multiple tags
+    Given workspace "Workspace" with questions
+      | question                         | tag         | answers                              |
+      | What is a Sprint?                | scrum       | Time-boxed iteration (*), A ceremony |
+      | Jaký nábytek má Ikea?            | ikea        | Stůl (*), Auto                       |
+      | What is sprint planning meeting? | scrum,agile | Team plans sprint (*), Team lunch    |
+      | What is velocity?                | agile       | Measure of delivered work (*), Mood  |
+      | What is a Backlog?               |             | Ordered list (*), Random list        |
+    Then I see available question tags below the workspace question filter
+      | scrum |
+      | ikea  |
+      | agile |
+    When I select question tags in workspace
+      | <selectedTag1> |
+      | <selectedTag2> |
+    Then I see quiz question "<visibleQuestion1>" in workspace
+    And I see quiz question "<visibleQuestion2>" in workspace
+    And I don't see quiz questions "<hiddenQuestion1>" in workspace
+    And I don't see quiz questions "<hiddenQuestion2>" in workspace
+
+    Examples:
+      | selectedTag1 | selectedTag2 | visibleQuestion1                 | visibleQuestion2      | hiddenQuestion1      | hiddenQuestion2          |
+      | scrum        | agile        | What is sprint planning meeting? | What is a Sprint?     | Jaký nábytek má Ikea? | What is a Backlog?       |
+      | scrum        | ikea         | What is a Sprint?                | Jaký nábytek má Ikea? | What is velocity?     | What is a Backlog?       |
+
