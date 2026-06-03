@@ -129,7 +129,12 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                 <StatsTable
                     testId="summary-stats-table"
                     caption="Summary"
-                    columns={['Started', 'Finished', 'Unfinished', 'Timeout']}
+                    columns={[
+                        'Started',
+                        'Finished',
+                        { label: 'Unfinished', tooltip: 'Attempts that have not reached a final state.' },
+                        'Timeout',
+                    ]}
                     rows={[summaryRow(stats.summary)]}
                 />
             </section>
@@ -146,12 +151,18 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                     caption="Attempts"
                     columns={[
                         'Duration',
-                        'Points',
+                        {
+                            label: 'Points',
+                            tooltip: 'Correct answers earn 1 point and partially correct answers earn 0.5 points.',
+                        },
                         'Correct Answers',
                         'Incorrect Answers',
-                        'Score',
+                        { label: 'Score', tooltip: 'The final percentage score for the attempt.' },
                         'Status',
-                        'Partially Correct Answers',
+                        {
+                            label: 'Partially Correct Answers',
+                            tooltip: 'A multiple choice answer with exactly one mistake.',
+                        },
                     ]}
                     rows={stats.attempts.map(attemptRow)}
                 />
@@ -173,7 +184,17 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                     <StatsTable
                         testId="question-stats-table"
                         caption="Questions"
-                        columns={['Question', 'Answered', 'Correct', 'Partially Correct', 'Incorrect', 'Unanswered']}
+                        columns={[
+                            'Question',
+                            'Answered',
+                            'Correct',
+                            {
+                                label: 'Partially Correct',
+                                tooltip: 'A multiple choice answer with exactly one mistake.',
+                            },
+                            'Incorrect',
+                            { label: 'Unanswered', tooltip: 'Questions not answered during the attempt.' },
+                        ]}
                         rows={questions.map(questionRow)}
                     />
                 </section>

@@ -211,6 +211,12 @@ export class WorkspacePage {
         await expect(list).toBeVisible()
         await expect(list.getByText(quizTitle)).toBeVisible()
     }
+    focusInQuizHelp = async (question: string) => {
+        await this.showQuestions()
+        await this.questionLocator(question)
+            .getByRole('button', { name: `Help for In Quiz action for ${question}` })
+            .focus()
+    }
 
     // ── Create new question / quiz ───────────────────
 
@@ -273,6 +279,7 @@ export class WorkspacePage {
     expectQuizEditVisible = async (quiz: string) => {
         await expect(this.quizLocator(quiz).getByRole('link', { name: 'Edit' })).toBeVisible()
     }
+    focusDryRunHelp = () => this.page.getByRole('button', { name: 'Help for Dry run action' }).focus()
 
     takeQuiz = async (quiz: string) => {
         await this.openActionsDropdown(quiz)

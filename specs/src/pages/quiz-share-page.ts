@@ -66,9 +66,10 @@ export class QuizSharePage {
 
     showCohortQr = (name: string) => this.cohortRowLocator(name).getByRole('button', { name: 'Show QR code' }).click()
 
-    copyQuizTakeLink = () => this.page.getByRole('button', { name: 'Share' }).first().click()
+    copyQuizTakeLink = () => this.page.getByRole('button', { name: 'Share', exact: true }).first().click()
 
-    copyCohortLink = (name: string) => this.cohortRowLocator(name).getByRole('button', { name: 'Share' }).click()
+    copyCohortLink = (name: string) =>
+        this.cohortRowLocator(name).getByRole('button', { name: 'Share', exact: true }).click()
 
     startRenameCohort = (name: string) => this.cohortRowLocator(name).getByRole('button', { name: 'Edit' }).click()
 
@@ -88,6 +89,7 @@ export class QuizSharePage {
             await quizGet
         } else {
             void quizGet.catch(() => {})
+            await expect(row).toBeVisible()
         }
     }
 
@@ -106,10 +108,12 @@ export class QuizSharePage {
             await quizGet
         } else {
             void quizGet.catch(() => {})
+            await expect(this.cohortRowLocator(name)).toBeVisible()
         }
     }
 
     addCohort = async (name: string) => {
+        const existingRowCount = await this.cohortRowLocator(name).count()
         await this.page.locator('#cohort-name-input').fill(name)
         const cohortPost = this.page.waitForResponse(
             response => response.url().endsWith('/cohorts') && response.request().method() === 'POST',
@@ -123,6 +127,7 @@ export class QuizSharePage {
             await quizGet
         } else {
             void quizGet.catch(() => {})
+            await expect(this.cohortRowLocator(name)).toHaveCount(existingRowCount)
         }
     }
 
@@ -146,4 +151,9 @@ export class QuizSharePage {
 
     expectDeleteDisabled = (name: string) =>
         expect(this.cohortRowLocator(name).getByRole('button', { name: 'Delete' })).toBeDisabled()
+
+    expectGeneralTakeLinkNote = () => expect(this.page.locator('#general-take-link-note')).toBeVisible()
+    expectCohortTakeLinkNote = () => expect(this.page.locator('#cohort-take-link-note')).toBeVisible()
+    expectCohortDeleteNote = (name: string) =>
+        expect(this.cohortRowLocator(name).getByText('Cohorts with attempts cannot be deleted.')).toBeVisible()
 }

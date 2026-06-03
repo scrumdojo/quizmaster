@@ -2,7 +2,7 @@ import './quiz-edit-form.scss'
 import { useState } from 'react'
 
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
-import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#fe/shared'
+import { Field, FieldNote, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#fe/shared'
 import { ErrorMessage, createValidator } from '#fe/shared/forms/validations.tsx'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
@@ -69,12 +69,19 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                     />
                 </Field>
             </Row>
+            <FieldNote id="quiz-availability-note">
+                Empty start or end dates do not restrict that side of the quiz availability window.
+            </FieldNote>
             <Row>
-                <Field label="Pass score (in %)">
+                <Field label="Pass score (in %)" tooltip="The minimum final percentage required to pass the quiz.">
                     <NumberInput id="pass-score" value={state.passScore} onChange={state.setPassScore} />
                     <ErrorMessage errorCode="score-above-max" />
                 </Field>
-                <Field label="Time limit (eg. 10m30s)">
+                <Field
+                    label="Time limit (eg. 10m30s)"
+                    tooltip="The time limit applies to the complete quiz."
+                    note="Use a duration such as 10m30s. The maximum time limit is 6 hours."
+                >
                     <Row>
                         <TextInput id="time-limit" value={timeLimitText} onChange={onTimeLimitTextChange} />
                         <span id="formatted-time-limit" className="bold-count">
@@ -85,7 +92,15 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                     <ErrorMessage errorCode="time-limit-invalid-format" />
                 </Field>
             </Row>
-            <Field label="Feedback mode">
+            <Field
+                label="Feedback mode"
+                note={
+                    <span id="feedback-mode-note">
+                        Exam mode shows feedback at the end. Learning mode shows feedback after each answer and allows
+                        the taker to try again.
+                    </span>
+                }
+            >
                 <RadioSet
                     name="mode"
                     value={state.feedbackMode}
@@ -93,7 +108,15 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                     options={{ exam: 'Exam', learn: 'Learning' }}
                 />
             </Field>
-            <Field label="Difficulty">
+            <Field
+                label="Difficulty"
+                note={
+                    <span id="quiz-difficulty-note">
+                        Keep Question respects each question setting. Easy reveals correct answer counts. Hard hides
+                        correct answer counts.
+                    </span>
+                }
+            >
                 <RadioSet
                     name="difficulty"
                     value={state.difficulty}
@@ -102,6 +125,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                 />
             </Field>
             <div className="label">Select quiz questions</div>
+            <FieldNote>At least two questions must be selected.</FieldNote>
             <Field label="Search questions">
                 <TextInput id="question-filter" value={state.filter} onChange={state.setFilter} />
                 {onCreateNewQuestion && (

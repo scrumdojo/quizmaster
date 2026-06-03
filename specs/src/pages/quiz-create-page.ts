@@ -106,4 +106,13 @@ export class QuizCreatePage {
 
     expectQuestionInList = (question: string) =>
         expect(this.page.locator('.question-item', { hasText: question })).toBeVisible()
+
+    expectAvailabilityNote = () => expect(this.page.locator('#quiz-availability-note')).toBeVisible()
+    expectFeedbackModeNote = () => expect(this.page.locator('#feedback-mode-note')).toBeVisible()
+    expectFeedbackModeNoteContains = (text: string) =>
+        expect(this.page.locator('#feedback-mode-note')).toContainText(text)
+    expectDifficultyNote = () => expect(this.page.locator('#quiz-difficulty-note')).toBeVisible()
+    expectDifficultyNoteContains = (text: string) =>
+        expect(this.page.locator('#quiz-difficulty-note')).toContainText(text)
+    expectRandomSubsetNote = () => expect(this.page.locator('#random-subset-note')).toBeVisible()
 }

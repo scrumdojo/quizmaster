@@ -1,4 +1,4 @@
-import { Button, Field, TextInput, Row, CheckField } from '#fe/shared'
+import { Button, Field, TextInput, Row, CheckField, HelpTooltip } from '#fe/shared'
 import { ErrorMessage } from '#fe/shared/forms/validations.tsx'
 
 import type { AnswerState } from './question-form-state.ts'
@@ -54,7 +54,11 @@ export const AnswersEdit = ({
     const handleToggleExplanations = () => setShowExplanations(showExplanations => !showExplanations)
 
     return (
-        <Field label="Enter your answers" required>
+        <Field
+            label="Enter your answers"
+            required
+            note={<span id="correct-answer-note">Use the radio buttons or checkboxes to mark correct answers.</span>}
+        >
             <div className="answer-controls">
                 <CheckField
                     id="show-explanation"
@@ -62,6 +66,9 @@ export const AnswersEdit = ({
                     onToggle={handleToggleExplanations}
                     checked={showExplanations}
                 />
+                <HelpTooltip label="Show explanations">
+                    Explanations are shown with answer feedback. Fill all answer explanations or leave them all empty.
+                </HelpTooltip>
             </div>
             {answerStates.map((state, idx) => (
                 <AnswerRow
