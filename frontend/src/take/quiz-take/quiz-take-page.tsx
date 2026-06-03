@@ -11,7 +11,13 @@ import type { QuizAnswers } from './quiz-answers-state.ts'
 import { isQuizAvailable } from './quiz-availability.ts'
 import { QuizPlayForm } from './quiz-play.tsx'
 import { QuizScorePage } from './quiz-score-page.tsx'
-import { clearQuizTakeSession, getStoredQuizRunId, loadQuizAnswers, storeQuizAnswers } from './quiz-session.ts'
+import {
+    clearQuizTakeSession,
+    getStoredQuizNickname,
+    getStoredQuizRunId,
+    loadQuizAnswers,
+    storeQuizAnswers,
+} from './quiz-session.ts'
 
 interface QuizTakePageProps {
     readonly isDryRun: boolean
@@ -27,6 +33,7 @@ export const QuizTakePage = ({ isDryRun }: QuizTakePageProps) => {
         () => (location.state as { quiz?: QuizTake } | null)?.quiz,
     )
     const quizRunId = quizId !== null ? getStoredQuizRunId(quizId) : null
+    const quizNickname = quizId !== null ? getStoredQuizNickname(quizId) : null
     const fetchedQuiz = useQuizAttemptApi(initialStateQuiz ? null : quizRunId)
     const quiz = initialStateQuiz ?? fetchedQuiz
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswers | null>(() => loadQuizAnswers())
@@ -56,7 +63,7 @@ export const QuizTakePage = ({ isDryRun }: QuizTakePageProps) => {
 
         if (!answers || quizRunId === null) return
 
-        const response = await evaluateQuiz(quiz.id, quizRunId)
+        const response = await evaluateQuiz(quiz.id, quizRunId, quizNickname ? { nickname: quizNickname } : undefined)
         setScoredQuiz(response)
     }
 
