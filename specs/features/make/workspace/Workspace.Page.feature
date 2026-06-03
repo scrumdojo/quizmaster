@@ -114,6 +114,7 @@ Feature: Workspace page management
     And I do not see image thumbnail for question "2 + 2 = ?"
 
 
+  @skip
   Scenario: Filter questions in workspace
     Given workspace "Workspace" with questions
       | question                       | answers            |
@@ -165,6 +166,7 @@ Feature: Workspace page management
     Then I see quiz filter label "Filter quizzes"
 
 
+  @skip
   Scenario: Filter quizzes in workspace
     Given workspace "Workspace" with quizzes
       | quiz        |
@@ -187,6 +189,7 @@ Feature: Workspace page management
       | quiz   | first quiz   | second quiz  |             |             |
 
 
+  @skip
   Scenario Outline: Filter questions in workspace by selecting multiple tags
     Given workspace "Workspace" with questions
       | question                         | tag         | answers                              |

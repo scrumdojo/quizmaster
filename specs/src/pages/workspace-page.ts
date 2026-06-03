@@ -5,7 +5,7 @@ export class WorkspacePage {
 
     // ── Navigation ───────────────────────────────────
 
-    goto = (guid: string) => this.page.goto(`/workspace/${guid}`, { waitUntil: 'networkidle' })
+    goto = (guid: string) => this.page.goto(`/workspace/${guid}`, { waitUntil: 'domcontentloaded' })
     waitForUrl = (guid: string) => this.page.waitForURL(`**/workspace/${guid}`)
 
     expectScrolledToTop = () => this.page.waitForFunction('scrollY === 0', { timeout: 5000 })
