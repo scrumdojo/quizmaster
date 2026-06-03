@@ -1,0 +1,55 @@
+# Full E2E stack for Quizmaster (skill: .claude/skills/run-app).
+#
+# Runs the backend with the `e2e` Spring profile (which enables the request-scoped
+# test clock the timer/scheduling specs need) plus a throwaway Postgres, both in
+# containers — JDK 21 and Postgres stay off the host. The backend serves the
+# host-built frontend at http://localhost:8080; the Cucumber/Playwright specs also
+# run on the host, against that URL.
+#
+# Driven by test-e2e-docker.sh (same dir). Do not run this at the same time as the
+# launcher (docker-compose.yml): both bind-mount the repo and build into
+# backend/build, so the script stops the launcher's backend first.
+#
+# Postgres deliberately has NO volume: every fresh `up` after `down` starts with an
+# empty database that Flyway migrates from scratch (CI-like, clean per run). The
+# Gradle cache is shared (external) with the launcher for fast boots; `down -v` will
+# NOT remove it because it is marked external.
+name: quizmaster-e2e
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: quizmaster
+      POSTGRES_PASSWORD: quizmaster
+      POSTGRES_DB: quizmaster
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizmaster -d quizmaster"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  app:
+    image: eclipse-temurin:21-jdk
+    working_dir: /app/backend
+    command: ["bash", "-c", "./gradlew bootRun --no-daemon"]
+    environment:
+      DB_HOST: postgres
+      BE_PORT: "8080"
+      FEATURE_FLAG: "false"           # parity with `pnpm test:e2e` (non-CI)
+      SPRING_PROFILES_ACTIVE: e2e     # enables RequestScopedTestClock (timer/scheduling specs)
+      GRADLE_USER_HOME: /gradle
+      SPRING_DEVTOOLS_RESTART_ENABLED: "false"
+    volumes:
+      - ${QUIZMASTER_DIR:-../../..}:/app
+      - gradle-cache:/gradle
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  gradle-cache:
+    external: true
+    name: quizmaster-run_quizmaster-gradle

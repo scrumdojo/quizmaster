@@ -1,0 +1,43 @@
+# Launcher for the Quizmaster app (skill: .claude/skills/run-app).
+# Postgres 16 + Spring Boot backend (JDK 21) in Docker; the backend serves the prebuilt
+# frontend at http://localhost:8080. No JDK/Postgres installed on the host.
+#
+# The repo is bind-mounted relative to this file (../../.. -> repo root). Override the
+# checkout location if you run it from elsewhere:
+#   QUIZMASTER_DIR=/path/to/quizmaster docker compose -f .claude/skills/run-app/docker-compose.yml up -d
+name: quizmaster-run
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: quizmaster
+      POSTGRES_PASSWORD: quizmaster
+      POSTGRES_DB: quizmaster
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizmaster -d quizmaster"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  app:
+    image: eclipse-temurin:21-jdk
+    working_dir: /app/backend
+    command: ["bash", "-c", "./gradlew bootRun --no-daemon"]
+    environment:
+      DB_HOST: postgres
+      BE_PORT: "8080"
+      FEATURE_FLAG: "false"
+      GRADLE_USER_HOME: /gradle
+      SPRING_DEVTOOLS_RESTART_ENABLED: "false"
+    volumes:
+      - ${QUIZMASTER_DIR:-../../..}:/app
+      - quizmaster-gradle:/gradle
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  quizmaster-gradle:

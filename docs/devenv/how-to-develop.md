@@ -26,6 +26,9 @@ The following command rebuilds the frontend and starts Quizmaster:
 pnpm start
 ```
 
+> **No host JDK/Postgres?** See [Quick run in Docker](container.md#quick-run-in-docker-no-host-jdkpostgres)
+> for a Docker-only launcher (`.claude/skills/run-app/`) that also runs the E2E suite in containers.
+
 ### Run backend tests
 
 ```sh
