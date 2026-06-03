@@ -114,7 +114,10 @@ export function WorkspacePage() {
     }, [debouncedQuestionFilter, loadQuestionPage, selectedQuestionTags])
 
     useEffect(() => {
-        setSelectedQuestionTags(current => current.filter(tag => availableQuestionTags.includes(tag)))
+        setSelectedQuestionTags(current => {
+            const next = current.filter(tag => availableQuestionTags.includes(tag))
+            return next.length === current.length ? current : next
+        })
     }, [availableQuestionTags])
 
     useEffect(() => {
