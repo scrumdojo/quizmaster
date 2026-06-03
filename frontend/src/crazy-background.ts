@@ -935,9 +935,8 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     window.addEventListener('resize', onResize)
 
     const onCanvasClick = (e: MouseEvent) => {
-        const rect = canvas.getBoundingClientRect()
-        const cx = e.clientX - rect.left
-        const cy = e.clientY - rect.top
+        const cx = e.clientX
+        const cy = e.clientY
 
         // Hunter hit — footprint burst
         for (let j = hunters.length - 1; j >= 0; j--) {
@@ -995,7 +994,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
             }
         }
     }
-    canvas.addEventListener('click', onCanvasClick)
+    window.addEventListener('click', onCanvasClick)
 
     for (let i = 0; i < 5; i++) mammoths.push(makeMammoth(w, h))
     for (let i = 0; i < 4; i++) hunters.push(makeHunter(w, h))
@@ -1223,7 +1222,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     return () => {
         cancelled = true
         window.removeEventListener('resize', onResize)
-        canvas.removeEventListener('click', onCanvasClick)
+        window.removeEventListener('click', onCanvasClick)
     }
 }
 
