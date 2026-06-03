@@ -130,12 +130,7 @@ export function WorkspacePage() {
     }
 
     const hasQuestions = questions.length > 0
-    const hasAtLeastTwoQuestions = questionTotalElements >= 2
     const hasQuizzes = quizzes.length > 0
-    const [quizCreateMessage, setQuizCreateMessage] = useState<string | null>(null)
-    const handleCreateQuizBlocked = () => {
-        setQuizCreateMessage("It's not possible to create quiz without min 2 questions exist")
-    }
 
     return (
         <div className="workspace-page">
@@ -256,29 +251,14 @@ export function WorkspacePage() {
                     <ItemList
                         title="My Quizzes"
                         action={
-                            hasAtLeastTwoQuestions ? (
-                                <LinkButton
-                                    label="Create"
-                                    icon="+"
-                                    id="create-quiz"
-                                    to={`${urls.workspaceQuizNew(workspace.guid)}?tab=quizzes`}
-                                />
-                            ) : (
-                                <button
-                                    type="button"
-                                    id="create-quiz"
-                                    className="link-button"
-                                    onClick={handleCreateQuizBlocked}
-                                >
-                                    <span className="link-button__icon" aria-hidden="true">
-                                        +
-                                    </span>
-                                    Create
-                                </button>
-                            )
+                            <LinkButton
+                                label="Create"
+                                icon="+"
+                                id="create-quiz"
+                                to={`${urls.workspaceQuizNew(workspace.guid)}?tab=quizzes`}
+                            />
                         }
                     >
-                        {quizCreateMessage && <p className="workspace-info-message">{quizCreateMessage}</p>}
                         <form
                             className="workspace-quiz-filter"
                             role="search"
@@ -310,14 +290,8 @@ export function WorkspacePage() {
                             </div>
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--quizzes">
-                                <h3>
-                                    {hasAtLeastTwoQuestions ? 'Turn questions into a quiz' : 'Quizzes will appear here'}
-                                </h3>
-                                <p>
-                                    {hasAtLeastTwoQuestions
-                                        ? 'You already have enough questions to work with. Group them into a quiz!'
-                                        : 'Once you have at least 2 questions in place, you can package them into quizzes!'}
-                                </p>
+                                <h3>Turn questions into a quiz</h3>
+                                <p>Select questions and package them into a quiz!</p>
                             </div>
                         )}
                     </ItemList>
