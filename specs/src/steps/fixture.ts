@@ -9,7 +9,8 @@ import { QuizmasterWorld } from '#steps/world/world.ts'
 export const test = base.extend<{ world: QuizmasterWorld }>({
     page: async ({ page }, use) => {
         await page.addInitScript(() => {
-            const globalState = globalThis as {
+            const globalState = globalThis as typeof globalThis & {
+                dispatchEvent: (event: Event) => boolean
                 __noCrazyBackground?: boolean
                 __quizClockNow?: number
                 __advanceQuizClock?: (ms: number) => void
@@ -18,7 +19,7 @@ export const test = base.extend<{ world: QuizmasterWorld }>({
             globalState.__quizClockNow = Date.now()
             globalState.__advanceQuizClock = (ms: number) => {
                 globalState.__quizClockNow = (globalState.__quizClockNow ?? Date.now()) + ms
-                globalThis.dispatchEvent(new Event('quiz-clock-tick'))
+                globalState.dispatchEvent(new Event('quiz-clock-tick'))
             }
         })
         await use(page)

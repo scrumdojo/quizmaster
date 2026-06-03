@@ -38,7 +38,10 @@ Given('I start quiz {string}', async function (quizBookmark: string) {
 })
 
 Given('I start the quiz', async function () {
-    const onWelcomePage = await this.quizWelcomePage.startButton().isVisible().catch(() => false)
+    const onWelcomePage = await this.quizWelcomePage
+        .startButton()
+        .isVisible()
+        .catch(() => false)
     const onNicknamePage = await this.quizNicknamePage.isVisible()
 
     if (!onWelcomePage && !onNicknamePage) {
@@ -114,7 +117,11 @@ When('{int} seconds pass', async function (seconds: number) {
 
     await advanceServerClock(this, seconds)
     await this.page.evaluate(ms => {
-        window.__advanceQuizClock?.(ms)
+        const browserGlobal = globalThis as typeof globalThis & {
+            __advanceQuizClock?: (deltaMs: number) => void
+        }
+
+        browserGlobal.__advanceQuizClock?.(ms)
     }, seconds * 1000)
 
     await expectTextToBe(this.questionPage.timerLocator(), formatTimerSeconds(remainingAfter))
