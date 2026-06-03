@@ -9,6 +9,7 @@ import { QuizStatsPage } from '#fe/make/quiz-stats/quiz-stats-page.tsx'
 import { QuizEditPage } from '#fe/make/quiz/quiz-edit-page.tsx'
 import { QuizSharePage } from '#fe/make/quiz/share/quiz-share-page.tsx'
 import { WorkspacePage } from '#fe/make/workspace/workspace.tsx'
+import { PollTakePage } from '#fe/take/poll-take'
 import { QuestionTakePage } from '#fe/take/question-take'
 import { QuizNicknamePage } from '#fe/take/quiz-take/quiz-nickname/quiz-nickname-page.tsx'
 import { QuizTakePage } from '#fe/take/quiz-take/quiz-take-page.tsx'
@@ -200,6 +201,7 @@ export const App = () => {
 
                     {/* Public question taking */}
                     <Route path={ROUTES.questionTake} element={<QuestionTakePage />} />
+                    <Route path={ROUTES.pollTake} element={<PollTakePage />} />
 
                     {/* Workspace */}
                     <Route path={ROUTES.workspaceNew} element={<WorkspaceCreatePage />} />

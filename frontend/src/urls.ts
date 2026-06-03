@@ -3,6 +3,7 @@ import { useParams } from 'react-router'
 export const ROUTES = {
     home: '/',
     questionTake: '/question/:id',
+    pollTake: '/poll/:id',
 
     workspaceNew: '/workspace/new',
     workspace: '/workspace/:workspaceId',
@@ -26,6 +27,7 @@ export const ROUTES = {
 export const urls = {
     home: () => '/',
     questionTake: (id: number | string) => `/question/${id}`,
+    pollTake: (id: number | string) => `/poll/${id}`,
 
     workspaceNew: () => '/workspace/new',
     workspace: (workspaceId: string, tab?: 'questions' | 'quizzes') =>

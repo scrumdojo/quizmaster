@@ -112,7 +112,7 @@ Endpoints live under `/api/`. Two flavors:
   `GET /api/workspaces/{guid}/quizzes?query=...`.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/quiz/{id}/leaderboard`,
-  `/api/question/{id}`, `/api/poll/{id}/submit`, `/api/attempt/...`.
+  `/api/question/{id}`, `/api/poll/{id}`, `/api/poll/{id}/submit`, `/api/attempt/...`.
 - Plus `GET /api/feature-flag`.
 
 Controllers are the source of truth: workspace authoring lives in
@@ -130,6 +130,7 @@ The router lives in `frontend/src/`. Path families:
 - `/workspace/...` — maker views (workspace, question, quiz CRUD, stats).
 - `/quiz/:id`, `/quiz/:id/questions/:questionId?` — taker views for quizzes.
 - `/question/:id` — taker view for a standalone question.
+- `/poll/:id` — taker view for a standalone poll.
 
 ## E2E Testing
 

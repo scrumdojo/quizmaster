@@ -54,6 +54,19 @@ public class PollTakeControllerTest {
     }
 
     @Test
+    public void getPollReturnsPublicDetail() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Integer pollId = createPoll(workspace.getGuid());
+
+        mockMvc.perform(get("/api/poll/{id}", pollId)).andExpect(status().isOk());
+    }
+
+    @Test
+    public void getPollForMissingPollReturnsNotFound() throws Exception {
+        mockMvc.perform(get("/api/poll/{id}", 999_999)).andExpect(status().isNotFound());
+    }
+
+    @Test
     public void submitVoteByAnswerIdReturnsNoContent() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Integer pollId = createPoll(workspace.getGuid());

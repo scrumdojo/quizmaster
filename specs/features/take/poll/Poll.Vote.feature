@@ -13,7 +13,6 @@ Feature: Vote in a poll
       | Monthly   |
 
 
-  @skip
   Scenario: Poll page shows the question and all answers
     When I take poll "Retro cadence"
     Then I see poll question "How often do you run retrospectives?"
@@ -24,7 +23,6 @@ Feature: Vote in a poll
     And no poll answer is selected
 
 
-  @skip
   Scenario: Poll allows selecting only one answer
     When I take poll "Retro cadence"
     And I select poll answer "Weekly"
@@ -32,7 +30,6 @@ Feature: Vote in a poll
     Then only poll answer "Monthly" is selected
 
 
-  @skip
   Scenario: Submitting a selected answer shows a thank-you message
     When I take poll "Retro cadence"
     And I select poll answer "Bi-weekly"

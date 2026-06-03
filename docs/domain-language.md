@@ -89,12 +89,13 @@ A poll contains:
   answer has its own backend-generated id plus the answer text.
 
 The backend supports creating polls and listing existing poll definitions
-through workspace-scoped authoring API and submitting anonymous votes through a
-public take API using the selected answer's id. Poll definitions and submitted
-votes are stored in memory for the duration of the running application process.
-The author can fetch aggregated results for a poll through a workspace-scoped
-results endpoint; the response contains every answer with its id, text, and
-current vote count, including answers that still have zero votes.
+through workspace-scoped authoring API. The public take API lets a voter fetch
+the poll question and answer ids by poll id and then submit an anonymous vote
+using the selected answer's id. Poll definitions and submitted votes are stored
+in memory for the duration of the running application process. The author can
+fetch aggregated results for a poll through a workspace-scoped results
+endpoint; the response contains every answer with its id, text, and current
+vote count, including answers that still have zero votes.
 
 ## Taking a quiz: Attempt
 

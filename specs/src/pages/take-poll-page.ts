@@ -29,7 +29,7 @@ export class TakePollPage {
     selectAnswer = (answer: string) => this.pollAnswerInputLocator(answer).check()
     submitVote = () => this.submitButtonLocator().click()
 
-    private selectedAnswersLocator = () => this.pollAnswerInputsLocator().locator(':checked')
+    private selectedAnswersLocator = () => this.page.locator('input[type="radio"]:checked')
 
     expectQuestionText = (text: string) => expect(this.pollQuestionLocator()).toHaveText(text)
     expectAnswerCount = (count: number) => expect(this.pollAnswerInputsLocator()).toHaveCount(count)

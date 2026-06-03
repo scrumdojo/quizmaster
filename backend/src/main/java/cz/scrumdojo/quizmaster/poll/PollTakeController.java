@@ -1,7 +1,9 @@
 package cz.scrumdojo.quizmaster.poll;
 
+import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +18,11 @@ public class PollTakeController {
 
     public PollTakeController(PollRepository pollRepository) {
         this.pollRepository = pollRepository;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PollResponse> getPoll(@PathVariable Integer id) {
+        return ResponseHelper.okOrNotFound(pollRepository.findById(id).map(PollResponse::from));
     }
 
     @PostMapping("/{id}/submit")
