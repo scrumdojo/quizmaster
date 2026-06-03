@@ -242,7 +242,9 @@ public class QuizTakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
         Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
-        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build()
+        );
 
         Attempt zed = fixtures.save(fixtures.attempt(quiz).nickname("Zed"), q1, q2);
         fixtures.score(zed, q1, AnswerStatus.CORRECT);

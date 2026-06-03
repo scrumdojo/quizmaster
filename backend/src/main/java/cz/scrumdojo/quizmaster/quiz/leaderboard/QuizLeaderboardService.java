@@ -50,7 +50,10 @@ public class QuizLeaderboardService {
             .toList();
         var scoresByAttemptId = scoresByAttemptId(finishedAttempts);
 
-        return new QuizLeaderboardResponse(rankCohorts(quiz, finishedAttempts, scoresByAttemptId), rankIndividuals(finishedAttempts, scoresByAttemptId));
+        return new QuizLeaderboardResponse(
+            rankCohorts(quiz, finishedAttempts, scoresByAttemptId),
+            rankIndividuals(finishedAttempts, scoresByAttemptId)
+        );
     }
 
     private Map<Integer, List<AttemptQuestion>> scoresByAttemptId(List<Attempt> attempts) {
@@ -108,7 +111,9 @@ public class QuizLeaderboardService {
         var rankedIndividuals = finishedAttempts
             .stream()
             .filter(attempt -> attempt.getNickname() != null)
-            .map(attempt -> new IndividualLeaderboardRow(attempt.getNickname(), scoreForAttempt(attempt, scoresByAttemptId)))
+            .map(attempt ->
+                new IndividualLeaderboardRow(attempt.getNickname(), scoreForAttempt(attempt, scoresByAttemptId))
+            )
             .sorted(
                 Comparator.comparingInt(IndividualLeaderboardRow::score)
                     .reversed()
@@ -119,7 +124,11 @@ public class QuizLeaderboardService {
         QuizLeaderboardIndividualResponse[] response = new QuizLeaderboardIndividualResponse[rankedIndividuals.size()];
         for (int index = 0; index < rankedIndividuals.size(); index++) {
             var individual = rankedIndividuals.get(index);
-            response[index] = new QuizLeaderboardIndividualResponse(index + 1, individual.nickname(), individual.score());
+            response[index] = new QuizLeaderboardIndividualResponse(
+                index + 1,
+                individual.nickname(),
+                individual.score()
+            );
         }
         return response;
     }

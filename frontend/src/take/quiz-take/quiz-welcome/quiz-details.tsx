@@ -27,7 +27,14 @@ const rankTone = (rank: number) => {
     return 'bronze'
 }
 
-export const QuizDetails = ({ quiz, questionCount, canStart, cohortLeaderboard, individualsLeaderboard, onStart }: QuizDetailsProps) => (
+export const QuizDetails = ({
+    quiz,
+    questionCount,
+    canStart,
+    cohortLeaderboard,
+    individualsLeaderboard,
+    onStart,
+}: QuizDetailsProps) => (
     <Page id="quiz-welcome" title="Welcome to the quiz">
         <TakeCard id="quiz-details" className="quiz-welcome-card">
             <header>
