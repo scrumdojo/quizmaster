@@ -98,7 +98,15 @@ export class QuestionEditPage {
     enterQuestionExplanation = (question: string) => this.questionExplanationLocator().fill(question)
     questionExplanation = () => this.questionExplanationLocator().inputValue()
 
-    submit = () => this.page.locator('button[type="submit"]').click()
+    // Waits for navigation away (confirms save was committed before proceeding)
+    submit = async () => {
+        const before = this.page.url()
+        await this.page.locator('button[type="submit"]').click()
+        await this.page.waitForURL(u => u.href !== before, { timeout: 15000 })
+    }
+
+    // For validation attempts — stays on the page, no navigation expected
+    attemptSubmit = () => this.page.locator('button[type="submit"]').click()
 
     private backButtonLocator = () => this.page.locator('#back')
     back = () => this.backButtonLocator().click()

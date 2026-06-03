@@ -96,6 +96,7 @@ export class WorkspacePage {
     editQuestion = async (question: string) => {
         await this.showQuestions()
         await this.questionLocator(question).getByRole('link', { name: 'Edit' }).click()
+        await this.page.waitForLoadState('networkidle')
     }
     editFirstQuestion = async () => {
         await this.showQuestions()

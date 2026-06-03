@@ -17,6 +17,7 @@ import {
     markAnswerCorrectness,
     selectAIQuestionType,
     submitQuestion,
+    attemptSubmitQuestion,
     enterTag,
     createQuestion,
     type AIQuestionTypeChoice,
@@ -705,7 +706,7 @@ Then('I do not see image preview', async function () {
 
 // Save question
 
-When('I attempt to submit the question', submitQuestion)
+When('I attempt to submit the question', attemptSubmitQuestion)
 When('I submit the question', submitQuestion)
 
 // Error messages assertions

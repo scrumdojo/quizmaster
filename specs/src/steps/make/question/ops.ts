@@ -95,6 +95,10 @@ export async function submitQuestion(this: QuizmasterWorld) {
     await this.questionEditPage.submit()
 }
 
+export async function attemptSubmitQuestion(this: QuizmasterWorld) {
+    await this.questionEditPage.attemptSubmit()
+}
+
 // ── createQuestion pipeline ─────────────────────────────
 
 export const createQuestion = async (world: QuizmasterWorld, spec: QuestionSpec) => {
