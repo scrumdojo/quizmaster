@@ -727,6 +727,7 @@ type Mammoth = {
     t: number
     flip: boolean
     health: number
+    taunt?: { phase: 'charging' | 'exploding'; t: number }
 }
 
 type Stone = { x: number; y: number; vx: number; vy: number; size: number }
@@ -746,6 +747,15 @@ const HUNTER_BASE_X = 30
 const GIANT_MAMMOTH_SCALE = 2.5
 const GIANT_MAMMOTH_MIN_DELAY_MS = 20000
 const GIANT_MAMMOTH_MAX_DELAY_MS = 45000
+
+// Idol of Durand: a mammoth occasionally taunts nearby hunters then explodes
+const TAUNT_CHANCE_PER_TICK = 0.0004
+const TAUNT_DEATH_RESCUE_CHANCE = 0.5
+const TAUNT_CHARGE_TICKS = 240
+const TAUNT_EXPLODE_TICKS = 24
+const TAUNT_PULL_RADIUS = 280
+const TAUNT_PULL_STRENGTH = 0.55
+const TAUNT_EXPLOSION_RADIUS = 200
 
 function randomGiantMammothDelayMs() {
     return GIANT_MAMMOTH_MIN_DELAY_MS + Math.random() * (GIANT_MAMMOTH_MAX_DELAY_MS - GIANT_MAMMOTH_MIN_DELAY_MS)
@@ -1023,6 +1033,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
         // Mammoth hit — dodge or damage
         for (let k = mammoths.length - 1; k >= 0; k--) {
             const m = mammoths[k]
+            if (m.taunt) continue
             const dx = cx - m.x
             const dy = cy - m.y
             if (dx * dx + dy * dy < 45 * 45) {
@@ -1047,24 +1058,29 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                     })
                 }
                 if (m.health <= 0) {
-                    for (let p = 0; p < 22; p++) {
-                        const angle = Math.random() * TAU
-                        const speed = 2 + Math.random() * 5
-                        particles.push({
-                            x: m.x,
-                            y: m.y,
-                            vx: Math.cos(angle) * speed,
-                            vy: Math.sin(angle) * speed,
-                            size: 3 + Math.random() * 9,
-                            opacity: 1,
-                            color: ['#8B4513', '#A0522D', '#C07040', '#F0EDD5'][Math.floor(Math.random() * 4)],
-                            gravity: 0.05,
-                            fade: 0.02,
-                            shrink: 0.985,
-                        })
+                    if (Math.random() < TAUNT_DEATH_RESCUE_CHANCE) {
+                        m.health = MAMMOTH_HEALTH
+                        m.taunt = { phase: 'charging', t: 0 }
+                    } else {
+                        for (let p = 0; p < 22; p++) {
+                            const angle = Math.random() * TAU
+                            const speed = 2 + Math.random() * 5
+                            particles.push({
+                                x: m.x,
+                                y: m.y,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: 3 + Math.random() * 9,
+                                opacity: 1,
+                                color: ['#8B4513', '#A0522D', '#C07040', '#F0EDD5'][Math.floor(Math.random() * 4)],
+                                gravity: 0.05,
+                                fade: 0.02,
+                                shrink: 0.985,
+                            })
+                        }
+                        mammoths[k] = makeMammoth(w, h)
+                        hunterScore++
                     }
-                    mammoths[k] = makeMammoth(w, h)
-                    hunterScore++
                 }
                 return
             }
@@ -1139,9 +1155,118 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
         for (let i = mammoths.length - 1; i >= 0; i--) {
             const m = mammoths[i]
             m.t++
-            m.x += m.vx
-            m.y += m.vy + Math.sin(m.t * 0.022) * 0.4
-            m.vy *= 0.96
+
+            if (!m.taunt && m.x > 60 && m.x < w - 60 && Math.random() < TAUNT_CHANCE_PER_TICK) {
+                m.taunt = { phase: 'charging', t: 0 }
+            }
+
+            if (m.taunt) {
+                m.taunt.t++
+
+                if (m.taunt.phase === 'charging') {
+                    for (const hu of hunters) {
+                        const dx = m.x - hu.x
+                        const dy = m.y - hu.y
+                        const distSq = dx * dx + dy * dy
+                        if (distSq < TAUNT_PULL_RADIUS * TAUNT_PULL_RADIUS && distSq > 1) {
+                            const dist = Math.sqrt(distSq)
+                            hu.x += (dx / dist) * TAUNT_PULL_STRENGTH
+                            hu.y += (dy / dist) * TAUNT_PULL_STRENGTH
+                        }
+                    }
+
+                    const progress = m.taunt.t / TAUNT_CHARGE_TICKS
+                    const ringR = 40 + progress * (TAUNT_EXPLOSION_RADIUS - 40)
+                    const pulse = 0.45 + Math.sin(m.taunt.t * 0.4) * 0.25
+                    ctx.save()
+                    const grd = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, ringR)
+                    grd.addColorStop(0, `rgba(255, 200, 60, ${0.35 * (1 - progress * 0.5)})`)
+                    grd.addColorStop(1, 'rgba(229, 62, 62, 0)')
+                    ctx.fillStyle = grd
+                    ctx.fillRect(m.x - ringR, m.y - ringR, ringR * 2, ringR * 2)
+                    ctx.strokeStyle = `rgba(229, 62, 62, ${pulse})`
+                    ctx.lineWidth = 3 + Math.sin(m.taunt.t * 0.5) * 1.5
+                    ctx.beginPath()
+                    ctx.arc(m.x, m.y, ringR, 0, TAU)
+                    ctx.stroke()
+                    ctx.restore()
+
+                    ctx.save()
+                    ctx.font = 'bold 16px sans-serif'
+                    ctx.textAlign = 'center'
+                    ctx.lineWidth = 4
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)'
+                    ctx.strokeText('TAUNTING!', m.x, m.y - 60)
+                    ctx.fillStyle = '#fbbf24'
+                    ctx.fillText('TAUNTING!', m.x, m.y - 60)
+                    ctx.restore()
+
+                    if (m.taunt.t >= TAUNT_CHARGE_TICKS) {
+                        m.taunt.phase = 'exploding'
+                        m.taunt.t = 0
+
+                        for (let p = 0; p < 60; p++) {
+                            const angle = Math.random() * TAU
+                            const speed = 3 + Math.random() * 8
+                            particles.push({
+                                x: m.x,
+                                y: m.y,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: 4 + Math.random() * 12,
+                                opacity: 1,
+                                color: ['#fde68a', '#fbbf24', '#f97316', '#dc2626'][Math.floor(Math.random() * 4)],
+                                gravity: 0.04,
+                                fade: 0.018,
+                                shrink: 0.985,
+                            })
+                        }
+                        for (let j = hunters.length - 1; j >= 0; j--) {
+                            const hu = hunters[j]
+                            const dx = m.x - hu.x
+                            const dy = m.y - hu.y
+                            if (dx * dx + dy * dy < TAUNT_EXPLOSION_RADIUS * TAUNT_EXPLOSION_RADIUS) {
+                                for (let p = 0; p < 14; p++) {
+                                    const angle = Math.random() * TAU
+                                    const speed = 1.5 + Math.random() * 3.5
+                                    particles.push({
+                                        x: hu.x,
+                                        y: hu.y,
+                                        vx: Math.cos(angle) * speed,
+                                        vy: Math.sin(angle) * speed,
+                                        size: 2 + Math.random() * 5,
+                                        opacity: 1,
+                                        color: ['#d97706', '#92400e', '#fbbf24'][Math.floor(Math.random() * 3)],
+                                        gravity: 0.06,
+                                        fade: 0.025,
+                                        shrink: 0.98,
+                                    })
+                                }
+                                hunters[j] = makeHunter(w, h)
+                                mammothScore++
+                            }
+                        }
+                    }
+                } else {
+                    const progress = m.taunt.t / TAUNT_EXPLODE_TICKS
+                    ctx.save()
+                    ctx.strokeStyle = `rgba(255, 220, 80, ${1 - progress})`
+                    ctx.lineWidth = 10 * (1 - progress)
+                    ctx.beginPath()
+                    ctx.arc(m.x, m.y, TAUNT_EXPLOSION_RADIUS * (0.5 + progress * 0.6), 0, TAU)
+                    ctx.stroke()
+                    ctx.restore()
+
+                    if (m.taunt.t >= TAUNT_EXPLODE_TICKS) {
+                        mammoths[i] = makeMammoth(w, h)
+                        continue
+                    }
+                }
+            } else {
+                m.x += m.vx
+                m.y += m.vy + Math.sin(m.t * 0.022) * 0.4
+                m.vy *= 0.96
+            }
 
             const margin = 60
             if (m.x < margin) {
@@ -1163,44 +1288,56 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                 m.vy = -Math.abs(m.vy) * 0.5
             }
 
-            // Hit test — mammoth tramples nearby hunters
-            for (let j = hunters.length - 1; j >= 0; j--) {
-                const hu = hunters[j]
-                const dx = m.x - hu.x
-                const dy = m.y - hu.y
-                if (dx * dx + dy * dy < 45 * 45) {
-                    for (let p = 0; p < 14; p++) {
-                        const angle = Math.random() * TAU
-                        const speed = 1.5 + Math.random() * 3.5
-                        particles.push({
-                            x: hu.x,
-                            y: hu.y,
-                            vx: Math.cos(angle) * speed,
-                            vy: Math.sin(angle) * speed,
-                            size: 2 + Math.random() * 5,
-                            opacity: 1,
-                            color: ['#d97706', '#92400e', '#fbbf24'][Math.floor(Math.random() * 3)],
-                            gravity: 0.06,
-                            fade: 0.025,
-                            shrink: 0.98,
-                        })
+            if (m.taunt) {
+                // Galio statue flash: rapid gold/grey alternation during channel
+                const flash = Math.floor(m.taunt.t / 4) % 2 === 0
+                ctx.save()
+                ctx.filter = flash
+                    ? 'sepia(1) saturate(4) brightness(1.5) hue-rotate(-10deg)'
+                    : 'grayscale(1) brightness(1.35) contrast(1.1)'
+                drawMammoth(ctx, m)
+                ctx.restore()
+            } else {
+                // Hit test — mammoth tramples nearby hunters
+                for (let j = hunters.length - 1; j >= 0; j--) {
+                    const hu = hunters[j]
+                    const dx = m.x - hu.x
+                    const dy = m.y - hu.y
+                    if (dx * dx + dy * dy < 45 * 45) {
+                        for (let p = 0; p < 14; p++) {
+                            const angle = Math.random() * TAU
+                            const speed = 1.5 + Math.random() * 3.5
+                            particles.push({
+                                x: hu.x,
+                                y: hu.y,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: 2 + Math.random() * 5,
+                                opacity: 1,
+                                color: ['#d97706', '#92400e', '#fbbf24'][Math.floor(Math.random() * 3)],
+                                gravity: 0.06,
+                                fade: 0.025,
+                                shrink: 0.98,
+                            })
+                        }
+                        hunters[j] = makeHunter(w, h)
+                        mammothScore++
                     }
-                    hunters[j] = makeHunter(w, h)
-                    mammothScore++
                 }
+                drawMammoth(ctx, m)
             }
 
-            drawMammoth(ctx, m)
-
-            // HP bar
-            const barW = 36
-            const barH = 4
-            const barX = m.x - barW / 2
-            const barY = m.y - 46
-            ctx.fillStyle = 'rgba(0,0,0,0.35)'
-            ctx.fillRect(barX, barY, barW, barH)
-            ctx.fillStyle = '#e53e3e'
-            ctx.fillRect(barX, barY, barW * (m.health / MAMMOTH_HEALTH), barH)
+            if (!m.taunt) {
+                // HP bar
+                const barW = 36
+                const barH = 4
+                const barX = m.x - barW / 2
+                const barY = m.y - 46
+                ctx.fillStyle = 'rgba(0,0,0,0.35)'
+                ctx.fillRect(barX, barY, barW, barH)
+                ctx.fillStyle = '#e53e3e'
+                ctx.fillRect(barX, barY, barW * (m.health / MAMMOTH_HEALTH), barH)
+            }
         }
 
         // ── giant mammoth ────────────────────────────────
@@ -1461,6 +1598,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                 let hit = false
                 for (let k = mammoths.length - 1; k >= 0; k--) {
                     const m = mammoths[k]
+                    if (m.taunt) continue
                     const dx = sp.x - m.x
                     const dy = sp.y - m.y
                     if (dx * dx + dy * dy < 40 * 40) {
@@ -1488,24 +1626,29 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                         }
                         hu.spears.splice(j, 1)
                         if (m.health <= 0) {
-                            for (let p = 0; p < 18; p++) {
-                                const angle = Math.random() * TAU
-                                const speed = 1.2 + Math.random() * 4.5
-                                particles.push({
-                                    x: m.x,
-                                    y: m.y,
-                                    vx: Math.cos(angle) * speed,
-                                    vy: Math.sin(angle) * speed,
-                                    size: 3 + Math.random() * 7,
-                                    opacity: 1,
-                                    color: ['#8B4513', '#A0522D', '#C07040'][Math.floor(Math.random() * 3)],
-                                    gravity: 0.05,
-                                    fade: 0.022,
-                                    shrink: 0.985,
-                                })
+                            if (Math.random() < TAUNT_DEATH_RESCUE_CHANCE) {
+                                m.health = MAMMOTH_HEALTH
+                                m.taunt = { phase: 'charging', t: 0 }
+                            } else {
+                                for (let p = 0; p < 18; p++) {
+                                    const angle = Math.random() * TAU
+                                    const speed = 1.2 + Math.random() * 4.5
+                                    particles.push({
+                                        x: m.x,
+                                        y: m.y,
+                                        vx: Math.cos(angle) * speed,
+                                        vy: Math.sin(angle) * speed,
+                                        size: 3 + Math.random() * 7,
+                                        opacity: 1,
+                                        color: ['#8B4513', '#A0522D', '#C07040'][Math.floor(Math.random() * 3)],
+                                        gravity: 0.05,
+                                        fade: 0.022,
+                                        shrink: 0.985,
+                                    })
+                                }
+                                mammoths[k] = makeMammoth(w, h)
+                                hunterScore++
                             }
-                            mammoths[k] = makeMammoth(w, h)
-                            hunterScore++
                         }
                         hit = true
                         break

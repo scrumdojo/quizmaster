@@ -1,5 +1,6 @@
 import type { Workspace } from '#fe/make/model/workspace.ts'
 import { postJson, fetchJson } from '#fe/shared/api/helpers.ts'
+import type { PollListItem } from '#shared/types/poll.ts'
 import type { QuestionPage } from '#shared/types/question-page.ts'
 import type { QuizPage } from '#shared/types/quiz-page.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
@@ -40,3 +41,6 @@ export const fetchWorkspaceQuizzes = async (guid: string, page = 0, query = ''):
 
     return await fetchJson<QuizPage>(`/api/workspaces/${guid}/quizzes?${searchParams.toString()}`)
 }
+
+export const fetchWorkspacePolls = async (guid: string): Promise<readonly PollListItem[]> =>
+    await fetchJson<readonly PollListItem[]>(`/api/workspaces/${guid}/polls`)

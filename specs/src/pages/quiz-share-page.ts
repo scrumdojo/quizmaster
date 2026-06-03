@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 export class QuizSharePage {
     private lastShareButtonCenter: { readonly x: number; readonly y: number } | null = null
@@ -13,6 +13,7 @@ export class QuizSharePage {
     private qrThemeImageLocator = () => this.qrCodeLocator().locator('svg image')
     private shareBirdLocator = () => this.page.getByTestId('share-bird')
     private shareBirdImageLocator = () => this.shareBirdLocator().locator('img')
+    private shareFlockBirdLocator = () => this.page.locator('[data-testid="share-bird"][data-flock="true"]')
 
     private cohortRowLocator = (name: string) => this.page.locator(`.cohort-row[data-name="${name}"]`)
 
@@ -72,13 +73,21 @@ export class QuizSharePage {
     showCohortQr = (name: string) => this.cohortRowLocator(name).getByRole('button', { name: 'Show QR code' }).click()
 
     copyQuizTakeLink = async () => {
-        const button = this.page.getByRole('button', { name: 'Share', exact: true }).first()
+        const button = this.quizShareButton()
         await this.rememberShareButtonCenter(button)
         await button.click()
     }
 
+    copyQuizTakeLinkRepeatedly = async (count: number) => {
+        const button = this.quizShareButton()
+        for (let i = 0; i < count; i++) {
+            await this.rememberShareButtonCenter(button)
+            await button.click()
+        }
+    }
+
     copyCohortLink = async (name: string) => {
-        const button = this.cohortRowLocator(name).getByRole('button', { name: 'Share', exact: true })
+        const button = this.cohortShareButton(name)
         await this.rememberShareButtonCenter(button)
         await button.click()
     }
@@ -181,6 +190,50 @@ export class QuizSharePage {
         await expect(this.shareBirdImageLocator()).toHaveAttribute('src', /\.gif$/)
     }
 
+    expectShareFlockStartedFromQuizShareButton = async () => {
+        await expect(this.shareFlockBirdLocator()).toHaveCount(7)
+        expect(this.lastShareButtonCenter).not.toBeNull()
+        let birdPathStartsAtButton = false
+        for (let i = 0; i < 7; i++) {
+            const style = (await this.shareFlockBirdLocator().nth(i).getAttribute('style')) ?? ''
+            const startX = Number.parseFloat(style.match(/--share-bird-x:\s*([0-9.]+)px/)?.[1] ?? '0')
+            const startY = Number.parseFloat(style.match(/--share-bird-y:\s*([0-9.]+)px/)?.[1] ?? '0')
+            const box = await this.shareFlockBirdLocator().nth(i).boundingBox()
+            expect(box).not.toBeNull()
+            const distanceX = Math.abs(box!.x + box!.width / 2 - this.lastShareButtonCenter!.x)
+            const distanceY = Math.abs(box!.y + box!.height / 2 - this.lastShareButtonCenter!.y)
+            birdPathStartsAtButton ||=
+                Math.abs(startX - this.lastShareButtonCenter!.x) < 8 &&
+                Math.abs(startY - this.lastShareButtonCenter!.y) < 8
+            expect(distanceX).toBeLessThan(105)
+            expect(distanceY).toBeLessThan(180)
+        }
+        expect(birdPathStartsAtButton).toBe(true)
+    }
+
+    expectAnimatedShareFlock = async () => {
+        await expect(this.shareFlockBirdLocator()).toHaveCount(7)
+        await expect(this.shareFlockBirdLocator().locator('img')).toHaveCount(7)
+    }
+
+    expectShareFlockFlyingToTopRight = async () => {
+        await expect(this.shareFlockBirdLocator()).toHaveCount(7)
+        const viewport = this.page.viewportSize()
+        expect(viewport).not.toBeNull()
+        await expect
+            .poll(async () => {
+                for (let i = 0; i < 7; i++) {
+                    const box = await this.shareFlockBirdLocator().nth(i).boundingBox()
+                    if (box && box.x + box.width / 2 > viewport!.width - 220 && box.y + box.height / 2 < 160) {
+                        return true
+                    }
+                }
+
+                return false
+            })
+            .toBe(true)
+    }
+
     expectShareBirdFlyingToTopRight = async () => {
         await expect(this.shareBirdLocator()).toBeVisible()
         await expect(this.shareBirdLocator()).toHaveAttribute('data-flight-target', 'top-right')
@@ -219,7 +272,11 @@ export class QuizSharePage {
     expectCohortDeleteNote = (name: string) =>
         expect(this.cohortRowLocator(name).getByText('Cohorts with attempts cannot be deleted.')).toBeVisible()
 
-    private rememberShareButtonCenter = async (button: ReturnType<Page['getByRole']>) => {
+    private quizShareButton = () => this.page.getByTestId('share-link-quiz-take')
+
+    private cohortShareButton = (name: string) => this.cohortRowLocator(name).locator('[data-testid^="share-link-"]')
+
+    private rememberShareButtonCenter = async (button: Locator) => {
         const buttonBox = await button.boundingBox()
         expect(buttonBox).not.toBeNull()
         this.lastShareButtonCenter = {

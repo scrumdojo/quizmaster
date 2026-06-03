@@ -31,7 +31,7 @@ export const urls = {
     pollTake: (id: number | string) => `/poll/${id}`,
 
     workspaceNew: () => '/workspace/new',
-    workspace: (workspaceId: string, tab?: 'questions' | 'quizzes') =>
+    workspace: (workspaceId: string, tab?: 'questions' | 'quizzes' | 'polls') =>
         `/workspace/${workspaceId}${tab ? `?tab=${tab}` : ''}`,
     workspaceQuestionNew: (workspaceId: string) => `/workspace/${workspaceId}/question/new`,
     workspaceQuestionEdit: (workspaceId: string, id: number | string) =>

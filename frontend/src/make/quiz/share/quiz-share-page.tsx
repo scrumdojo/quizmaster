@@ -1,6 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react'
 import type { CSSProperties, MouseEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams } from 'react-router'
 import './quiz-share-page.scss'
@@ -43,6 +43,19 @@ const QR_THEME_IMAGES: Record<QrThemeImage, string> = {
 
 const SHARE_BIRD_GIF_URL =
     'https://cdn.prod.website-files.com/6334dbcbbe4129ee195573c1/6543fb118d9abe3cc96e2fb8_8_IUQSWVLwaajCn5eWped71A4u6ziuWXFzP9w70bSA42oHEPLRWVf1p_F1HVELN7yJSDunSFBhQrrPNO4MmtFNxj5U8QCiCxfbPppby20iY0x5IFOyhbOHhe_Jn24PGgI1qd6OsjXGgnqC90DNj-dz8.gif'
+const SHARE_FLOCK_CLICK_WINDOW_MS = 1200
+const SHARE_BIRD_REMOVE_DELAY_MS = 1800
+const SHARE_FLOCK_REMOVE_DELAY_MS = 2600
+
+const SHARE_FLOCK_OFFSETS = [
+    { startX: -24, startY: -8, midX: -96, midY: -38, endX: -130, endY: 14, delay: 0, size: 3.4 },
+    { startX: -12, startY: 11, midX: -54, midY: -100, endX: -88, endY: -2, delay: 45, size: 3.9 },
+    { startX: 0, startY: 0, midX: -16, midY: -58, endX: -46, endY: 18, delay: 90, size: 4.2 },
+    { startX: 13, startY: -12, midX: 26, midY: -122, endX: -8, endY: -12, delay: 135, size: 3.7 },
+    { startX: 26, startY: 10, midX: 72, midY: -82, endX: 34, endY: 10, delay: 180, size: 3.25 },
+    { startX: -34, startY: 16, midX: -132, midY: -6, endX: -168, endY: 34, delay: 220, size: 3.1 },
+    { startX: 36, startY: 3, midX: 120, midY: -42, endX: 72, endY: 28, delay: 260, size: 3.55 },
+] as const
 
 const currentAnimationTheme = (): AnimationTheme => {
     const theme = localStorage.getItem('animation-theme')
@@ -70,12 +83,15 @@ interface CohortInlineError {
 
 interface ShareBird {
     readonly id: number
+    readonly flock: boolean
     readonly startX: number
     readonly startY: number
     readonly midX: number
     readonly midY: number
     readonly endX: number
     readonly endY: number
+    readonly delayMs: number
+    readonly sizeRem: number
 }
 
 export const QuizSharePage = () => {
@@ -89,6 +105,9 @@ export const QuizSharePage = () => {
     const [copiedKey, setCopiedKey] = useState<string | null>(null)
     const [editing, setEditing] = useState<{ readonly guid: string; readonly name: string } | null>(null)
     const [shareBirds, setShareBirds] = useState<readonly ShareBird[]>([])
+    const shareClickRef = useRef<{ readonly key: string; readonly count: number; readonly lastClickAt: number } | null>(
+        null,
+    )
 
     useApi(
         quizId,
@@ -140,30 +159,75 @@ export const QuizSharePage = () => {
         setCopiedKey(key)
     }
 
-    const launchShareBird = (event: MouseEvent<HTMLButtonElement>) => {
+    const shareClickCount = (key: string) => {
+        const now = Date.now()
+        const previous = shareClickRef.current
+        const count =
+            previous && previous.key === key && now - previous.lastClickAt <= SHARE_FLOCK_CLICK_WINDOW_MS
+                ? previous.count + 1
+                : 1
+
+        shareClickRef.current = count >= 3 ? null : { key, count, lastClickAt: now }
+        return count
+    }
+
+    const scheduleShareBirdRemoval = (ids: readonly number[], delayMs = SHARE_BIRD_REMOVE_DELAY_MS) => {
+        window.setTimeout(() => {
+            setShareBirds(current => current.filter(currentBird => !ids.includes(currentBird.id)))
+        }, delayMs)
+    }
+
+    const launchShareBird = (event: MouseEvent<HTMLButtonElement>, key: string) => {
         const rect = event.currentTarget.getBoundingClientRect()
         const startX = rect.left + rect.width / 2
         const startY = rect.top + rect.height / 2
         const endX = window.innerWidth - 36
         const endY = 34
+        const repeatedClickCount = shareClickCount(key)
         const bird: ShareBird = {
             id: Date.now() + Math.random(),
+            flock: false,
             startX,
             startY,
             midX: startX + (endX - startX) * 0.5,
             midY: Math.min(startY - 120, startY + (endY - startY) * 0.35),
             endX,
             endY,
+            delayMs: 120,
+            sizeRem: 4,
+        }
+
+        if (repeatedClickCount >= 3) {
+            const flock = SHARE_FLOCK_OFFSETS.map((offset, index): ShareBird => {
+                const flockEndX = Math.min(window.innerWidth - 18, Math.max(18, endX + offset.endX))
+                const flockEndY = Math.max(18, endY + offset.endY)
+                return {
+                    id: Date.now() + Math.random() + index,
+                    flock: true,
+                    startX: startX + offset.startX,
+                    startY: startY + offset.startY,
+                    midX: startX + (flockEndX - startX) * 0.5 + offset.midX,
+                    midY: Math.min(startY - 100 + offset.midY, startY + (flockEndY - startY) * 0.35),
+                    endX: flockEndX,
+                    endY: flockEndY,
+                    delayMs: 650 + offset.delay,
+                    sizeRem: offset.size,
+                }
+            })
+            setShareBirds(current => [...current, ...flock])
+            scheduleShareBirdRemoval(
+                flock.map(flockBird => flockBird.id),
+                SHARE_FLOCK_REMOVE_DELAY_MS,
+            )
+            return
         }
 
         setShareBirds(current => [...current, bird])
-        window.setTimeout(() => {
-            setShareBirds(current => current.filter(currentBird => currentBird.id !== bird.id))
-        }, 1600)
+        scheduleShareBirdRemoval([bird.id])
     }
 
     const handleShareClick = async (event: MouseEvent<HTMLButtonElement>, key: string, url: string) => {
-        launchShareBird(event)
+        launchShareBird(event, key)
         await copyLink(key, url)
     }
 
@@ -224,7 +288,11 @@ export const QuizSharePage = () => {
             >
                 Show QR code
             </Button>
-            <Button className="button secondary" onClick={event => void handleShareClick(event, key, url)}>
+            <Button
+                className="button secondary"
+                data-testid={`share-link-${key}`}
+                onClick={event => void handleShareClick(event, key, url)}
+            >
                 {copiedKey === key ? 'Copied' : 'Share'}
             </Button>
             <HelpTooltip label={`Share ${label}`}>Copies the take link to the clipboard.</HelpTooltip>
@@ -281,6 +349,7 @@ export const QuizSharePage = () => {
                         className="share-bird"
                         data-testid="share-bird"
                         data-flight-target="top-right"
+                        data-flock={bird.flock}
                         style={
                             {
                                 '--share-bird-x': `${bird.startX}px`,
@@ -289,6 +358,8 @@ export const QuizSharePage = () => {
                                 '--share-bird-mid-y': `${bird.midY}px`,
                                 '--share-bird-end-x': `${bird.endX}px`,
                                 '--share-bird-end-y': `${bird.endY}px`,
+                                '--share-bird-delay': `${bird.delayMs}ms`,
+                                '--share-bird-size': `${bird.sizeRem}rem`,
                             } as CSSProperties
                         }
                         aria-hidden="true"

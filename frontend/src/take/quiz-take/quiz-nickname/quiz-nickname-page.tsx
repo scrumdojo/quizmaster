@@ -41,7 +41,7 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
                 nickname: trimmedNickname,
             })
             const playableQuiz: QuizTake = { ...quiz, questions }
-            setQuizRun(attemptId, quiz.id)
+            setQuizRun(attemptId, quiz.id, trimmedNickname)
             navigate(urls.quizTake(quiz.id), { state: { quiz: playableQuiz } })
         } catch {
             setIsStarting(false)
