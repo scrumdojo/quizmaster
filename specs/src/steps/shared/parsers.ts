@@ -7,8 +7,8 @@ const parseChoiceAnswers = (answersStr: string): AnswerSpec[] =>
     answersStr
         .split(',')
         .map(raw => raw.trim())
-        .map(anwersStr => {
-            const [, text, correctMarker] = anwersStr.match(CHOICE_PATTERN) ?? []
+        .map(answerStr => {
+            const [, text, correctMarker] = answerStr.match(CHOICE_PATTERN) ?? []
             const correct = !!correctMarker
             return {
                 text,
