@@ -48,9 +48,16 @@ public class WorkspaceQuestionController {
         workspaceGuard.requireExists(workspaceGuid);
 
         String normalizedQuery = query == null ? "" : query.trim();
-        String[] normalizedTags = tags == null
-            ? new String[0]
-            : tags.stream().map(String::trim).filter(tag -> !tag.isEmpty()).map(String::toLowerCase).distinct().toArray(String[]::new);
+        String[] normalizedTags =
+            tags == null
+                ? new String[0]
+                : tags
+                      .stream()
+                      .map(String::trim)
+                      .filter(tag -> !tag.isEmpty())
+                      .map(String::toLowerCase)
+                      .distinct()
+                      .toArray(String[]::new);
 
         var pageRequest = PageRequest.of(page, PAGE_SIZE);
         var questionPage = normalizedQuery.isEmpty()
@@ -59,16 +66,16 @@ public class WorkspaceQuestionController {
                   : questionRepository.findByWorkspaceGuidAndAnySelectedTag(workspaceGuid, normalizedTags, pageRequest))
             : (normalizedTags.length == 0
                   ? questionRepository.searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCase(
-                      workspaceGuid,
-                      normalizedQuery,
-                      pageRequest
-                  )
+                        workspaceGuid,
+                        normalizedQuery,
+                        pageRequest
+                    )
                   : questionRepository.searchByWorkspaceGuidAndQuestionOrTagContainingIgnoreCaseAndAnySelectedTag(
-                      workspaceGuid,
-                      normalizedQuery,
-                      normalizedTags,
-                      pageRequest
-                  ));
+                        workspaceGuid,
+                        normalizedQuery,
+                        normalizedTags,
+                        pageRequest
+                    ));
         List<String> availableTags = questionRepository.findDistinctTagsByWorkspaceGuid(workspaceGuid);
         var items = questionPage
             .getContent()

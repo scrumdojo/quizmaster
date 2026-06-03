@@ -163,7 +163,9 @@ export class WorkspacePage {
         await this.showQuestions()
         const locator = this.questionTagFilterLocator().locator('.workspace-question-tag-filter__button')
         await expect(this.questionTagFilterLocator()).toBeVisible()
-        await expect.poll(async () => (await locator.allTextContents()).map(tag => tag.trim()).sort()).toEqual(tags.sort())
+        await expect
+            .poll(async () => (await locator.allTextContents()).map(tag => tag.trim()).sort())
+            .toEqual(tags.sort())
     }
     selectQuestionTags = async (tags: string[]) => {
         await this.showQuestions()

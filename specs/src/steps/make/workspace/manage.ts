@@ -131,12 +131,22 @@ Then('I do not see tag badge for question {string}', async function (question: s
 
 Then('I see available question tags below the workspace question filter', async function (table: DataTable) {
     await this.workspacePage.expectAvailableQuestionTags(
-        table.raw().flat().map(tag => tag.trim()).filter(Boolean),
+        table
+            .raw()
+            .flat()
+            .map(tag => tag.trim())
+            .filter(Boolean),
     )
 })
 
 When('I select question tags in workspace', async function (table: DataTable) {
-    await this.workspacePage.selectQuestionTags(table.raw().flat().map(tag => tag.trim()).filter(Boolean))
+    await this.workspacePage.selectQuestionTags(
+        table
+            .raw()
+            .flat()
+            .map(tag => tag.trim())
+            .filter(Boolean),
+    )
 })
 
 Then('I see "In Quiz" tag on question {string}', async function (question: string) {

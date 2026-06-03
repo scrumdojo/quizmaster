@@ -208,7 +208,6 @@ Feature: Workspace page management
     And I don't see quiz questions "<hiddenQuestion2>" in workspace
 
     Examples:
-      | selectedTag1 | selectedTag2 | visibleQuestion1                 | visibleQuestion2      | hiddenQuestion1      | hiddenQuestion2          |
-      | scrum        | agile        | What is sprint planning meeting? | What is a Sprint?     | Jaký nábytek má Ikea? | What is a Backlog?       |
-      | scrum        | ikea         | What is a Sprint?                | Jaký nábytek má Ikea? | What is velocity?     | What is a Backlog?       |
-
+      | selectedTag1 | selectedTag2 | visibleQuestion1                 | visibleQuestion2      | hiddenQuestion1       | hiddenQuestion2    |
+      | scrum        | agile        | What is sprint planning meeting? | What is a Sprint?     | Jaký nábytek má Ikea? | What is a Backlog? |
+      | scrum        | ikea         | What is a Sprint?                | Jaký nábytek má Ikea? | What is velocity?     | What is a Backlog? |

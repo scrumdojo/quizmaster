@@ -110,7 +110,8 @@ public class WorkspaceQuestionControllerTest {
             fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum" }).build()
         );
         Question mixedQuestion = fixtures.save(
-            fixtures.questionIn(workspace)
+            fixtures
+                .questionIn(workspace)
                 .question("What is sprint planning meeting?")
                 .tags(new String[] { "scrum", "agile" })
                 .build()
@@ -119,10 +120,9 @@ public class WorkspaceQuestionControllerTest {
 
         mockMvc
             .perform(
-                get("/api/workspaces/{guid}/questions", workspace.getGuid()).queryParam("tag", "scrum").queryParam(
-                    "tag",
-                    "agile"
-                )
+                get("/api/workspaces/{guid}/questions", workspace.getGuid())
+                    .queryParam("tag", "scrum")
+                    .queryParam("tag", "agile")
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalElements").value(2))
@@ -135,13 +135,18 @@ public class WorkspaceQuestionControllerTest {
     public void getWorkspaceQuestionsFilteredByQueryAndSelectedTags() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question matchingQuestion = fixtures.save(
-            fixtures.questionIn(workspace)
+            fixtures
+                .questionIn(workspace)
                 .question("What is sprint planning meeting?")
                 .tags(new String[] { "scrum", "agile" })
                 .build()
         );
-        fixtures.save(fixtures.questionIn(workspace).question("What is velocity?").tags(new String[] { "agile" }).build());
-        fixtures.save(fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum" }).build());
+        fixtures.save(
+            fixtures.questionIn(workspace).question("What is velocity?").tags(new String[] { "agile" }).build()
+        );
+        fixtures.save(
+            fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum" }).build()
+        );
 
         mockMvc
             .perform(
