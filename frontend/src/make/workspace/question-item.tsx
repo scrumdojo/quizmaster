@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import { tagToColor } from '#fe/make/model/tag.ts'
-import { Button, LinkButton } from '#fe/shared'
+import { Button, HelpTooltip, LinkButton } from '#fe/shared'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 
 interface Props {
@@ -46,6 +46,9 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                             >
                                 In Quiz
                             </button>
+                            <HelpTooltip label={`In Quiz action for ${question.question}`}>
+                                Lists the quizzes that use this question.
+                            </HelpTooltip>
                             {showQuizList && (
                                 <ul className="in-quiz-list">
                                     {question.quizTitles.map(title => (

@@ -1,7 +1,17 @@
 import type { QuestionRequest } from '#fe/make/api/question.ts'
 import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#fe/make/create-question/form'
 import { RobinAiHelper } from '#fe/make/create-question/robin-ai'
-import { SubmitButton, Form, Field, TextArea, TextInput, CheckField, Row, QuestionTypeRadioSet } from '#fe/shared'
+import {
+    SubmitButton,
+    Form,
+    Field,
+    TextArea,
+    TextInput,
+    CheckField,
+    Row,
+    QuestionTypeRadioSet,
+    HelpTooltip,
+} from '#fe/shared'
 import { ErrorMessage, createValidator } from '#fe/shared/forms/validations.tsx'
 import type { Question } from '#fe/shared/model/question.ts'
 
@@ -34,14 +44,26 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
                     <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
                     <ErrorMessage errorCode="empty-question" />
                 </Field>
-                <Field label="Image URL">
+                <Field
+                    label="Image URL"
+                    tooltip="Use a direct image URL. A preview appears when the image can be loaded."
+                >
                     <TextInput id="image-url" value={state.imageUrl} onChange={state.setImageUrl} />
                     {state.imageUrl.trim() !== '' && (
                         <img src={state.imageUrl} alt="preview" className="image-preview" />
                     )}
                 </Field>
                 <Row>
-                    <Field label="Question type" required>
+                    <Field
+                        label="Question type"
+                        required
+                        note={
+                            <span id="question-type-note">
+                                Single choice requires one correct answer. Multiple choice requires at least two correct
+                                answers. Numerical questions require a numeric answer.
+                            </span>
+                        }
+                    >
                         <QuestionTypeRadioSet
                             name="question-type"
                             value={state.questionType}
@@ -49,7 +71,12 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
                         />
                     </Field>
                     {state.isMultipleChoice && (
-                        <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
+                        <span className="check-with-help">
+                            <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
+                            <HelpTooltip label="Easy">
+                                Show the number of correct answers to takers unless quiz difficulty overrides it.
+                            </HelpTooltip>
+                        </span>
                     )}
                 </Row>
                 {state.isNumerical ? (
@@ -69,14 +96,14 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
                         removeAnswer={state.removeAnswer}
                     />
                 )}
-                <Field label="Question explanation">
+                <Field label="Question explanation" tooltip="This explanation is shown when feedback is available.">
                     <TextArea
                         id="question-explanation"
                         value={state.questionExplanation}
                         onChange={state.setQuestionExplanation}
                     />
                 </Field>
-                <Field label="Tag">
+                <Field label="Tag" tooltip="Tags help you find questions in the workspace and quiz form.">
                     <TextInput id="question-tag" value={state.tagText} onChange={state.setTagText} />
                 </Field>
                 <SubmitButton />

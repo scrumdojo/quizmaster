@@ -5,6 +5,7 @@ export class AppPage {
 
     private settingsPanel = () => this.page.locator('[data-testid="animation-settings"]')
     private canvas = () => this.page.locator('#crazy-bg')
+    private tooltipLocator = () => this.page.getByRole('tooltip')
 
     // Opens the dropdown by clicking the FAB trigger button
     openAnimationSettings = async () => {
@@ -12,6 +13,12 @@ export class AppPage {
         const isOpen = await this.settingsPanel().locator('.bg-game-dropdown').isVisible()
         if (!isOpen) await trigger.click()
     }
+
+    focusHelpTooltip = (label: string) => this.page.getByRole('button', { name: `Help for ${label}` }).focus()
+    dismissHelpTooltip = () => this.page.keyboard.press('Escape')
+    expectHelpText = (text: string) => expect(this.tooltipLocator()).toHaveText(text)
+    expectHelpTextHidden = (text: string) =>
+        expect(this.page.getByRole('tooltip').filter({ hasText: text })).toHaveCount(0)
 
     turnOffAnimation = async () => {
         await this.openAnimationSettings()

@@ -255,3 +255,17 @@ Feature: Show stats
       | quizName    | question1                          | answered1 | successRate1 | partiallyCorrect1 | incorrect1 | unanswered1 | question2                     | answered2 | successRate2 | partiallyCorrect2 | incorrect2 | unanswered2 | question3              | answered3 | successRate3 | partiallyCorrect3 | incorrect3 | unanswered3 |
       | First Quiz  | Which are planets in solar system? | 2         | 50%          | 1 (50%)           | 0 (0%)     | 0           | What is the capital of Italy? | 0         | 0%           | 0 (0%)            | 0 (0%)     | 2           | What color is the sky? | 0         | 0%           | 0 (0%)            | 0 (0%)     | 2           |
       | Second Quiz | Which are planets in solar system? | 1         | 0%           | 0 (0%)            | 1 (100%)   | 0           | What is 2 + 2?                | 1         | 100%         | 0 (0%)            | 0 (0%)     | 0           |                        |           |              |                   |            |             |
+
+
+  Scenario Outline: Explain statistics columns
+    Given quiz "Stats Quiz" with 2 questions
+    When I open quiz "Stats Quiz" statistics
+    And I focus the help tooltip for statistics column "<column>"
+    Then I see help text "<help>"
+
+    Examples:
+      | column            | help                                                                        |
+      | Points            | Correct answers earn 1 point and partially correct answers earn 0.5 points. |
+      | Score             | The final percentage score for the attempt.                                 |
+      | Partially Correct | A multiple choice answer with exactly one mistake.                          |
+      | Unanswered        | Questions not answered during the attempt.                                  |

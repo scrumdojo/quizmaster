@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import type { QuizListItem } from '#fe/make/model/quiz-list-item.ts'
-import { LinkButton } from '#fe/shared'
+import { HelpTooltip, LinkButton } from '#fe/shared'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 
 interface Props {
@@ -44,7 +44,12 @@ export const QuizItem = ({ quiz, orderNumber, onDeleteClick }: Props) => {
                                 to={`${urls.workspaceQuizEdit(workspaceId, quiz.id)}?tab=quizzes`}
                             />
                             <LinkButton label="Take" to={urls.quizWelcome(quiz.id)} />
-                            <LinkButton label="Dry run" to={urls.workspaceQuizDryRun(workspaceId, quiz.id)} />
+                            <span className="quiz-item__action-with-help">
+                                <LinkButton label="Dry run" to={urls.workspaceQuizDryRun(workspaceId, quiz.id)} />
+                                <HelpTooltip label="Dry run action">
+                                    Dry run ignores scheduling. Other quiz rules still apply.
+                                </HelpTooltip>
+                            </span>
                             <LinkButton label="Statistics" to={urls.workspaceQuizStats(workspaceId, quiz.id)} />
                             <button type="button" className="link-button link-button--secondary" onClick={handleDelete}>
                                 Delete

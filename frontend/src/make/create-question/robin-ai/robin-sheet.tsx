@@ -62,7 +62,11 @@ export const RobinSheet = ({
                         ✕
                     </button>
                 </div>
-                <Field label="Question type" required>
+                <Field
+                    label="Question type"
+                    required
+                    note="Single choice requires one correct answer. Multiple choice requires at least two correct answers. Numerical questions require a numeric answer."
+                >
                     <QuestionTypeRadioSet
                         name="robin-question-type"
                         value={questionType}
@@ -214,7 +218,11 @@ export const RobinSheet = ({
                 )}
             </div>
             <div className="robin-sheet__composer" data-testid="robin-composer">
-                <Field label="Question type" required>
+                <Field
+                    label="Question type"
+                    required
+                    note="Single choice requires one correct answer. Multiple choice requires at least two correct answers. Numerical questions require a numeric answer."
+                >
                     <QuestionTypeRadioSet
                         name="robin-question-type"
                         value={questionType}

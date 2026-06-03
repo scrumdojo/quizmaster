@@ -23,6 +23,12 @@
         gap: 0.75rem;
     }
 
+    .check-with-help {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
     .image-preview {
         max-width: min(100%, 380px);
         display: block;

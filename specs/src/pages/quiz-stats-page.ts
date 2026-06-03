@@ -11,10 +11,15 @@ export class QuizStatsPage {
     private summaryStatsTableLocator = () => this.page.getByTestId('summary-stats-table')
 
     private tableCaptionLocator = (table: Locator) => table.locator('caption')
-    private tableHeaderCellsLocator = (table: Locator) => table.locator('thead th')
+    private tableHeaderCellsLocator = (table: Locator) => table.locator('thead .stats-table__column-text')
     private tableBodyRowsLocator = (table: Locator) => table.locator('tbody tr')
 
     expectPageHeading = (text: string) => expectTextToBe(this.pageHeadingLocator(), text)
+    focusColumnHelp = (column: string) =>
+        this.page
+            .getByRole('button', { name: `Help for ${column} statistics column`, exact: true })
+            .first()
+            .focus()
 
     expectAttemptStatsRowCount = (count: number) =>
         expect(this.tableBodyRowsLocator(this.attemptStatsTableLocator())).toHaveCount(count)

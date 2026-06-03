@@ -10,7 +10,7 @@ import {
     updateCohort,
     type CohortCreateError,
 } from '#fe/make/api/quiz.ts'
-import { Alert, Button, Page } from '#fe/shared'
+import { Alert, Button, FieldNote, HelpTooltip, Page } from '#fe/shared'
 import { useApi } from '#fe/shared/api/hooks.ts'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
@@ -158,6 +158,7 @@ export const QuizSharePage = () => {
             <Button className="button secondary" onClick={() => copyLink(key, url)}>
                 {copiedKey === key ? 'Copied' : 'Share'}
             </Button>
+            <HelpTooltip label={`Share ${label}`}>Copies the take link to the clipboard.</HelpTooltip>
         </div>
     )
 
@@ -190,11 +191,17 @@ export const QuizSharePage = () => {
         >
             <section>
                 <h2>Take link</h2>
+                <FieldNote id="general-take-link-note">
+                    The general take link lets participants join without assigning them to a cohort.
+                </FieldNote>
                 {renderHiddenLink('quiz-take-link', '', takeUrl)}
                 {renderShareActions(quizQrKey, quiz.title, takeUrl, 'quiz-take-qr')}
             </section>
             <section>
                 <h2>Cohorts</h2>
+                <FieldNote id="cohort-take-link-note">
+                    Each cohort receives a unique take link, and its attempts contribute to the cohort leaderboard.
+                </FieldNote>
                 {cohorts.length === 0 && <p id="no-cohorts">No cohorts yet</p>}
                 {cohorts.length > 0 && (
                     <ul id="cohort-list">
@@ -254,6 +261,11 @@ export const QuizSharePage = () => {
                                                     >
                                                         Delete
                                                     </Button>
+                                                    {!cohort.canDelete && (
+                                                        <FieldNote id={`cohort-delete-note-${cohort.guid}`}>
+                                                            Cohorts with attempts cannot be deleted.
+                                                        </FieldNote>
+                                                    )}
                                                 </div>
                                             </div>
                                         </>

@@ -147,6 +147,10 @@ When('I disable explanations', async function () {
     await this.questionEditPage.disableExplanations()
 })
 
+When('I select numerical question type', async function () {
+    await this.questionEditPage.setNumericalChoice()
+})
+
 // Title assertions
 
 Then('I see question edit page', async function () {
@@ -230,6 +234,34 @@ Then('tolerance is less than {string}', async function (threshold: string) {
 
 Then('I see note {string}', async function (value: string) {
     await this.questionEditPage.expectNumericalAnswerNote(value)
+})
+
+Then('I see a note explaining the available question types', async function () {
+    await this.questionEditPage.expectQuestionTypeNote()
+})
+
+Then('the note explains that single choice requires one correct answer', async function () {
+    await this.questionEditPage.expectQuestionTypeNoteContains('Single choice requires one correct answer.')
+})
+
+Then('the note explains that multiple choice requires at least two correct answers', async function () {
+    await this.questionEditPage.expectQuestionTypeNoteContains('Multiple choice requires at least two correct answers.')
+})
+
+Then('the note explains that numerical questions require a numeric answer', async function () {
+    await this.questionEditPage.expectQuestionTypeNoteContains('Numerical questions require a numeric answer.')
+})
+
+Then('I see a note explaining how to mark correct answers', async function () {
+    await this.questionEditPage.expectCorrectAnswerNote()
+})
+
+Then('I see a note explaining numerical tolerance', async function () {
+    await this.questionEditPage.expectToleranceNote()
+})
+
+Then('the note explains that zero tolerance requires an exact answer', async function () {
+    await this.questionEditPage.expectToleranceNoteContains('Zero tolerance requires an exact answer.')
 })
 
 Then(/easy is (on|off)/, async function (value: string) {

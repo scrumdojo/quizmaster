@@ -139,3 +139,45 @@ Feature: Create Quiz from Workspace
     And I save the inline question
     Then I am back on the quiz creation form
     And I see question "3 * 3 = ?" in the quiz question list
+
+
+  Scenario: Explain quiz availability
+    Given workspace "Quiz Help" with 2 questions
+    When I start creating a new quiz
+    Then I see a note explaining that empty availability dates do not restrict the quiz
+
+
+  Scenario: Explain feedback modes
+    Given workspace "Quiz Help" with 2 questions
+    When I start creating a new quiz
+    Then I see a note explaining feedback modes
+    And the note explains that Exam mode shows feedback at the end
+    And the note explains that Learning mode shows feedback after each answer
+
+
+  Scenario: Explain quiz difficulty
+    Given workspace "Quiz Help" with 2 questions
+    When I start creating a new quiz
+    Then I see a note explaining quiz difficulty
+    And the note explains that Keep Question respects the question setting
+    And the note explains that Easy reveals correct answer counts
+    And the note explains that Hard hides correct answer counts
+
+
+  Scenario: Explain random question subsets
+    Given workspace "Quiz Help" with 3 questions
+    When I start creating a new quiz
+    And I enable question randomization
+    Then I see a note explaining that each attempt receives questions from the selected pool
+
+
+  Scenario Outline: Show quiz field tooltip
+    Given workspace "Quiz Help" with 2 questions
+    When I start creating a new quiz
+    And I focus the help tooltip for "<field>"
+    Then I see help text "<help>"
+
+    Examples:
+      | field      | help                                                    |
+      | Pass score | The minimum final percentage required to pass the quiz. |
+      | Time limit | The time limit applies to the complete quiz.            |

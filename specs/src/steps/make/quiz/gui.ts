@@ -178,6 +178,42 @@ Then('I see total question count {int}', async function (expectedCount: number) 
     await this.quizCreatePage.expectTotalQuestionCount(expectedCount)
 })
 
+Then('I see a note explaining that empty availability dates do not restrict the quiz', async function () {
+    await this.quizCreatePage.expectAvailabilityNote()
+})
+
+Then('I see a note explaining feedback modes', async function () {
+    await this.quizCreatePage.expectFeedbackModeNote()
+})
+
+Then('the note explains that Exam mode shows feedback at the end', async function () {
+    await this.quizCreatePage.expectFeedbackModeNoteContains('Exam mode shows feedback at the end.')
+})
+
+Then('the note explains that Learning mode shows feedback after each answer', async function () {
+    await this.quizCreatePage.expectFeedbackModeNoteContains('Learning mode shows feedback after each answer')
+})
+
+Then('I see a note explaining quiz difficulty', async function () {
+    await this.quizCreatePage.expectDifficultyNote()
+})
+
+Then('the note explains that Keep Question respects the question setting', async function () {
+    await this.quizCreatePage.expectDifficultyNoteContains('Keep Question respects each question setting.')
+})
+
+Then('the note explains that Easy reveals correct answer counts', async function () {
+    await this.quizCreatePage.expectDifficultyNoteContains('Easy reveals correct answer counts.')
+})
+
+Then('the note explains that Hard hides correct answer counts', async function () {
+    await this.quizCreatePage.expectDifficultyNoteContains('Hard hides correct answer counts.')
+})
+
+Then('I see a note explaining that each attempt receives questions from the selected pool', async function () {
+    await this.quizCreatePage.expectRandomSubsetNote()
+})
+
 // Quiz edit navigation
 
 When('I navigate to edit quiz {string}', async function (quizName: string) {

@@ -169,6 +169,11 @@
     text-transform: uppercase;
     white-space: nowrap;
 }
+.stats-table__column-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
 .quiz-stats td {
     color: var(--text-strong);
     font-size: 0.95rem;

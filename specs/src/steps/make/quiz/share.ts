@@ -142,3 +142,15 @@ Given('cohort {string} has an attempt for quiz {string}', async function (cohort
 Then('I cannot delete cohort {string}', async function (cohortName: string) {
     await this.quizSharePage.expectDeleteDisabled(cohortName)
 })
+
+Then('I see a note explaining that the general take link does not assign a cohort', async function () {
+    await this.quizSharePage.expectGeneralTakeLinkNote()
+})
+
+Then('I see a note explaining that cohort attempts contribute to the cohort leaderboard', async function () {
+    await this.quizSharePage.expectCohortTakeLinkNote()
+})
+
+Then('I see a note explaining that cohorts with attempts cannot be deleted', async function () {
+    await this.quizSharePage.expectCohortDeleteNote('Boyz')
+})

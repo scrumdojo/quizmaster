@@ -23,9 +23,19 @@ export const NumericalAnswerEdit = ({
                 <DecimalInput id="numerical-correct-answer" value={answer} onChange={onAnswerChange} />
                 <ErrorMessage errorCode="empty-numerical-answer" />
                 <ErrorMessage errorCode="invalid-numerical-answer" />
-                {decimalDigits > 0 && <p>{decimalDigits} decimal digits will be required in the answer.</p>}
+                {decimalDigits > 0 && (
+                    <p className="field-note">{decimalDigits} decimal digits will be required in the answer.</p>
+                )}
             </Field>
-            <Field label="Tolerance">
+            <Field
+                label="Tolerance"
+                note={
+                    <span id="numerical-tolerance-note">
+                        Answers within the correct answer plus or minus the tolerance are accepted. Zero tolerance
+                        requires an exact answer.
+                    </span>
+                }
+            >
                 <NumberInput
                     id="numerical-tolerance"
                     min={0}

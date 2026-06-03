@@ -5,7 +5,7 @@ export class WorkspacePage {
 
     // ── Navigation ───────────────────────────────────
 
-    goto = (guid: string) => this.page.goto(`/workspace/${guid}`, { waitUntil: 'networkidle' })
+    goto = (guid: string) => this.page.goto(`/workspace/${guid}`, { waitUntil: 'domcontentloaded' })
     waitForUrl = (guid: string) => this.page.waitForURL(`**/workspace/${guid}`)
 
     expectScrolledToTop = () => this.page.waitForFunction('scrollY === 0', { timeout: 5000 })
@@ -211,6 +211,12 @@ export class WorkspacePage {
         await expect(list).toBeVisible()
         await expect(list.getByText(quizTitle)).toBeVisible()
     }
+    focusInQuizHelp = async (question: string) => {
+        await this.showQuestions()
+        await this.questionLocator(question)
+            .getByRole('button', { name: `Help for In Quiz action for ${question}` })
+            .focus()
+    }
 
     // ── Create new question / quiz ───────────────────
 
@@ -273,6 +279,7 @@ export class WorkspacePage {
     expectQuizEditVisible = async (quiz: string) => {
         await expect(this.quizLocator(quiz).getByRole('link', { name: 'Edit' })).toBeVisible()
     }
+    focusDryRunHelp = () => this.page.getByRole('button', { name: 'Help for Dry run action' }).focus()
 
     takeQuiz = async (quiz: string) => {
         await this.openActionsDropdown(quiz)

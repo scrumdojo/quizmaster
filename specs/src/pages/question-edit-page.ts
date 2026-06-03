@@ -164,6 +164,13 @@ export class QuestionEditPage {
     expectQuestionExplanationNotEmpty = () => expect(this.questionExplanationLocator()).not.toHaveValue('')
     expectAddAnswerNotVisible = () => expect(this.addAnswerButtonLocator()).not.toBeVisible()
     expectErrorCount = (n: number) => expect(this.errorsLocator()).toHaveCount(n)
+    expectQuestionTypeNote = () => expect(this.page.locator('#question-type-note')).toBeVisible()
+    expectQuestionTypeNoteContains = (text: string) =>
+        expect(this.page.locator('#question-type-note')).toContainText(text)
+    expectCorrectAnswerNote = () => expect(this.page.locator('#correct-answer-note')).toBeVisible()
+    expectToleranceNote = () => expect(this.page.locator('#numerical-tolerance-note')).toBeVisible()
+    expectToleranceNoteContains = (text: string) =>
+        expect(this.page.locator('#numerical-tolerance-note')).toContainText(text)
 
     private checkedAnswersLocator = () =>
         this.answerRowsLocator().locator('input[type="checkbox"]:checked, input[type="radio"]:checked')

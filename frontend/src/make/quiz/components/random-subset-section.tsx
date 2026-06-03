@@ -1,4 +1,4 @@
-import { CheckField, NumberInput } from '#fe/shared'
+import { CheckField, FieldNote, NumberInput } from '#fe/shared'
 import { ErrorMessage } from '#fe/shared/forms/validations.tsx'
 
 interface RandomSubsetSectionProps {
@@ -12,12 +12,17 @@ export const RandomSubsetSection = ({ enabled, onEnabledChange, count, onCountCh
     <>
         <CheckField id="isRandomized" label="Serve a random subset" checked={enabled} onToggle={onEnabledChange} />
         {enabled && (
-            <span className="inline-label">
-                <div className="random-count-input">
-                    <NumberInput id="quiz-randomQuestionCount" value={count} onChange={onCountChange} />
-                </div>
-                Questions per take
-            </span>
+            <>
+                <FieldNote id="random-subset-note">
+                    Each attempt receives the configured number of questions from the selected pool.
+                </FieldNote>
+                <span className="inline-label">
+                    <div className="random-count-input">
+                        <NumberInput id="quiz-randomQuestionCount" value={count} onChange={onCountChange} />
+                    </div>
+                    Questions per take
+                </span>
+            </>
         )}
         <ErrorMessage errorCode="too-many-randomized-questions" />
     </>

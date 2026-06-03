@@ -135,3 +135,17 @@ Feature: Share Quiz
     * cohort "Boyz" has an attempt for quiz "Cohort Quiz"
     When I navigate to share quiz "Cohort Quiz"
     Then I cannot delete cohort "Boyz"
+
+
+  Scenario: Explain general and cohort take links
+    When I navigate to share quiz "Cohort Quiz"
+    Then I see a note explaining that the general take link does not assign a cohort
+    And I see a note explaining that cohort attempts contribute to the cohort leaderboard
+
+
+  Scenario: Explain why a cohort cannot be deleted
+    Given quiz "Cohort Quiz" has a cohort named "Boyz"
+    And cohort "Boyz" has an attempt for quiz "Cohort Quiz"
+    When I navigate to share quiz "Cohort Quiz"
+    Then I cannot delete cohort "Boyz"
+    And I see a note explaining that cohorts with attempts cannot be deleted
