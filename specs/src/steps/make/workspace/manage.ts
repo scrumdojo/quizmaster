@@ -131,7 +131,7 @@ Then('I see "In Quiz" tag on question {string}', async function (question: strin
     await this.workspacePage.expectQuestionInQuizTag(question)
 })
 
-Then('the "In Quiz" tag on question {string} uses button styling', async function (question: string) {
+Then('the "In Quiz" tag on question {string} uses outlined button styling', async function (question: string) {
     await this.workspacePage.expectQuestionInQuizTagButtonStyle(question)
 })
 

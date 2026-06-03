@@ -174,7 +174,7 @@ export class WorkspacePage {
     }
     expectQuestionInQuizTagButtonStyle = async (question: string) => {
         await this.showQuestions()
-        await expect(this.questionUsedBadgeLocator(question)).toHaveClass(/link-button/)
+        await expect(this.questionUsedBadgeLocator(question)).toHaveClass(/link-button--secondary/)
     }
     expectQuestionInQuizTagAbsent = async (question: string) => {
         await this.showQuestions()

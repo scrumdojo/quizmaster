@@ -9,5 +9,5 @@ Feature: "In Quiz" status tag for workspace questions
     When I open the workspace
     And I click the "Questions" tab
     Then I see "In Quiz" tag on question "2 + 2 = ?"
-    And the "In Quiz" tag on question "2 + 2 = ?" uses button styling
+    And the "In Quiz" tag on question "2 + 2 = ?" uses outlined button styling
     And I do not see "In Quiz" tag on question "3 * 3 = ?"
