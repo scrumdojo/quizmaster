@@ -125,6 +125,80 @@ public class QuestionTakeControllerTest {
     }
 
     @Test
+    public void submitNumericalQuestionWithinToleranceIsCorrect() throws Exception {
+        Question question = fixtures.save(
+            fixtures
+                .question()
+                .question("What is pi rounded to two decimals?")
+                .answers(new String[] { "3.14" })
+                .correctAnswers(new int[] { 0 })
+                .questionType("numerical")
+                .tolerance(0.01)
+        );
+
+        mockMvc
+            .perform(
+                post("/api/question/{id}/submit", question.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"type": "numerical", "value": 3.13}
+                        """
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().json(
+                    """
+                    {
+                        "status": "CORRECT",
+                        "score": 1.0,
+                        "question": {
+                            "questionType": "numerical",
+                            "answers": ["3.14"],
+                            "correctAnswers": [0],
+                            "tolerance": 0.01
+                        }
+                    }
+                    """
+                )
+            )
+            .andExpect(jsonPath("$.question.workspaceGuid").doesNotExist());
+    }
+
+    @Test
+    public void submitNumericalQuestionOutsideToleranceIsIncorrect() throws Exception {
+        Question question = fixtures.save(
+            fixtures
+                .question()
+                .question("What is pi rounded to two decimals?")
+                .answers(new String[] { "3.14" })
+                .correctAnswers(new int[] { 0 })
+                .questionType("numerical")
+                .tolerance(0.01)
+        );
+
+        mockMvc
+            .perform(
+                post("/api/question/{id}/submit", question.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"type": "numerical", "value": 3.16}
+                        """
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().json(
+                    """
+                    {"status": "INCORRECT", "score": 0.0}
+                    """
+                )
+            );
+    }
+
+    @Test
     public void submitQuestionInQuizReturnsForbidden() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
