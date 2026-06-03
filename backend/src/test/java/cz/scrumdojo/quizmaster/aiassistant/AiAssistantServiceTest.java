@@ -276,6 +276,111 @@ public class AiAssistantServiceTest {
     }
 
     @Test
+    void validateNumericalResponse_valid() {
+        assertDoesNotThrow(() ->
+            AiAssistantService.validateNumericalResponse(
+                new AiAssistantService.AssistantResponse(
+                    "What is pi to two decimals?",
+                    new String[] { "3.14" },
+                    new int[] { 0 },
+                    new String[] { "" },
+                    0.01,
+                    null
+                )
+            )
+        );
+    }
+
+    @Test
+    void validateNumericalResponse_missingQuestion() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateNumericalResponse(
+                new AiAssistantService.AssistantResponse("", new String[] { "3.14" }, new int[] { 0 }, null, null, null)
+            )
+        );
+    }
+
+    @Test
+    void validateNumericalResponse_wrongAnswersLength() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateNumericalResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "3.14", "extra" },
+                    new int[] { 0 },
+                    null,
+                    null,
+                    null
+                )
+            )
+        );
+    }
+
+    @Test
+    void validateNumericalResponse_nonNumericAnswer() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateNumericalResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "not-a-number" },
+                    new int[] { 0 },
+                    null,
+                    null,
+                    null
+                )
+            )
+        );
+    }
+
+    @Test
+    void validateNumericalResponse_wrongCorrectAnswers() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateNumericalResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "3.14" },
+                    new int[] { 1 },
+                    null,
+                    null,
+                    null
+                )
+            )
+        );
+    }
+
+    @Test
+    void validateNumericalResponse_negativeTolerance() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateNumericalResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "3.14" },
+                    new int[] { 0 },
+                    null,
+                    -0.01,
+                    null
+                )
+            )
+        );
+    }
+
+    @Test
+    void validateNumericalResponse_wrongExplanationsLength() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateNumericalResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "3.14" },
+                    new int[] { 0 },
+                    new String[] { "one", "extra" },
+                    null,
+                    null
+                )
+            )
+        );
+    }
+
+    @Test
     void validateBatchResponses_valid() {
         assertDoesNotThrow(() ->
             AiAssistantService.validateBatchResponses(
