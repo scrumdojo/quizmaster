@@ -12,6 +12,12 @@ Feature: Background animation preferences
     Then the background animation shows the mammoths theme
 
 
+  Scenario: A giant mammoth with 10 lives periodically appears during the battle
+    Given I am on the home page
+    When I switch the animation to the mammoths theme
+    Then a giant mammoth with 10 lives can appear
+
+
   Scenario: Mammoths attack and kill hunters during battle
     Given I am on the home page
     When I switch the animation to the mammoths theme
@@ -28,6 +34,12 @@ Feature: Background animation preferences
     Given I am on the home page
     When I switch the animation to the mammoths theme
     Then clicking a mammoth kills it with an explosion effect
+
+
+  Scenario: Hovering over a mammoth sprite shows a spear cursor
+    Given I am on the home page
+    When I switch the animation to the mammoths theme
+    Then hovering over a mammoth shows a spear cursor
 
 
   Scenario: Mammoth button shows a spear cursor

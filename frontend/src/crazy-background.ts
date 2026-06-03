@@ -718,6 +718,33 @@ type Mammoth = {
     flip: boolean
 }
 
+type GiantMammoth = Mammoth & {
+    health: number
+    scale: number
+}
+
+const GIANT_MAMMOTH_HEALTH = 10
+const GIANT_MAMMOTH_SCALE = 2.5
+const GIANT_MAMMOTH_MIN_DELAY_MS = 20000
+const GIANT_MAMMOTH_MAX_DELAY_MS = 45000
+
+function randomGiantMammothDelayMs() {
+    return GIANT_MAMMOTH_MIN_DELAY_MS + Math.random() * (GIANT_MAMMOTH_MAX_DELAY_MS - GIANT_MAMMOTH_MIN_DELAY_MS)
+}
+
+function makeGiantMammoth(w: number, h: number): GiantMammoth {
+    return {
+        x: w + 160,
+        y: Math.random() * h * 0.45 + h * 0.3,
+        vx: -(0.3 + Math.random() * 0.3),
+        vy: (Math.random() - 0.5) * 0.2,
+        t: 0,
+        flip: true,
+        health: GIANT_MAMMOTH_HEALTH,
+        scale: GIANT_MAMMOTH_SCALE,
+    }
+}
+
 type Hunter = {
     x: number
     y: number
@@ -927,6 +954,8 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     const particles: SplatParticle[] = []
     let mammothScore = 0
     let hunterScore = 0
+    let giantMammoth: GiantMammoth | null = null
+    let nextGiantMammothAt = performance.now() + randomGiantMammothDelayMs()
 
     const onResize = () => {
         w = canvas.width = window.innerWidth
@@ -996,6 +1025,19 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     }
     window.addEventListener('click', onCanvasClick)
 
+    const onMouseMove = (e: MouseEvent) => {
+        const mx = e.clientX
+        const my = e.clientY
+        const nearMammoth = mammoths.some(m => {
+            const dx = mx - m.x
+            const dy = my - m.y
+            return dx * dx + dy * dy < 50 * 50
+        })
+        const spear = document.documentElement.style.getPropertyValue('--cursor-spear')
+        document.documentElement.style.cursor = nearMammoth && spear ? spear : ''
+    }
+    window.addEventListener('mousemove', onMouseMove)
+
     for (let i = 0; i < 5; i++) mammoths.push(makeMammoth(w, h))
     for (let i = 0; i < 4; i++) hunters.push(makeHunter(w, h))
 
@@ -1044,6 +1086,43 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
             }
 
             drawMammoth(ctx, m)
+        }
+
+        // ── giant mammoth ────────────────────────────────
+        const now = performance.now()
+        if (!giantMammoth && now >= nextGiantMammothAt) {
+            giantMammoth = makeGiantMammoth(w, h)
+        }
+        if (giantMammoth) {
+            giantMammoth.t++
+            giantMammoth.x += giantMammoth.vx
+            giantMammoth.y += giantMammoth.vy + Math.sin(giantMammoth.t * 0.018) * 0.3
+            if (giantMammoth.x < -200) {
+                giantMammoth = null
+                nextGiantMammothAt = now + randomGiantMammothDelayMs()
+            } else {
+                // Draw scaled mammoth
+                ctx.save()
+                ctx.translate(giantMammoth.x, giantMammoth.y)
+                ctx.scale(giantMammoth.scale, giantMammoth.scale)
+                drawMammoth(ctx, { ...giantMammoth, x: 0, y: 0 })
+                ctx.restore()
+                // Health bar
+                const barW = 80 * giantMammoth.scale
+                const barH = 8
+                const barX = giantMammoth.x - barW / 2
+                const barY = giantMammoth.y - 55 * giantMammoth.scale
+                ctx.fillStyle = 'rgba(0,0,0,0.4)'
+                ctx.fillRect(barX, barY, barW, barH)
+                ctx.fillStyle = '#e53e3e'
+                ctx.fillRect(barX, barY, barW * (giantMammoth.health / GIANT_MAMMOTH_HEALTH), barH)
+                // Lives text
+                ctx.fillStyle = '#fff'
+                ctx.font = `bold ${12 * giantMammoth.scale}px sans-serif`
+                ctx.textAlign = 'center'
+                ctx.fillText(`♥ ${giantMammoth.health}`, giantMammoth.x, barY - 4)
+                ctx.textAlign = 'left'
+            }
         }
 
         // ── hunters ─────────────────────────────────────
@@ -1138,6 +1217,55 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                     }
                 }
 
+                // Hit test against giant mammoth
+                if (!hit && giantMammoth) {
+                    const gdx = sp.x - giantMammoth.x
+                    const gdy = sp.y - giantMammoth.y
+                    const hitRadius = 55 * giantMammoth.scale
+                    if (gdx * gdx + gdy * gdy < hitRadius * hitRadius) {
+                        giantMammoth.health--
+                        hu.spears.splice(j, 1)
+                        for (let p = 0; p < 8; p++) {
+                            const angle = Math.random() * TAU
+                            particles.push({
+                                x: giantMammoth.x,
+                                y: giantMammoth.y,
+                                vx: Math.cos(angle) * (1 + Math.random() * 2.5),
+                                vy: Math.sin(angle) * (1 + Math.random() * 2.5),
+                                size: 2 + Math.random() * 5,
+                                opacity: 1,
+                                color: '#e53e3e',
+                                gravity: 0.04,
+                                fade: 0.03,
+                                shrink: 0.98,
+                            })
+                        }
+                        if (giantMammoth.health <= 0) {
+                            // Explosion on death
+                            for (let p = 0; p < 30; p++) {
+                                const angle = Math.random() * TAU
+                                const speed = 2 + Math.random() * 6
+                                particles.push({
+                                    x: giantMammoth.x,
+                                    y: giantMammoth.y,
+                                    vx: Math.cos(angle) * speed,
+                                    vy: Math.sin(angle) * speed,
+                                    size: 4 + Math.random() * 10,
+                                    opacity: 1,
+                                    color: ['#8B4513', '#A0522D', '#F0EDD5', '#e53e3e'][Math.floor(Math.random() * 4)],
+                                    gravity: 0.05,
+                                    fade: 0.018,
+                                    shrink: 0.985,
+                                })
+                            }
+                            hunterScore += GIANT_MAMMOTH_HEALTH
+                            giantMammoth = null
+                            nextGiantMammothAt = performance.now() + randomGiantMammothDelayMs()
+                        }
+                        hit = true
+                    }
+                }
+
                 if (!hit) {
                     // Draw spear in flight
                     const angle = Math.atan2(sp.vy, sp.vx)
@@ -1223,6 +1351,8 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
         cancelled = true
         window.removeEventListener('resize', onResize)
         window.removeEventListener('click', onCanvasClick)
+        window.removeEventListener('mousemove', onMouseMove)
+        document.documentElement.style.cursor = ''
     }
 }
 
@@ -1256,12 +1386,16 @@ function applyTheme(theme: AnimationTheme) {
             canvas.dataset.mammothScoreboardSide = 'right'
             canvas.dataset.hunterClickKill = 'true'
             canvas.dataset.mammothClickKill = 'true'
+            canvas.dataset.mammothHoverSpear = 'true'
+            canvas.dataset.giantMammothLives = '10'
         } else {
             delete canvas.dataset.mammothAttacksHunters
             delete canvas.dataset.hunterScoreboardSide
             delete canvas.dataset.mammothScoreboardSide
             delete canvas.dataset.hunterClickKill
             delete canvas.dataset.mammothClickKill
+            delete canvas.dataset.mammothHoverSpear
+            delete canvas.dataset.giantMammothLives
         }
     }
 

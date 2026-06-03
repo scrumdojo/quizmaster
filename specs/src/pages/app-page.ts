@@ -50,6 +50,10 @@ export class AppPage {
         await expect(this.page.getByRole('button', { name: 'Turn off' })).toBeVisible()
     }
 
+    expectGiantMammothEnabled = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-lives', '10')
+
+    expectMammothSpriteSpearCursor = () => expect(this.canvas()).toHaveAttribute('data-mammoth-hover-spear', 'true')
+
     expectMammothButtonSpearCursor = () =>
         expect(this.page.getByRole('button', { name: 'Mammoths' })).toHaveAttribute('style', /cursor:.*url\(/)
 

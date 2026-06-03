@@ -56,6 +56,14 @@ Then('the cursor changes to a spear', async function () {
     await this.appPage.expectMammothButtonSpearCursor()
 })
 
+Then('hovering over a mammoth shows a spear cursor', async function () {
+    await this.appPage.expectMammothSpriteSpearCursor()
+})
+
+Then('a giant mammoth with 10 lives can appear', async function () {
+    await this.appPage.expectGiantMammothEnabled()
+})
+
 Then('mammoths can attack and kill hunters', async function () {
     await this.appPage.expectMammothsAttackHunters()
 })
