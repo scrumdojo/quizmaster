@@ -11,7 +11,7 @@ import type { IdResponse } from '#shared/types/id-response.ts'
 import type { QuestionRequest } from '#shared/types/question.ts'
 import type { Quiz, QuizRequest } from '#shared/types/quiz.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
-import type { QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
+import type { PollSpec, QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
 const parseSpecTags = (tagValue: string | undefined): string[] =>
@@ -77,6 +77,25 @@ export const createQuestionViaRest = async (
     const url = `/api/workspaces/${workspaceGuid}/questions`
     const response = await world.page.request.post(url, {
         data: toQuestionPayload(spec),
+    })
+    if (!response.ok()) {
+        throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)
+    }
+    const { id } = (await response.json()) as IdResponse
+    return id
+}
+
+export const createPollViaRest = async (
+    world: QuizmasterWorld,
+    workspaceGuid: string,
+    spec: PollSpec,
+): Promise<number> => {
+    const url = `/api/workspaces/${workspaceGuid}/polls`
+    const response = await world.page.request.post(url, {
+        data: {
+            question: spec.question,
+            answers: spec.answers,
+        },
     })
     if (!response.ok()) {
         throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)

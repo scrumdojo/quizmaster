@@ -15,9 +15,10 @@ import {
     QuizWelcomePage,
     QuizStatsPage,
     TakeQuestionPage,
+    TakePollPage,
 } from '#pages/index.ts'
 import { QuizNicknamePage } from '#pages/quiz-nickname-page'
-import type { AnswerSpec, QuestionSpec } from '#steps/shared/specs.ts'
+import type { AnswerSpec, PollSpec, QuestionSpec } from '#steps/shared/specs.ts'
 
 export class QuizmasterWorld {
     constructor(
@@ -30,6 +31,7 @@ export class QuizmasterWorld {
         this.robinSheetPage = new RobinSheetPage(this.page)
         this.workspaceCreatePage = new WorkspaceCreatePage(this.page)
         this.takeQuestionPage = new TakeQuestionPage(this.page)
+        this.takePollPage = new TakePollPage(this.page)
         this.questionPage = new QuestionPage(this.page)
         this.quizWelcomePage = new QuizWelcomePage(this.page)
         this.quizSharePage = new QuizSharePage(this.page)
@@ -47,6 +49,7 @@ export class QuizmasterWorld {
     readonly robinSheetPage: RobinSheetPage
     readonly workspaceCreatePage: WorkspaceCreatePage
     readonly takeQuestionPage: TakeQuestionPage
+    readonly takePollPage: TakePollPage
     readonly questionPage: QuestionPage
     readonly quizWelcomePage: QuizWelcomePage
     readonly quizSharePage: QuizSharePage
@@ -97,6 +100,22 @@ export class QuizmasterWorld {
         this.activeQuizBookmark = key
     }
     correctAnswersCounts: Record<string, string> = {}
+    pollWip: PollSpec | undefined = undefined
+    pollBookmarks: Record<string, PollSpec> = {}
+    pollIds: Record<string, number> = {}
+    activePollBookmark = ''
+    get activePoll() {
+        return this.pollBookmarks[this.activePollBookmark]
+    }
+
+    bookmarkPoll(key: string, poll: PollSpec) {
+        if (this.pollBookmarks[key] !== undefined) {
+            throw new Error(`Duplicate poll bookmark: "${key}"`)
+        }
+        this.pollBookmarks[key] = poll
+        this.activePollBookmark = key
+    }
+
     clockInstalled = false
     scenarioClockNow?: Date
     lastAnsweredTitle?: string

@@ -42,3 +42,9 @@ export interface QuizSpec {
     endAt?: string
     bookmark?: string
 }
+
+export interface PollSpec {
+    question: string
+    answers: string[]
+    bookmark?: string
+}
