@@ -51,3 +51,11 @@ Then('the cursor changes to a spear', async function () {
 Then('mammoths can attack and kill hunters', async function () {
     await this.appPage.expectMammothsAttackHunters()
 })
+
+Then('the Hunters scoreboard is on the {word} side', async function (side: string) {
+    await this.appPage.expectHunterScoreboardSide(side)
+})
+
+Then('the Mammoths scoreboard is on the {word} side', async function (side: string) {
+    await this.appPage.expectMammothScoreboardSide(side)
+})

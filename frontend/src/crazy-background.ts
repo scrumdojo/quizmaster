@@ -925,6 +925,8 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     const mammoths: Mammoth[] = []
     const hunters: Hunter[] = []
     const particles: SplatParticle[] = []
+    let mammothScore = 0
+    let hunterScore = 0
 
     const onResize = () => {
         w = canvas.width = window.innerWidth
@@ -975,6 +977,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                         })
                     }
                     hunters[j] = makeHunter(w, h)
+                    mammothScore++
                 }
             }
 
@@ -1067,6 +1070,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                         }
                         mammoths[k] = makeMammoth(w, h)
                         hu.spears.splice(j, 1)
+                        hunterScore++
                         hit = true
                         break
                     }
@@ -1119,6 +1123,35 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
         }
 
         ctx.globalAlpha = 1
+
+        // ── scoreboards ─────────────────────────────────
+        drawScorePanel(ctx, {
+            x: 18,
+            y: 18,
+            width: 130,
+            label: 'Hunters',
+            score: hunterScore,
+            align: 'left',
+            background: 'rgba(254,243,199,0.82)',
+            border: '#d97706',
+            labelColor: '#92400e',
+            scoreColor: '#78350f',
+            glow: 'rgba(217,119,6,0.18)',
+        })
+        drawScorePanel(ctx, {
+            x: w - 148,
+            y: 18,
+            width: 130,
+            label: 'Mammoths',
+            score: mammothScore,
+            align: 'right',
+            background: 'rgba(245,225,200,0.82)',
+            border: '#8B4513',
+            labelColor: '#5C3D11',
+            scoreColor: '#3d1a00',
+            glow: 'rgba(139,69,19,0.18)',
+        })
+
         requestAnimationFrame(tick)
     }
 
@@ -1149,11 +1182,20 @@ function applyTheme(theme: AnimationTheme) {
         canvas.dataset.angelScoreboardSide = 'left'
         canvas.dataset.satanScoreboardSide = 'right'
         delete canvas.dataset.mammothAttacksHunters
+        delete canvas.dataset.hunterScoreboardSide
+        delete canvas.dataset.mammothScoreboardSide
     } else {
         delete canvas.dataset.angelScoreboardSide
         delete canvas.dataset.satanScoreboardSide
-        if (theme === 'mammoths') canvas.dataset.mammothAttacksHunters = 'true'
-        else delete canvas.dataset.mammothAttacksHunters
+        if (theme === 'mammoths') {
+            canvas.dataset.mammothAttacksHunters = 'true'
+            canvas.dataset.hunterScoreboardSide = 'left'
+            canvas.dataset.mammothScoreboardSide = 'right'
+        } else {
+            delete canvas.dataset.mammothAttacksHunters
+            delete canvas.dataset.hunterScoreboardSide
+            delete canvas.dataset.mammothScoreboardSide
+        }
     }
 
     if (theme === 'off') {

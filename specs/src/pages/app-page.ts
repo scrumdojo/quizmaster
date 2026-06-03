@@ -41,4 +41,10 @@ export class AppPage {
         expect(this.page.getByRole('button', { name: 'Mammoths' })).toHaveAttribute('style', /cursor:.*url\(/)
 
     expectMammothsAttackHunters = () => expect(this.canvas()).toHaveAttribute('data-mammoth-attacks-hunters', 'true')
+
+    expectHunterScoreboardSide = (side: string) =>
+        expect(this.canvas()).toHaveAttribute('data-hunter-scoreboard-side', side)
+
+    expectMammothScoreboardSide = (side: string) =>
+        expect(this.canvas()).toHaveAttribute('data-mammoth-scoreboard-side', side)
 }
