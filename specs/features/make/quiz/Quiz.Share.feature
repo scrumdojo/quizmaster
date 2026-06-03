@@ -58,6 +58,27 @@ Feature: Share Quiz
     Then I do not see the QR code for the quiz take link
 
 
+  Scenario: Add mammoth image to QR code when mammoth background is active
+    When I switch the animation to the mammoths theme
+    * I navigate to share quiz "Cohort Quiz"
+    * I show the QR code for the quiz take link
+    Then the QR code contains the mammoth image
+
+
+  Scenario: Add angel image to QR code when Angels & Devils background is active
+    When I switch the animation to Angels & Devils
+    * I navigate to share quiz "Cohort Quiz"
+    * I show the QR code for the quiz take link
+    Then the QR code contains the angel image
+
+
+  Scenario: Keep QR code clean when background animation is off
+    When I turn off the background animation
+    * I navigate to share quiz "Cohort Quiz"
+    * I show the QR code for the quiz take link
+    Then the QR code does not contain a theme image
+
+
   Scenario: Show QR code for a cohort take link
     Given quiz "Cohort Quiz" has a cohort named "Boyz"
     * quiz "Cohort Quiz" has a cohort named "Girlz"

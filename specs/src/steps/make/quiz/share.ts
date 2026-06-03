@@ -70,6 +70,18 @@ Then('the QR code value matches the quiz take link', async function () {
     expect(await this.quizSharePage.quizTakeQrValue()).toBe(await this.quizSharePage.takeLink())
 })
 
+Then('the QR code contains the mammoth image', async function () {
+    await this.quizSharePage.expectQrThemeImage('mammoth')
+})
+
+Then('the QR code contains the angel image', async function () {
+    await this.quizSharePage.expectQrThemeImage('angel')
+})
+
+Then('the QR code does not contain a theme image', async function () {
+    await this.quizSharePage.expectNoQrThemeImage()
+})
+
 When('I show the QR code for cohort {string}', async function (cohortName: string) {
     await this.quizSharePage.showCohortQr(cohortName)
 })
