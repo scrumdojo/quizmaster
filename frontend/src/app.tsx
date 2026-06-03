@@ -80,7 +80,6 @@ const BackgroundGameFab = ({ battleOnly, onBattleOnlyChange }: BackgroundGameFab
     const select = (t: AnimationTheme) => {
         window.__setAnimationTheme?.(t)
         setTheme(t)
-        onBattleOnlyChange(false)
         setOpen(false)
     }
 
