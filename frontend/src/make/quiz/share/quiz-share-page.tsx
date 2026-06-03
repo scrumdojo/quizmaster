@@ -20,6 +20,11 @@ const quizQrKey = 'quiz-take'
 
 type CohortErrorTarget = 'add' | `edit:${string}`
 
+const cohortErrorMessages: Record<CohortCreateError, string> = {
+    'empty-cohort-name': 'Name cannot be empty.',
+    'duplicate-cohort-name': 'A cohort with this name already exists.',
+}
+
 interface ActiveQrCode {
     readonly key: string
     readonly label: string
@@ -130,7 +135,7 @@ export const QuizSharePage = () => {
         error?.target === target && (
             <div className="cohort-inline-error">
                 <Alert type="error" dataTestId={error.code}>
-                    {error.code}
+                    {cohortErrorMessages[error.code]}
                 </Alert>
             </div>
         )
