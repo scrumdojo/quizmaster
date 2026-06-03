@@ -19,22 +19,24 @@ import org.springframework.web.server.ResponseStatusException;
 public class OpenRouterEmbeddingClient {
 
     private static final String OPENROUTER_EMBEDDINGS_URL = "https://openrouter.ai/api/v1/embeddings";
-    private static final Duration TIMEOUT = Duration.ofSeconds(60);
 
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
     private final String apiToken;
     private final String model;
+    private final Duration timeout;
 
     public OpenRouterEmbeddingClient(
         ObjectMapper objectMapper,
         @Value("${ai.token:}") String apiToken,
-        @Value("${ai.embedding.model}") String model
+        @Value("${ai.embedding.model}") String model,
+        @Value("${ai.embedding.timeout:PT10S}") Duration timeout
     ) {
         this.objectMapper = objectMapper;
         this.apiToken = apiToken.strip();
         this.model = model;
-        this.httpClient = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
+        this.timeout = timeout;
+        this.httpClient = HttpClient.newBuilder().connectTimeout(timeout).build();
     }
 
     public List<double[]> embed(List<String> inputs) {
@@ -49,7 +51,7 @@ public class OpenRouterEmbeddingClient {
             String body = objectMapper.writeValueAsString(new EmbeddingRequest(model, inputs));
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(OPENROUTER_EMBEDDINGS_URL))
-                .timeout(TIMEOUT)
+                .timeout(timeout)
                 .header("Authorization", "Bearer " + apiToken)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
@@ -83,6 +85,10 @@ public class OpenRouterEmbeddingClient {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Embedding request failed.");
         }
+    }
+
+    Duration timeout() {
+        return timeout;
     }
 
     private record EmbeddingRequest(String model, @JsonProperty("input") List<String> input) {}

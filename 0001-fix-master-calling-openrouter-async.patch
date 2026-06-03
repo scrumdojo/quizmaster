@@ -1,0 +1,325 @@
+From 05de45c11b850b1ff6d2b4e8a1834b6a40d54595 Mon Sep 17 00:00:00 2001
+From: MrMarkus <MrMarkus@gmail.com>
+Date: Tue, 2 Jun 2026 16:42:52 +0000
+Subject: [PATCH] fix(master): calling openrouter async
+
+---
+ .../OpenRouterEmbeddingClient.java            | 14 +++++--
+ .../aiassistant/QuestionEmbeddingService.java | 42 +++++++++++++++++++
+ .../quizmaster/config/AsyncConfig.java        | 23 ++++++++++
+ .../WorkspaceQuestionController.java          | 19 +--------
+ .../src/main/resources/application.properties |  1 +
+ .../OpenRouterEmbeddingClientTimeoutTest.java | 22 ++++++++++
+ .../QuestionEmbeddingPersistenceTest.java     | 17 +++++++-
+ 7 files changed, 115 insertions(+), 23 deletions(-)
+ create mode 100644 backend/src/main/java/cz/scrumdojo/quizmaster/config/AsyncConfig.java
+ create mode 100644 backend/src/test/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClientTimeoutTest.java
+
+diff --git a/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClient.java b/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClient.java
+index c8447e93..df2ce04b 100644
+--- a/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClient.java
++++ b/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClient.java
+@@ -19,22 +19,24 @@ import org.springframework.web.server.ResponseStatusException;
+ public class OpenRouterEmbeddingClient {
+ 
+     private static final String OPENROUTER_EMBEDDINGS_URL = "https://openrouter.ai/api/v1/embeddings";
+-    private static final Duration TIMEOUT = Duration.ofSeconds(60);
+ 
+     private final ObjectMapper objectMapper;
+     private final HttpClient httpClient;
+     private final String apiToken;
+     private final String model;
++    private final Duration timeout;
+ 
+     public OpenRouterEmbeddingClient(
+         ObjectMapper objectMapper,
+         @Value("${ai.token:}") String apiToken,
+-        @Value("${ai.embedding.model}") String model
++        @Value("${ai.embedding.model}") String model,
++        @Value("${ai.embedding.timeout:PT10S}") Duration timeout
+     ) {
+         this.objectMapper = objectMapper;
+         this.apiToken = apiToken.strip();
+         this.model = model;
+-        this.httpClient = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
++        this.timeout = timeout;
++        this.httpClient = HttpClient.newBuilder().connectTimeout(timeout).build();
+     }
+ 
+     public List<double[]> embed(List<String> inputs) {
+@@ -49,7 +51,7 @@ public class OpenRouterEmbeddingClient {
+             String body = objectMapper.writeValueAsString(new EmbeddingRequest(model, inputs));
+             HttpRequest request = HttpRequest.newBuilder()
+                 .uri(URI.create(OPENROUTER_EMBEDDINGS_URL))
+-                .timeout(TIMEOUT)
++                .timeout(timeout)
+                 .header("Authorization", "Bearer " + apiToken)
+                 .header("Content-Type", "application/json")
+                 .POST(HttpRequest.BodyPublishers.ofString(body))
+@@ -85,5 +87,9 @@ public class OpenRouterEmbeddingClient {
+         }
+     }
+ 
++    Duration timeout() {
++        return timeout;
++    }
++
+     private record EmbeddingRequest(String model, @JsonProperty("input") List<String> input) {}
+ }
+diff --git a/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/QuestionEmbeddingService.java b/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/QuestionEmbeddingService.java
+index 2e854ff2..6fcccf65 100644
+--- a/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/QuestionEmbeddingService.java
++++ b/backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/QuestionEmbeddingService.java
+@@ -4,23 +4,32 @@ import cz.scrumdojo.quizmaster.question.Question;
+ import cz.scrumdojo.quizmaster.question.QuestionRepository;
+ import java.util.List;
+ import java.util.Objects;
++import lombok.extern.slf4j.Slf4j;
+ import org.springframework.beans.factory.annotation.Value;
++import org.springframework.context.ApplicationEventPublisher;
++import org.springframework.scheduling.annotation.Async;
+ import org.springframework.stereotype.Service;
++import org.springframework.transaction.event.TransactionPhase;
++import org.springframework.transaction.event.TransactionalEventListener;
+ 
++@Slf4j
+ @Service
+ public class QuestionEmbeddingService {
+ 
+     private final OpenRouterEmbeddingClient embeddingClient;
+     private final QuestionRepository questionRepository;
++    private final ApplicationEventPublisher eventPublisher;
+     private final String embeddingModel;
+ 
+     public QuestionEmbeddingService(
+         OpenRouterEmbeddingClient embeddingClient,
+         QuestionRepository questionRepository,
++        ApplicationEventPublisher eventPublisher,
+         @Value("${ai.embedding.model}") String embeddingModel
+     ) {
+         this.embeddingClient = embeddingClient;
+         this.questionRepository = questionRepository;
++        this.eventPublisher = eventPublisher;
+         this.embeddingModel = embeddingModel;
+     }
+ 
+@@ -36,6 +45,39 @@ public class QuestionEmbeddingService {
+         question.setEmbeddingTextHash(QuestionEmbeddingText.hash(question.getQuestion()));
+     }
+ 
++    public void scheduleEmbedding(Integer questionId) {
++        if (questionId == null) {
++            return;
++        }
++        eventPublisher.publishEvent(new QuestionEmbeddingRequestedEvent(questionId));
++    }
++
++    @Async("backgroundTaskExecutor")
++    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
++    public void handleQuestionEmbeddingRequested(QuestionEmbeddingRequestedEvent event) {
++        questionRepository.findById(event.questionId()).ifPresent(this::embedBestEffort);
++    }
++
++    private void embedBestEffort(Question question) {
++        try {
++            embedForSave(question);
++            questionRepository.save(question);
++        } catch (RuntimeException e) {
++            var id = question == null ? null : question.getId();
++            var workspaceGuid = question == null ? null : question.getWorkspaceGuid();
++            log.warn(
++                "Embedding failed for question {} in workspace {}, saving without embedding",
++                id,
++                workspaceGuid,
++                e
++            );
++            clearEmbedding(question);
++            questionRepository.save(question);
++        }
++    }
++
++    public static record QuestionEmbeddingRequestedEvent(Integer questionId) {}
++
+     public double[] embedQuestionText(String questionText) {
+         return embedQuestionTexts(List.of(questionText)).getFirst();
+     }
+diff --git a/backend/src/main/java/cz/scrumdojo/quizmaster/config/AsyncConfig.java b/backend/src/main/java/cz/scrumdojo/quizmaster/config/AsyncConfig.java
+new file mode 100644
+index 00000000..f9c80c05
+--- /dev/null
++++ b/backend/src/main/java/cz/scrumdojo/quizmaster/config/AsyncConfig.java
+@@ -0,0 +1,23 @@
++package cz.scrumdojo.quizmaster.config;
++
++import java.util.concurrent.Executor;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++import org.springframework.scheduling.annotation.EnableAsync;
++import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
++
++@Configuration
++@EnableAsync
++public class AsyncConfig {
++
++    @Bean(name = "backgroundTaskExecutor")
++    public Executor backgroundTaskExecutor() {
++        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
++        executor.setCorePoolSize(2);
++        executor.setMaxPoolSize(5);
++        executor.setQueueCapacity(50);
++        executor.setThreadNamePrefix("background-task-");
++        executor.initialize();
++        return executor;
++    }
++}
+diff --git a/backend/src/main/java/cz/scrumdojo/quizmaster/workspace/WorkspaceQuestionController.java b/backend/src/main/java/cz/scrumdojo/quizmaster/workspace/WorkspaceQuestionController.java
+index 311e3103..7ee2421c 100644
+--- a/backend/src/main/java/cz/scrumdojo/quizmaster/workspace/WorkspaceQuestionController.java
++++ b/backend/src/main/java/cz/scrumdojo/quizmaster/workspace/WorkspaceQuestionController.java
+@@ -3,21 +3,17 @@ package cz.scrumdojo.quizmaster.workspace;
+ import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingService;
+ import cz.scrumdojo.quizmaster.common.IdResponse;
+ import cz.scrumdojo.quizmaster.common.ResponseHelper;
+-import cz.scrumdojo.quizmaster.question.Question;
+ import cz.scrumdojo.quizmaster.question.QuestionRepository;
+ import cz.scrumdojo.quizmaster.question.QuestionRequest;
+ import cz.scrumdojo.quizmaster.question.QuestionResponse;
+ import cz.scrumdojo.quizmaster.quiz.QuizRepository;
+ import jakarta.validation.Valid;
+-import java.util.List;
+ import java.util.Set;
+-import lombok.extern.slf4j.Slf4j;
+ import org.springframework.data.domain.PageRequest;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.transaction.annotation.Transactional;
+ import org.springframework.web.bind.annotation.*;
+ 
+-@Slf4j
+ @RestController
+ @RequestMapping("/api/workspaces/{workspaceGuid}/questions")
+ public class WorkspaceQuestionController {
+@@ -99,8 +95,8 @@ public class WorkspaceQuestionController {
+         workspaceGuard.requireExists(workspaceGuid);
+ 
+         var question = request.toEntity(workspaceGuid);
+-        embedBestEffort(question);
+         var created = questionRepository.save(question);
++        questionEmbeddingService.scheduleEmbedding(created.getId());
+         return ResponseEntity.ok(new IdResponse(created.getId()));
+     }
+ 
+@@ -118,8 +114,8 @@ public class WorkspaceQuestionController {
+             .map(existing -> {
+                 var question = request.toEntity(workspaceGuid);
+                 question.setId(existing.getId());
+-                embedBestEffort(question);
+                 questionRepository.save(question);
++                questionEmbeddingService.scheduleEmbedding(existing.getId());
+                 return ResponseEntity.ok(new IdResponse(existing.getId()));
+             })
+             .orElse(ResponseEntity.notFound().build());
+@@ -133,15 +129,4 @@ public class WorkspaceQuestionController {
+         int deleted = questionRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
+         return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+     }
+-
+-    private void embedBestEffort(Question question) {
+-        try {
+-            questionEmbeddingService.embedForSave(question);
+-        } catch (RuntimeException e) {
+-            log.warn("Embedding failed for question, saving without embedding", e);
+-            question.setEmbedding(null);
+-            question.setEmbeddingModel(null);
+-            question.setEmbeddingTextHash(null);
+-        }
+-    }
+ }
+diff --git a/backend/src/main/resources/application.properties b/backend/src/main/resources/application.properties
+index fd69193d..0846f8a9 100644
+--- a/backend/src/main/resources/application.properties
++++ b/backend/src/main/resources/application.properties
+@@ -14,4 +14,5 @@ ai.token=${OPENROUTER_API_KEY:}
+ ai.model=${OPENROUTER_MODEL:openai/gpt-5.4}
+ ai.max-tokens=${OPENROUTER_MAX_TOKENS:8192}
+ ai.embedding.model=${OPENROUTER_EMBEDDING_MODEL:openai/text-embedding-3-small}
++ai.embedding.timeout=${AI_EMBEDDING_TIMEOUT:PT10S}
+ ai.embedding.similarity-threshold=${AI_EMBEDDING_SIMILARITY_THRESHOLD:0.90}
+diff --git a/backend/src/test/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClientTimeoutTest.java b/backend/src/test/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClientTimeoutTest.java
+new file mode 100644
+index 00000000..648bdd35
+--- /dev/null
++++ b/backend/src/test/java/cz/scrumdojo/quizmaster/aiassistant/OpenRouterEmbeddingClientTimeoutTest.java
+@@ -0,0 +1,22 @@
++package cz.scrumdojo.quizmaster.aiassistant;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++import java.time.Duration;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.test.context.TestPropertySource;
++
++@SpringBootTest
++@TestPropertySource(properties = "ai.embedding.timeout=PT5S")
++class OpenRouterEmbeddingClientTimeoutTest {
++
++    @Autowired
++    private OpenRouterEmbeddingClient embeddingClient;
++
++    @Test
++    void usesConfiguredTimeoutProperty() {
++        assertThat(embeddingClient.timeout()).isEqualTo(Duration.ofSeconds(5));
++    }
++}
+diff --git a/backend/src/test/java/cz/scrumdojo/quizmaster/question/QuestionEmbeddingPersistenceTest.java b/backend/src/test/java/cz/scrumdojo/quizmaster/question/QuestionEmbeddingPersistenceTest.java
+index 829b107e..737deedc 100644
+--- a/backend/src/test/java/cz/scrumdojo/quizmaster/question/QuestionEmbeddingPersistenceTest.java
++++ b/backend/src/test/java/cz/scrumdojo/quizmaster/question/QuestionEmbeddingPersistenceTest.java
+@@ -11,6 +11,7 @@ import cz.scrumdojo.quizmaster.TestFixtures;
+ import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingText;
+ import cz.scrumdojo.quizmaster.common.IdResponse;
+ import cz.scrumdojo.quizmaster.workspace.Workspace;
++import java.time.Duration;
+ import org.junit.jupiter.api.Tag;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.beans.factory.annotation.Autowired;
+@@ -63,7 +64,7 @@ class QuestionEmbeddingPersistenceTest {
+             IdResponse.class
+         );
+ 
+-        Question question = questionRepository.findById(response.id()).orElseThrow();
++        Question question = waitForEmbedding(response.id());
+         assertThat(question.getEmbedding()).isNotEmpty();
+         assertThat(question.getEmbeddingModel()).isEqualTo(embeddingModel);
+         assertThat(question.getEmbeddingTextHash()).isEqualTo(
+@@ -86,13 +87,25 @@ class QuestionEmbeddingPersistenceTest {
+             )
+             .andExpect(status().isOk());
+ 
+-        Question updated = questionRepository.findById(question.getId()).orElseThrow();
++        Question updated = waitForEmbedding(question.getId());
+         assertThat(updated.getEmbedding()).isNotEmpty();
+         assertThat(updated.getEmbeddingModel()).isEqualTo(embeddingModel);
+         assertThat(updated.getEmbeddingTextHash()).isEqualTo(QuestionEmbeddingText.hash("What is Kanban?"));
+         assertThat(updated.getEmbeddingTextHash()).isNotEqualTo(QuestionEmbeddingText.hash("What is Scrum?"));
+     }
+ 
++    private Question waitForEmbedding(Integer questionId) throws InterruptedException {
++        long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
++        while (System.nanoTime() < deadline) {
++            Question question = questionRepository.findById(questionId).orElseThrow();
++            if (question.getEmbedding() != null && question.getEmbedding().length > 0) {
++                return question;
++            }
++            Thread.sleep(200);
++        }
++        return questionRepository.findById(questionId).orElseThrow();
++    }
++
+     private static String questionJson(String question) {
+         return """
+         {
+-- 
+2.47.3
+

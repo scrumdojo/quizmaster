@@ -3,21 +3,17 @@ package cz.scrumdojo.quizmaster.workspace;
 import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
-import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/workspaces/{workspaceGuid}/questions")
 public class WorkspaceQuestionController {
@@ -99,8 +95,8 @@ public class WorkspaceQuestionController {
         workspaceGuard.requireExists(workspaceGuid);
 
         var question = request.toEntity(workspaceGuid);
-        embedBestEffort(question);
         var created = questionRepository.save(question);
+        questionEmbeddingService.scheduleEmbedding(created.getId());
         return ResponseEntity.ok(new IdResponse(created.getId()));
     }
 
@@ -118,8 +114,8 @@ public class WorkspaceQuestionController {
             .map(existing -> {
                 var question = request.toEntity(workspaceGuid);
                 question.setId(existing.getId());
-                embedBestEffort(question);
                 questionRepository.save(question);
+                questionEmbeddingService.scheduleEmbedding(existing.getId());
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
             })
             .orElse(ResponseEntity.notFound().build());
@@ -132,16 +128,5 @@ public class WorkspaceQuestionController {
 
         int deleted = questionRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
         return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
-    }
-
-    private void embedBestEffort(Question question) {
-        try {
-            questionEmbeddingService.embedForSave(question);
-        } catch (RuntimeException e) {
-            log.warn("Embedding failed for question, saving without embedding", e);
-            question.setEmbedding(null);
-            question.setEmbeddingModel(null);
-            question.setEmbeddingTextHash(null);
-        }
     }
 }

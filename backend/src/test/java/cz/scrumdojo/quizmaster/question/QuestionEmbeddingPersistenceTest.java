@@ -11,6 +11,7 @@ import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingText;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
+import java.time.Duration;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ class QuestionEmbeddingPersistenceTest {
             IdResponse.class
         );
 
-        Question question = questionRepository.findById(response.id()).orElseThrow();
+        Question question = waitForEmbedding(response.id());
         assertThat(question.getEmbedding()).isNotEmpty();
         assertThat(question.getEmbeddingModel()).isEqualTo(embeddingModel);
         assertThat(question.getEmbeddingTextHash()).isEqualTo(
@@ -86,11 +87,23 @@ class QuestionEmbeddingPersistenceTest {
             )
             .andExpect(status().isOk());
 
-        Question updated = questionRepository.findById(question.getId()).orElseThrow();
+        Question updated = waitForEmbedding(question.getId());
         assertThat(updated.getEmbedding()).isNotEmpty();
         assertThat(updated.getEmbeddingModel()).isEqualTo(embeddingModel);
         assertThat(updated.getEmbeddingTextHash()).isEqualTo(QuestionEmbeddingText.hash("What is Kanban?"));
         assertThat(updated.getEmbeddingTextHash()).isNotEqualTo(QuestionEmbeddingText.hash("What is Scrum?"));
+    }
+
+    private Question waitForEmbedding(Integer questionId) throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+        while (System.nanoTime() < deadline) {
+            Question question = questionRepository.findById(questionId).orElseThrow();
+            if (question.getEmbedding() != null && question.getEmbedding().length > 0) {
+                return question;
+            }
+            Thread.sleep(200);
+        }
+        return questionRepository.findById(questionId).orElseThrow();
     }
 
     private static String questionJson(String question) {
