@@ -1,13 +1,9 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
+import { countDecimalDigits } from '#shared/parsers/decimal-digits.ts'
 import { expectTextToBe } from '#steps/common.ts'
 import { Then, When } from '#steps/fixture.ts'
-
-const countDecimalDigits = (value: string): number => {
-    const [, decimals] = value.split('.')
-    return decimals?.length ?? 0
-}
 
 Then('I see a number input', async function () {
     await expect(this.takeQuestionPage.numericalInputLocator()).toBeVisible()
