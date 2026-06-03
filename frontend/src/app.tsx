@@ -28,6 +28,18 @@ const SPEAR_CURSOR = `url("data:image/svg+xml;base64,${btoa(
 
 document.documentElement.style.setProperty('--cursor-spear', SPEAR_CURSOR)
 
+const PAW_CURSOR = `url("data:image/svg+xml;base64,${btoa(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52">' +
+        '<ellipse cx="26" cy="36" rx="16" ry="13" fill="#3d1a00"/>' +
+        '<circle cx="10" cy="20" r="7" fill="#3d1a00"/>' +
+        '<circle cx="21" cy="13" r="7" fill="#3d1a00"/>' +
+        '<circle cx="33" cy="13" r="7" fill="#3d1a00"/>' +
+        '<circle cx="44" cy="20" r="7" fill="#3d1a00"/>' +
+        '</svg>',
+)}") 26 26, auto`
+
+document.documentElement.style.setProperty('--cursor-paw', PAW_CURSOR)
+
 const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] = [
     { value: 'off', label: 'Turn off', cursor: 'pointer' },
     { value: 'angels', label: 'Angels & Devils', cursor: 'pointer' },

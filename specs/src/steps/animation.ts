@@ -60,8 +60,20 @@ Then('hovering over a mammoth shows a spear cursor', async function () {
     await this.appPage.expectMammothSpriteSpearCursor()
 })
 
-Then('a giant mammoth with 10 lives can appear', async function () {
+Then('hovering over a hunter shows a paw cursor', async function () {
+    await this.appPage.expectHunterSpritePawCursor()
+})
+
+Then('a giant mammoth with 100 lives can appear', async function () {
     await this.appPage.expectGiantMammothEnabled()
+})
+
+Then('the giant mammoth stomps nearby hunters', async function () {
+    await this.appPage.expectGiantMammothStomp()
+})
+
+Then('the giant mammoth throws stones at hunters', async function () {
+    await this.appPage.expectGiantMammothThrowsStones()
 })
 
 Then('mammoths can attack and kill hunters', async function () {
@@ -94,6 +106,22 @@ Then('the Hunters scoreboard is on the {word} side', async function (side: strin
 
 Then('the Mammoths scoreboard is on the {word} side', async function (side: string) {
     await this.appPage.expectMammothScoreboardSide(side)
+})
+
+Then('mammoths are contained within the screen', async function () {
+    await this.appPage.expectMammothContained()
+})
+
+Then('basic mammoths have 10 lives', async function () {
+    await this.appPage.expectMammothHealth()
+})
+
+Then('mammoths can dodge incoming attacks', async function () {
+    await this.appPage.expectMammothDodge()
+})
+
+Then('dodges are visually shown', async function () {
+    await this.appPage.expectMammothDodgeVisual()
 })
 
 Then('cave throat singing audio plays during the battle', async function () {

@@ -67,6 +67,16 @@ type SplatParticle = {
     shrink?: number
 }
 
+type FloatingText = {
+    x: number
+    y: number
+    vy: number
+    text: string
+    opacity: number
+    color: string
+    size: number
+}
+
 type GoalStar = {
     x: number
     y: number
@@ -716,14 +726,21 @@ type Mammoth = {
     vy: number
     t: number
     flip: boolean
+    health: number
 }
+
+type Stone = { x: number; y: number; vx: number; vy: number; size: number }
 
 type GiantMammoth = Mammoth & {
     health: number
     scale: number
+    stones: Stone[]
+    throwCooldown: number
 }
 
-const GIANT_MAMMOTH_HEALTH = 10
+const MAMMOTH_HEALTH = 10
+const MAMMOTH_DODGE_CHANCE = 0.35
+const GIANT_MAMMOTH_HEALTH = 100
 const GIANT_MAMMOTH_SCALE = 2.5
 const GIANT_MAMMOTH_MIN_DELAY_MS = 20000
 const GIANT_MAMMOTH_MAX_DELAY_MS = 45000
@@ -742,6 +759,8 @@ function makeGiantMammoth(w: number, h: number): GiantMammoth {
         flip: true,
         health: GIANT_MAMMOTH_HEALTH,
         scale: GIANT_MAMMOTH_SCALE,
+        stones: [],
+        throwCooldown: 60,
     }
 }
 
@@ -764,6 +783,7 @@ function makeMammoth(w: number, h: number): Mammoth {
         vy: (Math.random() - 0.5) * 0.35,
         t: 0,
         flip: true,
+        health: MAMMOTH_HEALTH,
     }
 }
 
@@ -952,6 +972,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     const mammoths: Mammoth[] = []
     const hunters: Hunter[] = []
     const particles: SplatParticle[] = []
+    const floatingTexts: FloatingText[] = []
     let mammothScore = 0
     let hunterScore = 0
     let giantMammoth: GiantMammoth | null = null
@@ -995,30 +1016,52 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
             }
         }
 
-        // Mammoth hit — explosion burst
+        // Mammoth hit — dodge or damage
         for (let k = mammoths.length - 1; k >= 0; k--) {
             const m = mammoths[k]
             const dx = cx - m.x
             const dy = cy - m.y
             if (dx * dx + dy * dy < 45 * 45) {
-                for (let p = 0; p < 22; p++) {
+                if (Math.random() < MAMMOTH_DODGE_CHANCE) {
+                    ninjaDodge(m)
+                    return
+                }
+                m.health--
+                for (let p = 0; p < 8; p++) {
                     const angle = Math.random() * TAU
-                    const speed = 2 + Math.random() * 5
                     particles.push({
                         x: m.x,
                         y: m.y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        size: 3 + Math.random() * 9,
+                        vx: Math.cos(angle) * (1.5 + Math.random() * 3),
+                        vy: Math.sin(angle) * (1.5 + Math.random() * 3),
+                        size: 2 + Math.random() * 6,
                         opacity: 1,
-                        color: ['#8B4513', '#A0522D', '#C07040', '#F0EDD5'][Math.floor(Math.random() * 4)],
+                        color: ['#8B4513', '#A0522D', '#C07040'][Math.floor(Math.random() * 3)],
                         gravity: 0.05,
-                        fade: 0.02,
+                        fade: 0.03,
                         shrink: 0.985,
                     })
                 }
-                mammoths[k] = makeMammoth(w, h)
-                hunterScore++
+                if (m.health <= 0) {
+                    for (let p = 0; p < 22; p++) {
+                        const angle = Math.random() * TAU
+                        const speed = 2 + Math.random() * 5
+                        particles.push({
+                            x: m.x,
+                            y: m.y,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed,
+                            size: 3 + Math.random() * 9,
+                            opacity: 1,
+                            color: ['#8B4513', '#A0522D', '#C07040', '#F0EDD5'][Math.floor(Math.random() * 4)],
+                            gravity: 0.05,
+                            fade: 0.02,
+                            shrink: 0.985,
+                        })
+                    }
+                    mammoths[k] = makeMammoth(w, h)
+                    hunterScore++
+                }
                 return
             }
         }
@@ -1033,8 +1076,16 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
             const dy = my - m.y
             return dx * dx + dy * dy < 50 * 50
         })
+        const nearHunter = hunters.some(hu => {
+            const dx = mx - hu.x
+            const dy = my - hu.y
+            return dx * dx + dy * dy < 50 * 50
+        })
         const spear = document.documentElement.style.getPropertyValue('--cursor-spear')
-        document.documentElement.style.cursor = nearMammoth && spear ? spear : ''
+        const paw = document.documentElement.style.getPropertyValue('--cursor-paw')
+        if (nearHunter && paw) document.documentElement.style.cursor = paw
+        else if (nearMammoth && spear) document.documentElement.style.cursor = spear
+        else document.documentElement.style.cursor = ''
     }
     window.addEventListener('mousemove', onMouseMove)
 
@@ -1044,7 +1095,29 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     const battleAudio = new Audio('/cave_throat_singing.mp3')
     battleAudio.loop = true
     battleAudio.volume = 1
-    canvas.dataset.battleAudio = 'cave_throat_singing'
+
+    const ninjaDodge = (m: Mammoth) => {
+        const dir = Math.random() > 0.5 ? -1 : 1
+        m.vy = dir * 7
+        m.vx *= 2.2
+        m.vx = Math.sign(m.vx) * Math.min(Math.abs(m.vx), 3)
+        for (let p = 0; p < 10; p++) {
+            const angle = Math.random() * TAU
+            particles.push({
+                x: m.x,
+                y: m.y,
+                vx: Math.cos(angle) * (1 + Math.random() * 2),
+                vy: Math.sin(angle) * (1 + Math.random() * 2),
+                size: 3 + Math.random() * 6,
+                opacity: 0.8,
+                color: ['#4c1d95', '#6d28d9', '#a78bfa', '#1e1b4b'][Math.floor(Math.random() * 4)],
+                gravity: 0.02,
+                fade: 0.04,
+                shrink: 0.97,
+            })
+        }
+        floatingTexts.push({ x: m.x, y: m.y - 30, vy: -1.5, text: 'DODGE!', opacity: 1, color: '#7c3aed', size: 14 })
+    }
 
     const resumeOnClick = () => {
         if (battleAudio.paused) battleAudio.play().catch(() => {})
@@ -1064,10 +1137,26 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
             m.t++
             m.x += m.vx
             m.y += m.vy + Math.sin(m.t * 0.022) * 0.4
+            m.vy *= 0.96
 
-            if (m.x < -100) {
-                mammoths[i] = makeMammoth(w, h)
-                continue
+            const margin = 60
+            if (m.x < margin) {
+                m.x = margin
+                m.vx = Math.abs(m.vx)
+                m.flip = false
+            }
+            if (m.x > w - margin) {
+                m.x = w - margin
+                m.vx = -Math.abs(m.vx)
+                m.flip = true
+            }
+            if (m.y < margin) {
+                m.y = margin
+                m.vy = Math.abs(m.vy) * 0.5
+            }
+            if (m.y > h - margin) {
+                m.y = h - margin
+                m.vy = -Math.abs(m.vy) * 0.5
             }
 
             // Hit test — mammoth tramples nearby hunters
@@ -1098,6 +1187,16 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
             }
 
             drawMammoth(ctx, m)
+
+            // HP bar
+            const barW = 36
+            const barH = 4
+            const barX = m.x - barW / 2
+            const barY = m.y - 46
+            ctx.fillStyle = 'rgba(0,0,0,0.35)'
+            ctx.fillRect(barX, barY, barW, barH)
+            ctx.fillStyle = '#e53e3e'
+            ctx.fillRect(barX, barY, barW * (m.health / MAMMOTH_HEALTH), barH)
         }
 
         // ── giant mammoth ────────────────────────────────
@@ -1113,26 +1212,157 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                 giantMammoth = null
                 nextGiantMammothAt = now + randomGiantMammothDelayMs()
             } else {
+                const gm = giantMammoth
+                const stompRadius = 70 * gm.scale
+
+                // Stomp — kill any hunter within range
+                for (let j = hunters.length - 1; j >= 0; j--) {
+                    const hu = hunters[j]
+                    const dx = hu.x - gm.x
+                    const dy = hu.y - gm.y
+                    if (dx * dx + dy * dy < stompRadius * stompRadius) {
+                        for (let p = 0; p < 20; p++) {
+                            const angle = Math.random() * TAU
+                            const speed = 2 + Math.random() * 5
+                            particles.push({
+                                x: hu.x,
+                                y: hu.y,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                size: 4 + Math.random() * 8,
+                                opacity: 1,
+                                color: ['#3d1a00', '#5C3D11', '#7B3A0E'][Math.floor(Math.random() * 3)],
+                                gravity: 0.08,
+                                fade: 0.025,
+                                shrink: 0.97,
+                            })
+                        }
+                        floatingTexts.push({
+                            x: hu.x,
+                            y: hu.y - 20,
+                            vy: -1.5,
+                            text: 'STOMP!',
+                            opacity: 1,
+                            color: '#dc2626',
+                            size: 18,
+                        })
+                        hunters[j] = makeHunter(w, h)
+                        mammothScore++
+                    }
+                }
+
+                // Throw stone at nearest hunter
+                gm.throwCooldown--
+                if (gm.throwCooldown <= 0) {
+                    gm.throwCooldown = 80 + Math.floor(Math.random() * 60)
+                    let nearest: Hunter | null = null
+                    let nearestDist = Infinity
+                    for (const hu of hunters) {
+                        const ddx = hu.x - gm.x
+                        const ddy = hu.y - gm.y
+                        const dist = Math.sqrt(ddx * ddx + ddy * ddy)
+                        if (dist < nearestDist) {
+                            nearestDist = dist
+                            nearest = hu
+                        }
+                    }
+                    if (nearest) {
+                        const ddx = nearest.x - gm.x
+                        const ddy = nearest.y - gm.y
+                        const dist = Math.max(nearestDist, 1)
+                        const speed = 6 + Math.random() * 3
+                        gm.stones.push({
+                            x: gm.x,
+                            y: gm.y - 20,
+                            vx: (ddx / dist) * speed,
+                            vy: (ddy / dist) * speed - 4,
+                            size: 10 + Math.random() * 6,
+                        })
+                    }
+                }
+
+                // Update and draw stones
+                for (let s = gm.stones.length - 1; s >= 0; s--) {
+                    const st = gm.stones[s]
+                    st.x += st.vx
+                    st.y += st.vy
+                    st.vy += 0.18
+                    if (st.x < -40 || st.x > w + 40 || st.y > h + 40) {
+                        gm.stones.splice(s, 1)
+                        continue
+                    }
+                    // Hit hunter
+                    let stoneHit = false
+                    for (let j = hunters.length - 1; j >= 0; j--) {
+                        const hu = hunters[j]
+                        const dx = st.x - hu.x
+                        const dy = st.y - hu.y
+                        if (dx * dx + dy * dy < (st.size + 20) * (st.size + 20)) {
+                            for (let p = 0; p < 16; p++) {
+                                const angle = Math.random() * TAU
+                                const speed = 2 + Math.random() * 4
+                                particles.push({
+                                    x: hu.x,
+                                    y: hu.y,
+                                    vx: Math.cos(angle) * speed,
+                                    vy: Math.sin(angle) * speed,
+                                    size: 3 + Math.random() * 7,
+                                    opacity: 1,
+                                    color: ['#6b7280', '#374151', '#9ca3af'][Math.floor(Math.random() * 3)],
+                                    gravity: 0.06,
+                                    fade: 0.025,
+                                    shrink: 0.975,
+                                })
+                            }
+                            floatingTexts.push({
+                                x: hu.x,
+                                y: hu.y - 20,
+                                vy: -1.5,
+                                text: '💥',
+                                opacity: 1,
+                                color: '#fff',
+                                size: 20,
+                            })
+                            hunters[j] = makeHunter(w, h)
+                            mammothScore++
+                            gm.stones.splice(s, 1)
+                            stoneHit = true
+                            break
+                        }
+                    }
+                    if (stoneHit) continue
+                    // Draw stone
+                    ctx.save()
+                    ctx.fillStyle = '#4b5563'
+                    ctx.strokeStyle = '#1f2937'
+                    ctx.lineWidth = 1.5
+                    ctx.beginPath()
+                    ctx.arc(st.x, st.y, st.size, 0, TAU)
+                    ctx.fill()
+                    ctx.stroke()
+                    ctx.restore()
+                }
+
                 // Draw scaled mammoth
                 ctx.save()
-                ctx.translate(giantMammoth.x, giantMammoth.y)
-                ctx.scale(giantMammoth.scale, giantMammoth.scale)
-                drawMammoth(ctx, { ...giantMammoth, x: 0, y: 0 })
+                ctx.translate(gm.x, gm.y)
+                ctx.scale(gm.scale, gm.scale)
+                drawMammoth(ctx, { ...gm, x: 0, y: 0 })
                 ctx.restore()
                 // Health bar
-                const barW = 80 * giantMammoth.scale
+                const barW = 80 * gm.scale
                 const barH = 8
-                const barX = giantMammoth.x - barW / 2
-                const barY = giantMammoth.y - 55 * giantMammoth.scale
+                const barX = gm.x - barW / 2
+                const barY = gm.y - 55 * gm.scale
                 ctx.fillStyle = 'rgba(0,0,0,0.4)'
                 ctx.fillRect(barX, barY, barW, barH)
                 ctx.fillStyle = '#e53e3e'
-                ctx.fillRect(barX, barY, barW * (giantMammoth.health / GIANT_MAMMOTH_HEALTH), barH)
+                ctx.fillRect(barX, barY, barW * (gm.health / GIANT_MAMMOTH_HEALTH), barH)
                 // Lives text
                 ctx.fillStyle = '#fff'
-                ctx.font = `bold ${12 * giantMammoth.scale}px sans-serif`
+                ctx.font = `bold ${12 * gm.scale}px sans-serif`
                 ctx.textAlign = 'center'
-                ctx.fillText(`♥ ${giantMammoth.health}`, giantMammoth.x, barY - 4)
+                ctx.fillText(`♥ ${gm.health}`, gm.x, barY - 4)
                 ctx.textAlign = 'left'
             }
         }
@@ -1205,25 +1435,49 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                     const dx = sp.x - m.x
                     const dy = sp.y - m.y
                     if (dx * dx + dy * dy < 40 * 40) {
-                        for (let p = 0; p < 18; p++) {
+                        if (Math.random() < MAMMOTH_DODGE_CHANCE) {
+                            ninjaDodge(m)
+                            hu.spears.splice(j, 1)
+                            hit = true
+                            break
+                        }
+                        m.health--
+                        for (let p = 0; p < 6; p++) {
                             const angle = Math.random() * TAU
-                            const speed = 1.2 + Math.random() * 4.5
                             particles.push({
                                 x: m.x,
                                 y: m.y,
-                                vx: Math.cos(angle) * speed,
-                                vy: Math.sin(angle) * speed,
-                                size: 3 + Math.random() * 7,
+                                vx: Math.cos(angle) * (1 + Math.random() * 2.5),
+                                vy: Math.sin(angle) * (1 + Math.random() * 2.5),
+                                size: 2 + Math.random() * 5,
                                 opacity: 1,
                                 color: ['#8B4513', '#A0522D', '#C07040'][Math.floor(Math.random() * 3)],
                                 gravity: 0.05,
-                                fade: 0.022,
+                                fade: 0.03,
                                 shrink: 0.985,
                             })
                         }
-                        mammoths[k] = makeMammoth(w, h)
                         hu.spears.splice(j, 1)
-                        hunterScore++
+                        if (m.health <= 0) {
+                            for (let p = 0; p < 18; p++) {
+                                const angle = Math.random() * TAU
+                                const speed = 1.2 + Math.random() * 4.5
+                                particles.push({
+                                    x: m.x,
+                                    y: m.y,
+                                    vx: Math.cos(angle) * speed,
+                                    vy: Math.sin(angle) * speed,
+                                    size: 3 + Math.random() * 7,
+                                    opacity: 1,
+                                    color: ['#8B4513', '#A0522D', '#C07040'][Math.floor(Math.random() * 3)],
+                                    gravity: 0.05,
+                                    fade: 0.022,
+                                    shrink: 0.985,
+                                })
+                            }
+                            mammoths[k] = makeMammoth(w, h)
+                            hunterScore++
+                        }
                         hit = true
                         break
                     }
@@ -1326,6 +1580,25 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
 
         ctx.globalAlpha = 1
 
+        // ── floating texts ───────────────────────────────
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+            const ft = floatingTexts[i]
+            ft.y += ft.vy
+            ft.opacity -= 0.022
+            if (ft.opacity <= 0) {
+                floatingTexts.splice(i, 1)
+                continue
+            }
+            ctx.globalAlpha = ft.opacity
+            ctx.fillStyle = ft.color
+            ctx.font = `bold ${ft.size}px sans-serif`
+            ctx.textAlign = 'center'
+            ctx.fillText(ft.text, ft.x, ft.y)
+            ctx.textAlign = 'left'
+        }
+
+        ctx.globalAlpha = 1
+
         // ── scoreboards ─────────────────────────────────
         drawScorePanel(ctx, {
             x: 18,
@@ -1363,7 +1636,6 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
         cancelled = true
         battleAudio.pause()
         battleAudio.currentTime = 0
-        delete canvas.dataset.battleAudio
         window.removeEventListener('resize', onResize)
         window.removeEventListener('click', onCanvasClick)
         window.removeEventListener('click', resumeOnClick)
@@ -1403,7 +1675,15 @@ function applyTheme(theme: AnimationTheme) {
             canvas.dataset.hunterClickKill = 'true'
             canvas.dataset.mammothClickKill = 'true'
             canvas.dataset.mammothHoverSpear = 'true'
-            canvas.dataset.giantMammothLives = '10'
+            canvas.dataset.hunterHoverPaw = 'true'
+            canvas.dataset.giantMammothLives = '100'
+            canvas.dataset.giantMammothStomp = 'true'
+            canvas.dataset.giantMammothThrowsStones = 'true'
+            canvas.dataset.mammothContained = 'true'
+            canvas.dataset.mammothHealth = String(MAMMOTH_HEALTH)
+            canvas.dataset.mammothDodge = 'true'
+            canvas.dataset.mammothDodgeVisual = 'true'
+            canvas.dataset.battleAudio = 'cave_throat_singing'
         } else {
             delete canvas.dataset.mammothAttacksHunters
             delete canvas.dataset.hunterScoreboardSide
@@ -1411,7 +1691,15 @@ function applyTheme(theme: AnimationTheme) {
             delete canvas.dataset.hunterClickKill
             delete canvas.dataset.mammothClickKill
             delete canvas.dataset.mammothHoverSpear
+            delete canvas.dataset.hunterHoverPaw
             delete canvas.dataset.giantMammothLives
+            delete canvas.dataset.giantMammothStomp
+            delete canvas.dataset.giantMammothThrowsStones
+            delete canvas.dataset.mammothContained
+            delete canvas.dataset.mammothHealth
+            delete canvas.dataset.mammothDodge
+            delete canvas.dataset.mammothDodgeVisual
+            delete canvas.dataset.battleAudio
         }
     }
 

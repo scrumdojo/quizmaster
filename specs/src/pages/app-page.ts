@@ -57,9 +57,15 @@ export class AppPage {
         await expect(this.page.getByRole('button', { name: 'Turn off' })).toBeVisible()
     }
 
-    expectGiantMammothEnabled = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-lives', '10')
+    expectGiantMammothEnabled = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-lives', '100')
+
+    expectGiantMammothStomp = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-stomp', 'true')
+
+    expectGiantMammothThrowsStones = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-throws-stones', 'true')
 
     expectMammothSpriteSpearCursor = () => expect(this.canvas()).toHaveAttribute('data-mammoth-hover-spear', 'true')
+
+    expectHunterSpritePawCursor = () => expect(this.canvas()).toHaveAttribute('data-hunter-hover-paw', 'true')
 
     expectMammothButtonSpearCursor = () =>
         expect(this.page.getByRole('button', { name: 'Mammoths' })).toHaveAttribute('style', /cursor:.*url\(/)
@@ -84,6 +90,14 @@ export class AppPage {
 
     expectMammothScoreboardSide = (side: string) =>
         expect(this.canvas()).toHaveAttribute('data-mammoth-scoreboard-side', side)
+
+    expectMammothContained = () => expect(this.canvas()).toHaveAttribute('data-mammoth-contained', 'true')
+
+    expectMammothHealth = () => expect(this.canvas()).toHaveAttribute('data-mammoth-health', '10')
+
+    expectMammothDodge = () => expect(this.canvas()).toHaveAttribute('data-mammoth-dodge', 'true')
+
+    expectMammothDodgeVisual = () => expect(this.canvas()).toHaveAttribute('data-mammoth-dodge-visual', 'true')
 
     expectBattleAudio = () => expect(this.canvas()).toHaveAttribute('data-battle-audio', 'cave_throat_singing')
 }
