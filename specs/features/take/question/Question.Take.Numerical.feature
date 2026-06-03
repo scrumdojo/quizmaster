@@ -31,21 +31,6 @@ Feature: Take a numerical question
       | 3.16   | Incorrect! |
 
 
-  @skip
-  Scenario: Note with number of decimal digits
-    Given question "Value of π to two decimal places?"
-    * with numerical answer "3.14"
-    * saved and bookmarked as "pi"
-    When I take question "pi"
-    And I retake with submit button states:
-      | answer | state    |
-      | 3      | inactive |
-      | 3.     | inactive |
-      | 3.1    | inactive |
-      | 3.14   | active   |
-      | 3.141  | inactive |
-
-
   Scenario: Quiz question shows required decimal digits hint
     Given question "Value of π to two decimal places?"
     * with numerical answer "3.14"

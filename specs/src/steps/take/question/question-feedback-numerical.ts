@@ -46,25 +46,3 @@ When('I retake with answers:', async function (data: DataTable) {
         await expectTextToBe(this.takeQuestionPage.questionFeedbackLocator(), feedback)
     }
 })
-
-// This step is used to verify that the submit button's state (enabled/disabled)
-// changes correctly based on the input provided.
-// The data table should have two columns: "answer" and "state", where "state" can be either "active"
-// (submit button enabled) or "inactive" (submit button disabled).
-When('I retake with submit button states:', async function (data: DataTable) {
-    for (const { answer, state } of data.hashes()) {
-        await this.takeQuestionPage.fillNumericalInput(answer)
-
-        if (state === 'active') {
-            await this.takeQuestionPage.expectSubmitEnabled()
-            continue
-        }
-
-        if (state === 'inactive') {
-            await this.takeQuestionPage.expectSubmitDisabled()
-            continue
-        }
-
-        throw new Error(`Invalid submit button state: ${state}. Allowed values are "active" or "inactive".`)
-    }
-})
