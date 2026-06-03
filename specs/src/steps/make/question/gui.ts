@@ -50,18 +50,13 @@ const aiPrompt = (world: { lastAiAssistantRequest?: { question: string } }) => {
     return prompt ?? ''
 }
 
-const SIMPLE_NUMERICAL_PATTERN = /^-?\d+(?:\.\d+)?$/
-
 const questionSpecToDraft = (row: Record<string, string | undefined>): QuestionDraft => {
     const spec = parseQuestionRow(row)
-    const rawAnswers = row.answers?.trim() ?? ''
-    const plainNumericalAnswer = SIMPLE_NUMERICAL_PATTERN.test(rawAnswers) ? rawAnswers : undefined
-    const numericalAnswer = spec.numericalAnswer ?? plainNumericalAnswer
 
-    if (numericalAnswer !== undefined) {
+    if (spec.numericalAnswer !== undefined) {
         return {
             question: spec.text,
-            answers: [numericalAnswer],
+            answers: [spec.numericalAnswer],
             correctAnswers: [0],
             explanations: [''],
             questionExplanation: spec.explanation ?? '',

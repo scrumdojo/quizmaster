@@ -1,7 +1,7 @@
 import type { AnswerSpec, QuestionAnswersSpec, QuestionSpec } from '#steps/shared/specs.ts'
 
 const CHOICE_PATTERN = /^(.+?)(\s*\(\*\))?$/
-const NUMERICAL_PATTERN = /^(-?\d+(?:\.\d+)?)\s*±\s*(\d+(?:\.\d+)?)$/
+const NUMERICAL_PATTERN = /^(-?\d+(?:\.\d+)?)(?:\s*±\s*(\d+(?:\.\d+)?))?$/
 
 const parseChoiceAnswers = (answersStr: string): AnswerSpec[] =>
     answersStr
