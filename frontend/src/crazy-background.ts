@@ -938,12 +938,13 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
         const rect = canvas.getBoundingClientRect()
         const cx = e.clientX - rect.left
         const cy = e.clientY - rect.top
+
+        // Hunter hit — footprint burst
         for (let j = hunters.length - 1; j >= 0; j--) {
             const hu = hunters[j]
             const dx = cx - hu.x
             const dy = cy - hu.y
             if (dx * dx + dy * dy < 35 * 35) {
-                // Footprint burst — dark earth tones
                 for (let p = 0; p < 16; p++) {
                     const angle = Math.random() * TAU
                     const speed = 1 + Math.random() * 3.5
@@ -962,7 +963,35 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                 }
                 hunters[j] = makeHunter(w, h)
                 mammothScore++
-                break
+                return
+            }
+        }
+
+        // Mammoth hit — explosion burst
+        for (let k = mammoths.length - 1; k >= 0; k--) {
+            const m = mammoths[k]
+            const dx = cx - m.x
+            const dy = cy - m.y
+            if (dx * dx + dy * dy < 45 * 45) {
+                for (let p = 0; p < 22; p++) {
+                    const angle = Math.random() * TAU
+                    const speed = 2 + Math.random() * 5
+                    particles.push({
+                        x: m.x,
+                        y: m.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        size: 3 + Math.random() * 9,
+                        opacity: 1,
+                        color: ['#8B4513', '#A0522D', '#C07040', '#F0EDD5'][Math.floor(Math.random() * 4)],
+                        gravity: 0.05,
+                        fade: 0.02,
+                        shrink: 0.985,
+                    })
+                }
+                mammoths[k] = makeMammoth(w, h)
+                hunterScore++
+                return
             }
         }
     }
@@ -1227,11 +1256,13 @@ function applyTheme(theme: AnimationTheme) {
             canvas.dataset.hunterScoreboardSide = 'left'
             canvas.dataset.mammothScoreboardSide = 'right'
             canvas.dataset.hunterClickKill = 'true'
+            canvas.dataset.mammothClickKill = 'true'
         } else {
             delete canvas.dataset.mammothAttacksHunters
             delete canvas.dataset.hunterScoreboardSide
             delete canvas.dataset.mammothScoreboardSide
             delete canvas.dataset.hunterClickKill
+            delete canvas.dataset.mammothClickKill
         }
     }
 

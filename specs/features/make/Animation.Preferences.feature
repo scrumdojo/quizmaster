@@ -24,6 +24,12 @@ Feature: Background animation preferences
     Then clicking a hunter kills it with a footprint effect
 
 
+  Scenario: Clicking a mammoth instantly kills it with an explosion effect
+    Given I am on the home page
+    When I switch the animation to the mammoths theme
+    Then clicking a mammoth kills it with an explosion effect
+
+
   Scenario: Mammoth button shows a spear cursor
     Given I am on the home page
     When I hover over the mammoth animation option

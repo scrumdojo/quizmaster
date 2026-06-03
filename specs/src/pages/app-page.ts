@@ -44,6 +44,8 @@ export class AppPage {
 
     expectHunterClickKill = () => expect(this.canvas()).toHaveAttribute('data-hunter-click-kill', 'true')
 
+    expectMammothClickKill = () => expect(this.canvas()).toHaveAttribute('data-mammoth-click-kill', 'true')
+
     expectHunterScoreboardSide = (side: string) =>
         expect(this.canvas()).toHaveAttribute('data-hunter-scoreboard-side', side)
 
