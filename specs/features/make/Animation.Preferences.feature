@@ -12,6 +12,12 @@ Feature: Background animation preferences
     Then the background animation shows the mammoths theme
 
 
+  Scenario: Mammoths attack and kill hunters during battle
+    Given I am on the home page
+    When I switch the animation to the mammoths theme
+    Then mammoths can attack and kill hunters
+
+
   Scenario: Mammoth button shows a spear cursor
     Given I am on the home page
     When I hover over the mammoth animation option

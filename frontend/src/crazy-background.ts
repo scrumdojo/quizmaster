@@ -951,6 +951,33 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
                 mammoths[i] = makeMammoth(w, h)
                 continue
             }
+
+            // Hit test — mammoth tramples nearby hunters
+            for (let j = hunters.length - 1; j >= 0; j--) {
+                const hu = hunters[j]
+                const dx = m.x - hu.x
+                const dy = m.y - hu.y
+                if (dx * dx + dy * dy < 45 * 45) {
+                    for (let p = 0; p < 14; p++) {
+                        const angle = Math.random() * TAU
+                        const speed = 1.5 + Math.random() * 3.5
+                        particles.push({
+                            x: hu.x,
+                            y: hu.y,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed,
+                            size: 2 + Math.random() * 5,
+                            opacity: 1,
+                            color: ['#d97706', '#92400e', '#fbbf24'][Math.floor(Math.random() * 3)],
+                            gravity: 0.06,
+                            fade: 0.025,
+                            shrink: 0.98,
+                        })
+                    }
+                    hunters[j] = makeHunter(w, h)
+                }
+            }
+
             drawMammoth(ctx, m)
         }
 
@@ -1121,9 +1148,12 @@ function applyTheme(theme: AnimationTheme) {
     if (theme === 'angels') {
         canvas.dataset.angelScoreboardSide = 'left'
         canvas.dataset.satanScoreboardSide = 'right'
+        delete canvas.dataset.mammothAttacksHunters
     } else {
         delete canvas.dataset.angelScoreboardSide
         delete canvas.dataset.satanScoreboardSide
+        if (theme === 'mammoths') canvas.dataset.mammothAttacksHunters = 'true'
+        else delete canvas.dataset.mammothAttacksHunters
     }
 
     if (theme === 'off') {

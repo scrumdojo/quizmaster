@@ -39,4 +39,6 @@ export class AppPage {
 
     expectMammothButtonSpearCursor = () =>
         expect(this.page.getByRole('button', { name: 'Mammoths' })).toHaveAttribute('style', /cursor:.*url\(/)
+
+    expectMammothsAttackHunters = () => expect(this.canvas()).toHaveAttribute('data-mammoth-attacks-hunters', 'true')
 }

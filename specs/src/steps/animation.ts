@@ -47,3 +47,7 @@ When('I hover over the mammoth animation option', async function () {
 Then('the cursor changes to a spear', async function () {
     await this.appPage.expectMammothButtonSpearCursor()
 })
+
+Then('mammoths can attack and kill hunters', async function () {
+    await this.appPage.expectMammothsAttackHunters()
+})
