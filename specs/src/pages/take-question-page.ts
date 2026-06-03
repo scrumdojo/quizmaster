@@ -51,15 +51,9 @@ export class TakeQuestionPage {
     numericalInputLocator = () => this.page.locator('input[type="number"]')
     private numericalAnswerDigitsHintLocator = () =>
         this.page.locator('.question-fieldset p', { hasText: /decimal digits/i })
-    submitAnswerButtonLocator = () => this.page.locator('#submit-answer')
     fillNumericalInput = (answer: string) => this.numericalInputLocator().fill(answer)
     fillNumericalAnswer = async (answer: string) => {
         await this.numericalInputLocator().fill(answer)
-        const legacySubmitVisible = await this.submitAnswerButtonLocator().isVisible()
-        if (legacySubmitVisible) {
-            await this.submitAnswerButtonLocator().click()
-            return
-        }
         await this.submit()
     }
 
