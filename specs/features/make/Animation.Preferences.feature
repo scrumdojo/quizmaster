@@ -18,6 +18,12 @@ Feature: Background animation preferences
     Then mammoths can attack and kill hunters
 
 
+  Scenario: Clicking a hunter instantly kills it with a footprint effect
+    Given I am on the home page
+    When I switch the animation to the mammoths theme
+    Then clicking a hunter kills it with a footprint effect
+
+
   Scenario: Mammoth button shows a spear cursor
     Given I am on the home page
     When I hover over the mammoth animation option

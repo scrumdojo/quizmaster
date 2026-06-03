@@ -934,6 +934,40 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     }
     window.addEventListener('resize', onResize)
 
+    const onCanvasClick = (e: MouseEvent) => {
+        const rect = canvas.getBoundingClientRect()
+        const cx = e.clientX - rect.left
+        const cy = e.clientY - rect.top
+        for (let j = hunters.length - 1; j >= 0; j--) {
+            const hu = hunters[j]
+            const dx = cx - hu.x
+            const dy = cy - hu.y
+            if (dx * dx + dy * dy < 35 * 35) {
+                // Footprint burst — dark earth tones
+                for (let p = 0; p < 16; p++) {
+                    const angle = Math.random() * TAU
+                    const speed = 1 + Math.random() * 3.5
+                    particles.push({
+                        x: hu.x,
+                        y: hu.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        size: 4 + Math.random() * 8,
+                        opacity: 1,
+                        color: ['#3d1a00', '#5C3D11', '#7B3A0E'][Math.floor(Math.random() * 3)],
+                        gravity: 0.08,
+                        fade: 0.03,
+                        shrink: 0.97,
+                    })
+                }
+                hunters[j] = makeHunter(w, h)
+                mammothScore++
+                break
+            }
+        }
+    }
+    canvas.addEventListener('click', onCanvasClick)
+
     for (let i = 0; i < 5; i++) mammoths.push(makeMammoth(w, h))
     for (let i = 0; i < 4; i++) hunters.push(makeHunter(w, h))
 
@@ -1160,6 +1194,7 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     return () => {
         cancelled = true
         window.removeEventListener('resize', onResize)
+        canvas.removeEventListener('click', onCanvasClick)
     }
 }
 
@@ -1191,10 +1226,12 @@ function applyTheme(theme: AnimationTheme) {
             canvas.dataset.mammothAttacksHunters = 'true'
             canvas.dataset.hunterScoreboardSide = 'left'
             canvas.dataset.mammothScoreboardSide = 'right'
+            canvas.dataset.hunterClickKill = 'true'
         } else {
             delete canvas.dataset.mammothAttacksHunters
             delete canvas.dataset.hunterScoreboardSide
             delete canvas.dataset.mammothScoreboardSide
+            delete canvas.dataset.hunterClickKill
         }
     }
 

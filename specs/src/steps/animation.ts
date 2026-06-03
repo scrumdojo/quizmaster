@@ -52,6 +52,10 @@ Then('mammoths can attack and kill hunters', async function () {
     await this.appPage.expectMammothsAttackHunters()
 })
 
+Then('clicking a hunter kills it with a footprint effect', async function () {
+    await this.appPage.expectHunterClickKill()
+})
+
 Then('the Hunters scoreboard is on the {word} side', async function (side: string) {
     await this.appPage.expectHunterScoreboardSide(side)
 })
