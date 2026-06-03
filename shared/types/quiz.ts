@@ -69,8 +69,15 @@ export interface QuizLeaderboardCohort {
     readonly score: number
 }
 
+export interface QuizLeaderboardIndividual {
+    readonly rank: number
+    readonly nickname: string
+    readonly score: number
+}
+
 export interface QuizLeaderboardResponse {
     readonly cohorts: readonly QuizLeaderboardCohort[]
+    readonly individuals: readonly QuizLeaderboardIndividual[]
 }
 
 export type QuizSubmittedAnswer =

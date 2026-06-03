@@ -39,22 +39,40 @@ public class QuizLeaderboardService {
 
     @Transactional(readOnly = true)
     public Optional<QuizLeaderboardResponse> getLeaderboard(Integer quizId) {
-        return quizRepository.findById(quizId).map(quiz -> new QuizLeaderboardResponse(rankCohorts(quiz)));
+        return quizRepository.findById(quizId).map(this::buildLeaderboard);
     }
 
-    private QuizLeaderboardCohortResponse[] rankCohorts(Quiz quiz) {
-        var finishedCohortAttempts = attemptRepository
+    private QuizLeaderboardResponse buildLeaderboard(Quiz quiz) {
+        var finishedAttempts = attemptRepository
             .findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId())
             .stream()
-            .filter(a -> a.getFinishedAt() != null && a.getCohortGuid() != null)
+            .filter(attempt -> attempt.getFinishedAt() != null)
             .toList();
-        var attemptIds = finishedCohortAttempts.stream().map(Attempt::getId).toList();
-        var scoresByAttemptId = attemptIds.isEmpty()
-            ? Map.<Integer, List<AttemptQuestion>>of()
+        var scoresByAttemptId = scoresByAttemptId(finishedAttempts);
+
+        return new QuizLeaderboardResponse(rankCohorts(quiz, finishedAttempts, scoresByAttemptId), rankIndividuals(finishedAttempts, scoresByAttemptId));
+    }
+
+    private Map<Integer, List<AttemptQuestion>> scoresByAttemptId(List<Attempt> attempts) {
+        var attemptIds = attempts.stream().map(Attempt::getId).toList();
+
+        return attemptIds.isEmpty()
+            ? Map.of()
             : attemptQuestionRepository
                   .findByAttemptIdInOrderByPosition(attemptIds)
                   .stream()
                   .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
+    }
+
+    private QuizLeaderboardCohortResponse[] rankCohorts(
+        Quiz quiz,
+        List<Attempt> finishedAttempts,
+        Map<Integer, List<AttemptQuestion>> scoresByAttemptId
+    ) {
+        var finishedCohortAttempts = finishedAttempts
+            .stream()
+            .filter(attempt -> attempt.getCohortGuid() != null)
+            .toList();
         var scoresByCohort = new HashMap<String, List<Integer>>();
         for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
@@ -83,6 +101,33 @@ public class QuizLeaderboardService {
         return response;
     }
 
+    private QuizLeaderboardIndividualResponse[] rankIndividuals(
+        List<Attempt> finishedAttempts,
+        Map<Integer, List<AttemptQuestion>> scoresByAttemptId
+    ) {
+        var rankedIndividuals = finishedAttempts
+            .stream()
+            .filter(attempt -> attempt.getNickname() != null)
+            .map(attempt -> new IndividualLeaderboardRow(attempt.getNickname(), scoreForAttempt(attempt, scoresByAttemptId)))
+            .sorted(
+                Comparator.comparingInt(IndividualLeaderboardRow::score)
+                    .reversed()
+                    .thenComparing(IndividualLeaderboardRow::nickname)
+            )
+            .toList();
+
+        QuizLeaderboardIndividualResponse[] response = new QuizLeaderboardIndividualResponse[rankedIndividuals.size()];
+        for (int index = 0; index < rankedIndividuals.size(); index++) {
+            var individual = rankedIndividuals.get(index);
+            response[index] = new QuizLeaderboardIndividualResponse(index + 1, individual.nickname(), individual.score());
+        }
+        return response;
+    }
+
+    private int scoreForAttempt(Attempt attempt, Map<Integer, List<AttemptQuestion>> scoresByAttemptId) {
+        return AttemptQuestion.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of()));
+    }
+
     private int averageScore(List<Integer> scores) {
         if (scores == null || scores.isEmpty()) {
             return 0;
@@ -92,4 +137,6 @@ public class QuizLeaderboardService {
     }
 
     private record CohortLeaderboardRow(String name, int score) {}
+
+    private record IndividualLeaderboardRow(String nickname, int score) {}
 }

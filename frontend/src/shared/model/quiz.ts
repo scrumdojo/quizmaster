@@ -5,6 +5,7 @@ export type {
     QuizAttemptStartResponse,
     QuizEvaluationResponse,
     QuizLeaderboardCohort,
+    QuizLeaderboardIndividual,
     QuizLeaderboardResponse,
     QuizMetadata,
     QuizTake,

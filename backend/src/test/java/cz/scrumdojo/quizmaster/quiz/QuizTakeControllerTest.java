@@ -120,7 +120,7 @@ public class QuizTakeControllerTest {
         );
 
         Attempt teamRocketAttempt = fixtures.save(
-            fixtures.attempt(quiz).cohortGuid(quiz.getCohorts().get(0).getGuid()),
+            fixtures.attempt(quiz).cohortGuid(quiz.getCohorts().get(0).getGuid()).nickname("Ada"),
             q1,
             q2,
             q3,
@@ -132,7 +132,7 @@ public class QuizTakeControllerTest {
         fixtures.score(teamRocketAttempt, q4, AnswerStatus.CORRECT);
 
         Attempt scrumNinjasAttempt = fixtures.save(
-            fixtures.attempt(quiz).cohortGuid(quiz.getCohorts().get(1).getGuid()),
+            fixtures.attempt(quiz).cohortGuid(quiz.getCohorts().get(1).getGuid()).nickname("Bea"),
             q1,
             q2,
             q3,
@@ -144,7 +144,7 @@ public class QuizTakeControllerTest {
         fixtures.score(scrumNinjasAttempt, q4, AnswerStatus.INCORRECT);
 
         Attempt retroMastersAttempt = fixtures.save(
-            fixtures.attempt(quiz).cohortGuid(quiz.getCohorts().get(2).getGuid()),
+            fixtures.attempt(quiz).cohortGuid(quiz.getCohorts().get(2).getGuid()).nickname("Cory"),
             q1,
             q2,
             q3,
@@ -178,6 +178,11 @@ public class QuizTakeControllerTest {
                             {"rank": 1, "cohort": "Team Rocket", "score": 100},
                             {"rank": 2, "cohort": "Scrum Ninjas", "score": 75},
                             {"rank": 3, "cohort": "Retro Masters", "score": 63}
+                        ],
+                        "individuals": [
+                            {"rank": 1, "nickname": "Ada", "score": 100},
+                            {"rank": 2, "nickname": "Bea", "score": 75},
+                            {"rank": 3, "nickname": "Cory", "score": 63}
                         ]
                     }
                     """
@@ -225,6 +230,56 @@ public class QuizTakeControllerTest {
                             {"rank": 1, "cohort": "Alpha", "score": 100},
                             {"rank": 2, "cohort": "Bravo", "score": 100},
                             {"rank": 3, "cohort": "Charlie", "score": 100}
+                        ]
+                    }
+                    """
+                )
+            );
+    }
+
+    @Test
+    public void getQuizLeaderboardReturnsRankedIndividualsFromFinishedNamedAttempts() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
+        Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
+
+        Attempt zed = fixtures.save(fixtures.attempt(quiz).nickname("Zed"), q1, q2);
+        fixtures.score(zed, q1, AnswerStatus.CORRECT);
+        fixtures.score(zed, q2, AnswerStatus.CORRECT);
+
+        Attempt amy = fixtures.save(fixtures.attempt(quiz).nickname("Amy"), q1, q2);
+        fixtures.score(amy, q1, AnswerStatus.CORRECT);
+        fixtures.score(amy, q2, AnswerStatus.CORRECT);
+
+        Attempt ben = fixtures.save(fixtures.attempt(quiz).nickname("Ben"), q1, q2);
+        fixtures.score(ben, q1, AnswerStatus.CORRECT);
+        fixtures.score(ben, q2, AnswerStatus.INCORRECT);
+
+        Attempt anonymous = fixtures.save(fixtures.attempt(quiz), q1, q2);
+        fixtures.score(anonymous, q1, AnswerStatus.CORRECT);
+        fixtures.score(anonymous, q2, AnswerStatus.CORRECT);
+
+        Attempt inProgress = fixtures.save(fixtures.attemptInProgress(quiz).nickname("Pending"), q1, q2);
+        fixtures.score(inProgress, q1, AnswerStatus.CORRECT);
+        fixtures.score(inProgress, q2, AnswerStatus.CORRECT);
+
+        Attempt dryRun = fixtures.save(fixtures.attempt(quiz).nickname("DryRun").isDryRun(true), q1, q2);
+        fixtures.score(dryRun, q1, AnswerStatus.CORRECT);
+        fixtures.score(dryRun, q2, AnswerStatus.CORRECT);
+
+        mockMvc
+            .perform(get("/api/quiz/{id}/leaderboard", quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(
+                content().json(
+                    """
+                    {
+                        "cohorts": [],
+                        "individuals": [
+                            {"rank": 1, "nickname": "Amy", "score": 100},
+                            {"rank": 2, "nickname": "Zed", "score": 100},
+                            {"rank": 3, "nickname": "Ben", "score": 50}
                         ]
                     }
                     """

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { useApi } from '#fe/shared/api/hooks.ts'
-import type { QuizLeaderboardCohort, QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
+import type { QuizLeaderboardResponse, QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
 import { createAttempt, createDryRun, fetchQuiz, fetchQuizLeaderboard } from '#fe/take/api/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 
@@ -21,11 +21,11 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
     const workspaceId = useWorkspaceId()
     const cohortGuid = params.cohortGuid
     const [quiz, setQuiz] = useState<QuizMetadata>()
-    const [leaderboard, setLeaderboard] = useState<readonly QuizLeaderboardCohort[]>([])
+    const [leaderboard, setLeaderboard] = useState<QuizLeaderboardResponse>({ cohorts: [], individuals: [] })
     const [isStarting, setIsStarting] = useState(false)
 
     useApi(params.id, fetchQuiz, setQuiz)
-    useApi(params.id, fetchQuizLeaderboard, response => setLeaderboard(response.cohorts))
+    useApi(params.id, fetchQuizLeaderboard, setLeaderboard)
 
     const canStart = quiz ? !isStarting && (isDryRun || isQuizAvailable(quiz)) : false
 
@@ -62,7 +62,8 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
                     quiz={quiz}
                     questionCount={quiz.questionCount}
                     canStart={canStart}
-                    cohortLeaderboard={leaderboard}
+                    cohortLeaderboard={leaderboard.cohorts}
+                    individualsLeaderboard={leaderboard.individuals}
                     onStart={onStart}
                 />
             </>
