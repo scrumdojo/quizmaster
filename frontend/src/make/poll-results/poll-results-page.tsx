@@ -23,7 +23,7 @@ export const PollResultsPage = () => {
         <Page
             id="poll-results-page"
             title="Poll results"
-            subtitle={`See how respondents voted on \"${poll.question}\".`}
+            subtitle={`See how respondents voted on "${poll.question}".`}
             back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
         >
             <section className="poll-results" aria-labelledby="poll-results-question">

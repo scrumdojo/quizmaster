@@ -1,1 +1,1 @@
-export type { PollAnswer, PollTake, PollVoteRequest } from '#shared/types/poll.ts'
+export type { PollAnswer, PollTake, PollVoteRequest } from '#fe/shared/model/poll.ts'
