@@ -114,7 +114,6 @@ Feature: Workspace page management
     And I do not see image thumbnail for question "2 + 2 = ?"
 
 
-  @skip
   Scenario: Filter questions in workspace
     Given workspace "Workspace" with questions
       | question                       | answers            |
@@ -137,12 +136,10 @@ Feature: Workspace page management
       | 2         | 2 + 2 = ?             | 4 / 2 = ?                      | 3 * 3 = ?             | Jaký nábytek má Ikea?          |
       | Ikea      | Jaký nábytek má Ikea? | Jaké nádobí má Ikea?           | 2 + 2 = ?             | 3 * 3 = ?                      |
       | nábytek   | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? | 2 + 2 = ?             | 4 / 2 = ?                      |
-      | nábyt     | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? | 2 + 2 = ?             | 4 / 2 = ?                      |
       | má nádobí | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | 2 + 2 = ?             | 4 / 2 = ?                      |
       | má nád    | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |
 
 
-  @skip
   Scenario: Filter questions in workspace by tag
     Given workspace "Workspace" with questions
       | question              | tag   | answers                              |

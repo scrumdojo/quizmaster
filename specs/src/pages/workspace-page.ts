@@ -84,6 +84,13 @@ export class WorkspacePage {
 
     private questionsLocator = () => this.page.locator('.question-item')
     private questionLocator = (question: string) => this.questionsLocator().filter({ hasText: question })
+    private waitForWorkspaceQuestionsResponse = () =>
+        this.page.waitForResponse(
+            response =>
+                response.request().method() === 'GET' &&
+                /\/api\/workspaces\/[^/]+\/questions(\?|$)/.test(response.url()) &&
+                response.ok(),
+        )
 
     expectQuestionCount = async (count: number) => {
         await this.showQuestions()
@@ -262,6 +269,13 @@ export class WorkspacePage {
     // ── Quiz list (gated → activate Quizzes tab first) ──
 
     private quizLocator = (quiz: string) => this.page.locator('.quiz-item').filter({ hasText: quiz })
+    private waitForWorkspaceQuizzesResponse = () =>
+        this.page.waitForResponse(
+            response =>
+                response.request().method() === 'GET' &&
+                /\/api\/workspaces\/[^/]+\/quizzes(\?|$)/.test(response.url()) &&
+                response.ok(),
+        )
     private actionsButton = (quiz: string) => this.quizLocator(quiz).getByRole('button', { name: 'Actions' })
 
     // Opens the Actions dropdown for a quiz row.
@@ -413,18 +427,18 @@ export class WorkspacePage {
         await this.showQuestions()
         const filterInput = this.page.locator('#workspace-question-filter-input')
         await expect(filterInput).toBeVisible()
+        const response = this.waitForWorkspaceQuestionsResponse()
         await filterInput.fill(filter)
-        // Wait for debounce and API call to complete
-        await this.page.waitForLoadState('networkidle')
+        await response
     }
 
     enterQuizFilterString = async (filter: string) => {
         await this.showQuizzes()
         const filterInput = this.page.locator('#workspace-quiz-filter-input')
         await expect(filterInput).toBeVisible()
+        const response = this.waitForWorkspaceQuizzesResponse()
         await filterInput.fill(filter)
-        // Wait for debounce and API call to complete
-        await this.page.waitForLoadState('networkidle')
+        await response
     }
 
     expectQuizFilterLabel = async (text: string) => {
