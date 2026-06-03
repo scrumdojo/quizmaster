@@ -17,6 +17,23 @@ public record QuestionResponse(
     QuestionType questionType,
     String[] tags
 ) {
+    public QuestionResponse withWorkspaceGuid(String workspaceGuid) {
+        return new QuestionResponse(
+            id,
+            question,
+            answers,
+            explanations,
+            questionExplanation,
+            correctAnswers,
+            workspaceGuid,
+            isEasy,
+            imageUrl,
+            tolerance,
+            questionType,
+            tags
+        );
+    }
+
     public static QuestionResponse from(Question q) {
         return new QuestionResponse(
             q.getId(),
@@ -35,20 +52,7 @@ public record QuestionResponse(
     }
 
     public static QuestionResponse feedbackFrom(Question q) {
-        return new QuestionResponse(
-            q.getId(),
-            q.getQuestion(),
-            q.getAnswers(),
-            q.getExplanations(),
-            q.getQuestionExplanation(),
-            q.getCorrectAnswers(),
-            null,
-            q.isEasy(),
-            q.getImageUrl(),
-            q.getTolerance(),
-            q.getQuestionType(),
-            q.getTags()
-        );
+        return from(q).withWorkspaceGuid(null);
     }
 
     public static QuestionResponse draft(
