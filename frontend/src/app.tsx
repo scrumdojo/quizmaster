@@ -33,7 +33,12 @@ const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] 
 
 const ICONS = ['🦣', '😇'] as const
 
-const BackgroundGameFab = () => {
+interface BackgroundGameFabProps {
+    readonly battleOnly: boolean
+    readonly onBattleOnlyChange: (value: boolean) => void
+}
+
+const BackgroundGameFab = ({ battleOnly, onBattleOnlyChange }: BackgroundGameFabProps) => {
     const [theme, setTheme] = useState<AnimationTheme>(() => {
         const v = localStorage.getItem('animation-theme')
         return v === 'mammoths' || v === 'off' ? v : 'angels'
@@ -60,6 +65,12 @@ const BackgroundGameFab = () => {
     const select = (t: AnimationTheme) => {
         window.__setAnimationTheme?.(t)
         setTheme(t)
+        onBattleOnlyChange(false)
+        setOpen(false)
+    }
+
+    const toggleBattleOnly = () => {
+        onBattleOnlyChange(!battleOnly)
         setOpen(false)
     }
 
@@ -90,14 +101,23 @@ const BackgroundGameFab = () => {
                             key={value}
                             type="button"
                             aria-label={label}
-                            aria-pressed={theme === value}
+                            aria-pressed={theme === value && !battleOnly}
                             onClick={() => select(value)}
-                            className={`bg-game-option${theme === value ? ' bg-game-option--active' : ''}`}
+                            className={`bg-game-option${theme === value && !battleOnly ? ' bg-game-option--active' : ''}`}
                             style={{ cursor }}
                         >
                             {label}
                         </button>
                     ))}
+                    <button
+                        type="button"
+                        aria-label="Battle only"
+                        aria-pressed={battleOnly}
+                        onClick={toggleBattleOnly}
+                        className={`bg-game-option${battleOnly ? ' bg-game-option--active' : ''}`}
+                    >
+                        Battle only
+                    </button>
                 </div>
             )}
         </div>
@@ -170,7 +190,10 @@ export const App = () => {
     return (
         <BrowserRouter>
             <ScrollToTop />
-            <div style={{ display: animationOnly ? 'none' : undefined, position: 'relative', zIndex: 1 }}>
+            <div
+                data-testid="app-interface"
+                style={{ display: animationOnly ? 'none' : undefined, position: 'relative', zIndex: 1 }}
+            >
                 <Routes>
                     <Route path={ROUTES.home} element={<HomePage />} />
 
@@ -198,7 +221,7 @@ export const App = () => {
                 </Routes>
             </div>
             <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />
-            <BackgroundGameFab />
+            <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
         </BrowserRouter>
     )
 }

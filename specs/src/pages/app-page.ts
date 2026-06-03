@@ -53,6 +53,15 @@ export class AppPage {
     expectMammothButtonSpearCursor = () =>
         expect(this.page.getByRole('button', { name: 'Mammoths' })).toHaveAttribute('style', /cursor:.*url\(/)
 
+    selectBattleOnly = async () => {
+        await this.openAnimationSettings()
+        await this.page.getByRole('button', { name: 'Battle only' }).click()
+    }
+
+    expectInterfaceHidden = () => expect(this.page.getByTestId('app-interface')).toBeHidden()
+
+    expectAnimationVisible = () => expect(this.canvas()).toBeVisible()
+
     expectMammothsAttackHunters = () => expect(this.canvas()).toHaveAttribute('data-mammoth-attacks-hunters', 'true')
 
     expectHunterClickKill = () => expect(this.canvas()).toHaveAttribute('data-hunter-click-kill', 'true')

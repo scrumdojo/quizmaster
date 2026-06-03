@@ -60,6 +60,18 @@ Then('mammoths can attack and kill hunters', async function () {
     await this.appPage.expectMammothsAttackHunters()
 })
 
+When('I select battle only mode', async function () {
+    await this.appPage.selectBattleOnly()
+})
+
+Then('the workspace interface is hidden', async function () {
+    await this.appPage.expectInterfaceHidden()
+})
+
+Then('the background animation is visible', async function () {
+    await this.appPage.expectAnimationVisible()
+})
+
 Then('clicking a hunter kills it with a footprint effect', async function () {
     await this.appPage.expectHunterClickKill()
 })
