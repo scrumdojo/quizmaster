@@ -37,7 +37,7 @@ const qrThemeImage = (emoji: string, label: string) =>
     )}`
 
 const QR_THEME_IMAGES: Record<QrThemeImage, string> = {
-    angel: qrThemeImage('😇', 'angel'),
+    angel: qrThemeImage('👼', 'angel'),
     mammoth: qrThemeImage('🦣', 'mammoth'),
 }
 
