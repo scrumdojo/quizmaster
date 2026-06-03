@@ -102,6 +102,10 @@ When('I copy the quiz take link', async function () {
     await this.quizSharePage.copyQuizTakeLink()
 })
 
+When('I copy the quiz take link three times quickly', async function () {
+    await this.quizSharePage.copyQuizTakeLinkRepeatedly(3)
+})
+
 Then('the clipboard contains the quiz take link', async function () {
     expect(await this.quizSharePage.clipboardText()).toBe(await this.quizSharePage.takeLink())
 })
@@ -120,6 +124,18 @@ Then('I see a share bird starting from the share button for cohort {string}', as
 
 Then('I see an animated share bird', async function () {
     await this.quizSharePage.expectAnimatedShareBird()
+})
+
+Then('I see a flock of share birds starting from the quiz share button', async function () {
+    await this.quizSharePage.expectShareFlockStartedFromQuizShareButton()
+})
+
+Then('I see a flock of animated share birds', async function () {
+    await this.quizSharePage.expectAnimatedShareFlock()
+})
+
+Then('the flock flies to the top-right corner', async function () {
+    await this.quizSharePage.expectShareFlockFlyingToTopRight()
 })
 
 Then('I see a share bird flying to the top-right corner', async function () {

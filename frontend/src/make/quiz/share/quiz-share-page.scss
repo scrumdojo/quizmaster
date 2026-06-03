@@ -64,13 +64,13 @@
     z-index: 1200;
     left: var(--share-bird-x);
     top: var(--share-bird-y);
-    width: 4rem;
-    height: 4rem;
+    width: var(--share-bird-size, 4rem);
+    height: var(--share-bird-size, 4rem);
     pointer-events: none;
     filter: drop-shadow(0 0.4rem 0.45rem rgba(15, 23, 42, 0.18));
     transform: translate(-50%, -50%);
     transform-origin: 50% 50%;
-    animation: share-bird-fly 1.365s cubic-bezier(0.22, 0.9, 0.3, 1) 120ms both;
+    animation: share-bird-fly 1.365s cubic-bezier(0.22, 0.9, 0.3, 1) var(--share-bird-delay, 120ms) both;
 }
 
 .share-bird__image {

@@ -115,6 +115,15 @@ Feature: Share Quiz
     * the share bird disappears
 
 
+  Scenario: Launch a flock after repeated sharing
+    When I navigate to share quiz "Cohort Quiz"
+    * I copy the quiz take link three times quickly
+    Then I see a flock of share birds starting from the quiz share button
+    * I see a flock of animated share birds
+    * the flock flies to the top-right corner
+    * the share bird disappears
+
+
   Scenario: Copy a cohort take link
     Given quiz "Cohort Quiz" has a cohort named "Boyz"
     * quiz "Cohort Quiz" has a cohort named "Girlz"
