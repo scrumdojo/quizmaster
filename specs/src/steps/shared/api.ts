@@ -14,6 +14,14 @@ import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/wo
 import type { QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
+const parseSpecTags = (tagValue: string | undefined): string[] =>
+    tagValue
+        ? tagValue
+              .split(',')
+              .map(tag => tag.trim())
+              .filter(Boolean)
+        : []
+
 export const createWorkspaceViaRest = async (world: QuizmasterWorld, name: string): Promise<string> => {
     const body: WorkspaceRequest = { title: name }
     const response = await world.page.request.post('/api/workspaces', { data: body })
@@ -36,7 +44,7 @@ const toNumericalPayload = (spec: QuestionSpec): QuestionRequest => {
         questionType: 'numerical',
         isEasy: false,
         tolerance,
-        tags: spec.tag ? [spec.tag] : [],
+        tags: parseSpecTags(spec.tag),
     }
 }
 
@@ -54,7 +62,7 @@ const toChoicePayload = (spec: QuestionSpec): QuestionRequest => {
         questionType,
         isEasy: spec.easy ?? false,
         imageUrl: spec.image,
-        tags: spec.tag ? [spec.tag] : [],
+        tags: parseSpecTags(spec.tag),
     }
 }
 
