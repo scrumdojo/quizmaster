@@ -8,6 +8,7 @@ export class QuizSharePage {
     private noCohortsLocator = () => this.page.locator('#no-cohorts')
     private quizTakeQrLocator = () => this.page.getByTestId('quiz-take-qr')
     private qrCodeLocator = () => this.page.locator('.share-qr-code')
+    private qrThemeImageLocator = () => this.qrCodeLocator().locator('svg image')
 
     private cohortRowLocator = (name: string) => this.page.locator(`.cohort-row[data-name="${name}"]`)
 
@@ -143,6 +144,16 @@ export class QuizSharePage {
 
     expectCohortQrHidden = async (name: string) =>
         expect(await this.qrCodeLocator().getAttribute('data-qr-value')).not.toBe(await this.cohortLink(name))
+
+    expectQrThemeImage = async (image: 'angel' | 'mammoth') => {
+        await expect(this.qrCodeLocator()).toHaveAttribute('data-qr-theme-image', image)
+        await expect(this.qrThemeImageLocator()).toHaveCount(1)
+    }
+
+    expectNoQrThemeImage = async () => {
+        await expect(this.qrCodeLocator()).toHaveAttribute('data-qr-theme-image', 'none')
+        await expect(this.qrThemeImageLocator()).toHaveCount(0)
+    }
 
     expectQuizTakeCopied = () => expect(this.page.getByRole('button', { name: 'Copied' }).first()).toBeVisible()
 

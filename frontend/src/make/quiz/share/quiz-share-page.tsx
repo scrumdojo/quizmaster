@@ -19,10 +19,37 @@ import type { QuizCohort } from '#shared/types/quiz.ts'
 const quizQrKey = 'quiz-take'
 
 type CohortErrorTarget = 'add' | `edit:${string}`
+type AnimationTheme = 'angels' | 'mammoths' | 'off'
+type QrThemeImage = 'angel' | 'mammoth'
 
 const cohortErrorMessages: Record<CohortCreateError, string> = {
     'empty-cohort-name': 'Name cannot be empty.',
     'duplicate-cohort-name': 'A cohort with this name already exists.',
+}
+
+const qrThemeImage = (emoji: string, label: string) =>
+    `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+            <rect width="96" height="96" rx="20" fill="white"/>
+            <text x="48" y="62" text-anchor="middle" font-size="54" aria-label="${label}">${emoji}</text>
+        </svg>`,
+    )}`
+
+const QR_THEME_IMAGES: Record<QrThemeImage, string> = {
+    angel: qrThemeImage('😇', 'angel'),
+    mammoth: qrThemeImage('🦣', 'mammoth'),
+}
+
+const currentAnimationTheme = (): AnimationTheme => {
+    const theme = localStorage.getItem('animation-theme')
+    return theme === 'mammoths' || theme === 'off' ? theme : 'angels'
+}
+
+const currentQrThemeImage = (): QrThemeImage | null => {
+    const theme = currentAnimationTheme()
+    if (theme === 'mammoths') return 'mammoth'
+    if (theme === 'angels') return 'angel'
+    return null
 }
 
 interface ActiveQrCode {
@@ -164,6 +191,7 @@ export const QuizSharePage = () => {
 
     const renderQrModal = () => {
         if (!activeQrCode) return null
+        const themeImage = currentQrThemeImage()
         return createPortal(
             <div className="share-qr-modal" role="dialog" aria-modal="true" aria-labelledby="share-qr-title">
                 <div className="share-qr-backdrop" onClick={() => setActiveQrCode(null)} />
@@ -174,8 +202,27 @@ export const QuizSharePage = () => {
                             Close
                         </Button>
                     </div>
-                    <div className="share-qr-code" data-testid={activeQrCode.testId} data-qr-value={activeQrCode.url}>
-                        <QRCodeSVG value={activeQrCode.url} size={480} />
+                    <div
+                        className="share-qr-code"
+                        data-testid={activeQrCode.testId}
+                        data-qr-value={activeQrCode.url}
+                        data-qr-theme-image={themeImage ?? 'none'}
+                    >
+                        <QRCodeSVG
+                            value={activeQrCode.url}
+                            size={480}
+                            level="H"
+                            imageSettings={
+                                themeImage
+                                    ? {
+                                          src: QR_THEME_IMAGES[themeImage],
+                                          height: 96,
+                                          width: 96,
+                                          excavate: true,
+                                      }
+                                    : undefined
+                            }
+                        />
                     </div>
                 </div>
             </div>,

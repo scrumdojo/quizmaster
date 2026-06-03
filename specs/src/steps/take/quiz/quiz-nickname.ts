@@ -1,9 +1,8 @@
 import { When, Then } from '#steps/fixture.ts'
-import { QuizmasterWorld } from '#steps/world'
 
-When('I continue to Nickname page', async function (world: QuizmasterWorld) {
-    const nicknameUrl = 'TODO'
-    await world.page.goto(nicknameUrl)
+When('I continue to Nickname page', async function () {
+    await this.quizWelcomePage.start()
+    await this.quizNicknamePage.waitForLoaded()
 })
 
 Then('I see the nickname input field', async function () {

@@ -10,6 +10,7 @@ import { QuizEditPage } from '#fe/make/quiz/quiz-edit-page.tsx'
 import { QuizSharePage } from '#fe/make/quiz/share/quiz-share-page.tsx'
 import { WorkspacePage } from '#fe/make/workspace/workspace.tsx'
 import { QuestionTakePage } from '#fe/take/question-take'
+import { QuizNicknamePage } from '#fe/take/quiz-take/quiz-nickname/quiz-nickname-page.tsx'
 import { QuizTakePage } from '#fe/take/quiz-take/quiz-take-page.tsx'
 import { QuizWelcomePage } from '#fe/take/quiz-take/quiz-welcome/quiz-welcome-page.tsx'
 import { ROUTES } from '#fe/urls.ts'
@@ -218,6 +219,8 @@ export const App = () => {
                     <Route path={ROUTES.quizWelcome} element={<QuizWelcomePage isDryRun={false} />} />
                     <Route path={ROUTES.quizWelcomeWithCohort} element={<QuizWelcomePage isDryRun={false} />} />
                     <Route path={ROUTES.quizTake} element={<QuizTakePage isDryRun={false} />} />
+                    <Route path={ROUTES.quizNickname} element={<QuizNicknamePage isDryRun={false} />} />
+                    <Route path={ROUTES.quizNicknameWithCohort} element={<QuizNicknamePage isDryRun={false} />} />
                 </Routes>
             </div>
             <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />

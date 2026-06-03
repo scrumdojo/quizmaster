@@ -59,7 +59,9 @@ public class QuizTakeController {
             return ResponseEntity.badRequest().body(Map.of("message", "Cohort does not belong to this quiz."));
         }
         return ResponseEntity.ok(
-            QuizAttemptStartResponse.from(attemptService.start(quiz, cohort.orElse(null), false, now()))
+            QuizAttemptStartResponse.from(
+                attemptService.start(quiz, cohort.orElse(null), normalizedNickname(request), false, now())
+            )
         );
     }
 
@@ -72,6 +74,14 @@ public class QuizTakeController {
 
     private boolean cohortRequested(QuizAttemptStartRequest request) {
         return request != null && request.cohortGuid() != null && !request.cohortGuid().isBlank();
+    }
+
+    private String normalizedNickname(QuizAttemptStartRequest request) {
+        if (request == null || request.nickname() == null) {
+            return null;
+        }
+        String nickname = request.nickname().trim();
+        return nickname.isEmpty() ? null : nickname;
     }
 
     @PostMapping("/{quizId}/attempts/{attemptId}/timeout")

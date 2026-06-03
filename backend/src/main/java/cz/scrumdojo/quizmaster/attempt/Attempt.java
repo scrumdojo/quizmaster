@@ -25,6 +25,9 @@ public class Attempt {
     @Column(name = "cohort_guid")
     private String cohortGuid;
 
+    @Column(name = "nickname")
+    private String nickname;
+
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;
 

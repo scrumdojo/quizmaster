@@ -3,7 +3,18 @@ import { expectTextToBe } from '#steps/common.ts'
 import { Given, When, Then } from '#steps/fixture.ts'
 import { expectQuestion } from '#steps/question/expects.ts'
 import { expectNavigationButtons } from '#steps/quiz/expects.ts'
-import { openQuiz, startQuiz } from '#steps/quiz/ops.ts'
+import { continueQuizStart, openQuiz, startQuiz } from '#steps/quiz/ops.ts'
+
+const parseTimerTextToSeconds = (timer: string) => {
+    const [minutes = '0', seconds = '0'] = timer.split(':')
+    return Number.parseInt(minutes, 10) * 60 + Number.parseInt(seconds, 10)
+}
+
+const formatTimerSeconds = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+}
 
 Given('I open quiz {string}', async function (quizBookmark: string) {
     await openQuiz(this, quizBookmark)
@@ -27,7 +38,17 @@ Given('I start quiz {string}', async function (quizBookmark: string) {
 })
 
 Given('I start the quiz', async function () {
-    await startQuiz(this, this.activeQuizBookmark)
+    const onWelcomePage = await this.quizWelcomePage.startButton().isVisible().catch(() => false)
+    const onNicknamePage = await this.quizNicknamePage.isVisible()
+
+    if (!onWelcomePage && !onNicknamePage) {
+        if (!this.activeQuizBookmark) {
+            throw new Error('No active quiz bookmark available for quiz start')
+        }
+        await openQuiz(this, this.activeQuizBookmark)
+    }
+
+    await continueQuizStart(this)
 })
 
 Then('I see question {string}', async function (bookmark: string) {
@@ -87,20 +108,18 @@ Then('progress shows {int} of {int}', async function (current: number, max: numb
 
 When('{int} seconds pass', async function (seconds: number) {
     await this.questionPage.timerLocator().waitFor({ state: 'visible' })
+    const timerBefore = ((await this.questionPage.timerLocator().textContent()) ?? '00:00').trim()
+    const remainingBefore = parseTimerTextToSeconds(timerBefore)
+    const remainingAfter = Math.max(0, remainingBefore - seconds)
 
     await advanceServerClock(this, seconds)
-    // Advance fake clock in 1-second chunks. A single runFor/fastForward with large
-    // values (60s+) is too slow — Playwright processes thousands of rAF callbacks
-    // synchronously, exceeding the test timeout. The await between chunks also gives
-    // React time to process state updates (e.g. rendering the timeout modal).
-    for (let i = 0; i < seconds; i++) {
-        await this.page.clock.runFor(1000)
-    }
-    // Flush timer callbacks scheduled exactly at the boundary.
-    await this.page.clock.runFor(1)
+    await this.page.evaluate(ms => {
+        window.__advanceQuizClock?.(ms)
+    }, seconds * 1000)
 
-    const timer = (await this.questionPage.timerLocator().textContent())?.trim()
-    if (timer === '00:00') {
+    await expectTextToBe(this.questionPage.timerLocator(), formatTimerSeconds(remainingAfter))
+
+    if (remainingAfter === 0) {
         await this.questionPage.dialogTextLocator().waitFor({ state: 'visible' })
     }
 })

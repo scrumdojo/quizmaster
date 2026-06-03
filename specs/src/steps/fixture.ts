@@ -9,7 +9,17 @@ import { QuizmasterWorld } from '#steps/world/world.ts'
 export const test = base.extend<{ world: QuizmasterWorld }>({
     page: async ({ page }, use) => {
         await page.addInitScript(() => {
-            ;(globalThis as { __noCrazyBackground?: boolean }).__noCrazyBackground = true
+            const globalState = globalThis as {
+                __noCrazyBackground?: boolean
+                __quizClockNow?: number
+                __advanceQuizClock?: (ms: number) => void
+            }
+            globalState.__noCrazyBackground = true
+            globalState.__quizClockNow = Date.now()
+            globalState.__advanceQuizClock = (ms: number) => {
+                globalState.__quizClockNow = (globalState.__quizClockNow ?? Date.now()) + ms
+                globalThis.dispatchEvent(new Event('quiz-clock-tick'))
+            }
         })
         await use(page)
     },
@@ -25,7 +35,7 @@ export const { Given, When, Then, BeforeScenario, After, AfterScenario } = creat
 
 const ENABLE_COVERAGE = process.env.ENABLE_COVERAGE === '1'
 const FEATURE_FLAG_ENABLED: boolean = process.env.FEATURE_FLAG === 'true'
-const AI_ENABLED = !!process.env.OPENROUTER_API_KEY
+const AI_ENABLED = process.env.E2E_AI_ENABLED === 'true' && !!process.env.OPENROUTER_API_KEY
 
 BeforeScenario(async function ({ $tags, $test }) {
     const hasFeatureFlag = $tags.includes('@feature-flag')

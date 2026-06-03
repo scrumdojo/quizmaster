@@ -255,7 +255,7 @@ public class WorkspaceQuizController {
             .findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(quiz ->
                 ResponseEntity.ok(
-                    QuizAttemptStartResponse.from(attemptService.start(quiz, null, true, LocalDateTime.now(clock)))
+                    QuizAttemptStartResponse.from(attemptService.start(quiz, null, null, true, LocalDateTime.now(clock)))
                 )
             )
             .orElse(ResponseEntity.notFound().build());

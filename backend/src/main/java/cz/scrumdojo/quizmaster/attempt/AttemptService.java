@@ -33,11 +33,12 @@ public class AttemptService {
     }
 
     @Transactional
-    public AttemptStart start(Quiz quiz, Cohort cohort, boolean isDryRun, LocalDateTime now) {
+    public AttemptStart start(Quiz quiz, Cohort cohort, String nickname, boolean isDryRun, LocalDateTime now) {
         Attempt persisted = attemptRepository.save(
             Attempt.builder()
                 .quizId(quiz.getId())
                 .cohortGuid(cohort == null ? null : cohort.getGuid())
+                .nickname(nickname)
                 .startedAt(now)
                 .isDryRun(isDryRun)
                 .build()

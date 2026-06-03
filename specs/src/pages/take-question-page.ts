@@ -9,9 +9,7 @@ export class TakeQuestionPage {
     private questionImageLocator_ = () => this.page.locator('img.question-image')
 
     waitForLoaded = async () => {
-        const submit = this.submitButtonLocator()
-        const feedback = this.questionFeedbackLocator()
-        await expect(submit.or(feedback)).toBeVisible()
+        await this.page.locator('h1#question, input[type="submit"], p.question-feedback').first().waitFor({ state: 'visible' })
     }
 
     private answersLocator = () => this.page.locator('ul.answers > li')
@@ -26,13 +24,22 @@ export class TakeQuestionPage {
 
     correctAnswersCountLocator = () => this.page.locator('.correct-answers-count')
 
-    selectAnswer = (answer: string) => this.answerCheckLocator(answer).check()
-    selectAnswerNth = (number: number) => this.answerCheckNthLocator(number).check()
+    selectAnswer = async (answer: string) => {
+        await expect(this.answerCheckLocator(answer)).toBeVisible()
+        await this.answerCheckLocator(answer).check({ force: true })
+    }
+    selectAnswerNth = async (number: number) => {
+        await expect(this.answerCheckNthLocator(number)).toBeVisible()
+        await this.answerCheckNthLocator(number).check({ force: true })
+    }
     unselectAnswer = (answer: string) => this.answerCheckLocator(answer).uncheck()
     private selectedAnswersLocator = () => this.answersLocator().locator('input:checked')
 
     private submitButtonLocator = () => this.page.locator('input[type="submit"]')
-    submit = () => this.submitButtonLocator().click()
+    submit = async () => {
+        await expect(this.submitButtonLocator()).toBeVisible()
+        await this.submitButtonLocator().click({ force: true })
+    }
 
     questionFeedbackLocator = () => this.page.locator('p.question-feedback')
     questionScoreLocator = () => this.page.locator('p.question-score')
