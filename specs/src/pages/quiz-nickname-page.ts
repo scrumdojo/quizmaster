@@ -7,7 +7,10 @@ export class QuizNicknamePage {
     private startQuizButtonLocator = () => this.page.locator('button#start-quiz')
 
     waitForLoaded = () => expect(this.nicknameInputLocator()).toBeVisible()
-    isVisible = async () => this.nicknameInputLocator().isVisible().catch(() => false)
+    isVisible = async () =>
+        this.nicknameInputLocator()
+            .isVisible()
+            .catch(() => false)
     expectNicknameInputVisible = () => expect(this.nicknameInputLocator()).toBeVisible()
     fillNickname = (nickname: string) => this.nicknameInputLocator().fill(nickname)
     startQuiz = async () => {

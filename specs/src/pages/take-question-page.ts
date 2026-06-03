@@ -9,7 +9,10 @@ export class TakeQuestionPage {
     private questionImageLocator_ = () => this.page.locator('img.question-image')
 
     waitForLoaded = async () => {
-        await this.page.locator('h1#question, input[type="submit"], p.question-feedback').first().waitFor({ state: 'visible' })
+        await this.page
+            .locator('h1#question, input[type="submit"], p.question-feedback')
+            .first()
+            .waitFor({ state: 'visible' })
     }
 
     private answersLocator = () => this.page.locator('ul.answers > li')

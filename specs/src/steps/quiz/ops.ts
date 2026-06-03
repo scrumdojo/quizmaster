@@ -24,7 +24,10 @@ const waitForQuizStartTransition = async (world: QuizmasterWorld) => {
 const waitForQuizQuestions = async (world: QuizmasterWorld) => {
     await world.page.waitForURL(url => {
         const path = url.pathname
-        return /\/quiz\/\d+\/questions(?:\/\d+)?$/.test(path) || /\/workspace\/[^/]+\/quiz\/\d+\/dry-run\/questions(?:\/\d+)?$/.test(path)
+        return (
+            /\/quiz\/\d+\/questions(?:\/\d+)?$/.test(path) ||
+            /\/workspace\/[^/]+\/quiz\/\d+\/dry-run\/questions(?:\/\d+)?$/.test(path)
+        )
     })
 }
 

@@ -1,5 +1,4 @@
 import './quiz-nickname-page.scss'
-
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
@@ -57,8 +56,7 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
                         <span className="eyebrow">Quiz</span>
                         <h2>Choose your nickname</h2>
                         <p>
-                            Enter the nickname you want to use for <strong>{quiz.title}</strong> before the quiz
-                            starts.
+                            Enter the nickname you want to use for <strong>{quiz.title}</strong> before the quiz starts.
                         </p>
                     </header>
                     <div className="quiz-nickname-card__form">
@@ -78,7 +76,9 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
                             className="button secondary"
                             onClick={() =>
                                 navigate(
-                                    cohortGuid ? urls.quizWelcomeWithCohort(quiz.id, cohortGuid) : urls.quizWelcome(quiz.id),
+                                    cohortGuid
+                                        ? urls.quizWelcomeWithCohort(quiz.id, cohortGuid)
+                                        : urls.quizWelcome(quiz.id),
                                 )
                             }
                         >
