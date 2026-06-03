@@ -372,5 +372,12 @@ export class WorkspacePage {
         await this.page.waitForLoadState('networkidle')
     }
 
+    expectQuizFilterLabel = async (text: string) => {
+        await this.showQuizzes()
+        const label = this.page.locator('.workspace-quiz-filter label')
+        await expect(label).toBeVisible()
+        await expect(label).toHaveText(text)
+    }
+
     getQuestion = (question: string) => this.page.locator('.question-item', { hasText: question })
 }

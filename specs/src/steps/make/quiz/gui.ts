@@ -25,6 +25,10 @@ When('I filter quizzes in workspace by {string}', async function (s: string) {
     await this.workspacePage.enterQuizFilterString(s)
 })
 
+Then('I see quiz filter label {string}', async function (text: string) {
+    await this.workspacePage.expectQuizFilterLabel(text)
+})
+
 When('I see quiz {string} in workspace', async function (title: string) {
     if (title.trim()) {
         await this.workspacePage.expectQuizVisible(title)

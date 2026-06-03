@@ -158,6 +158,13 @@ Feature: Workspace page management
       | ikea  | Jaký nábytek má Ikea? | What is a Sprint?  |
 
 
+  Scenario: Quiz filter section has the same label and input as question filter
+    Given workspace "Workspace" with quizzes
+      | quiz      |
+      | Math Quiz |
+    Then I see quiz filter label "Filter quizzes"
+
+
   Scenario: Filter quizzes in workspace
     Given workspace "Workspace" with quizzes
       | quiz        |
