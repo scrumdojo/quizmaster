@@ -67,6 +67,15 @@ Then('I do not see the question create button', async function () {
     await this.workspacePage.expectQuestionCreateButtonHidden()
 })
 
+Then('I see poll {string} in the list', async function (pollQuestion: string) {
+    await this.workspacePage.expectPollVisible(pollQuestion)
+})
+
+When('I click the {string} poll results link', async function (pollQuestion: string) {
+    await this.workspacePage.openPollResults(pollQuestion)
+    await this.pollResultsPage.waitForLoaded()
+})
+
 // ── Workspace page assertions ───────────────────────────
 
 Then('I see the workspace {string}', async function (name: string) {

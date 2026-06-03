@@ -3,6 +3,11 @@ export interface PollAnswer {
     readonly text: string
 }
 
+export interface PollListItem {
+    readonly id: number
+    readonly question: string
+}
+
 export interface PollTake {
     readonly id: number
     readonly question: string

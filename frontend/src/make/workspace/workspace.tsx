@@ -4,14 +4,21 @@ import { useSearchParams } from 'react-router'
 
 import { deleteQuestion } from '#fe/make/api/question.ts'
 import { deleteQuiz } from '#fe/make/api/quiz.ts'
-import { fetchWorkspace, fetchWorkspaceQuestions, fetchWorkspaceQuizzes } from '#fe/make/api/workspace.ts'
+import {
+    fetchWorkspace,
+    fetchWorkspacePolls,
+    fetchWorkspaceQuestions,
+    fetchWorkspaceQuizzes,
+} from '#fe/make/api/workspace.ts'
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import type { QuizListItem } from '#fe/make/model/quiz-list-item.ts'
 import type { Workspace } from '#fe/make/model/workspace.ts'
 import { ItemList, LinkButton } from '#fe/shared'
 import { useApi } from '#fe/shared/api/hooks.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
+import type { PollListItem } from '#shared/types/poll.ts'
 
+import { PollItem } from './poll-item.tsx'
 import { QuestionItem } from './question-item.tsx'
 import { QuizItem } from './quiz-item.tsx'
 import { WorkspaceRobinAiHelper } from './workspace-robin-ai-helper.tsx'
@@ -20,12 +27,16 @@ export function WorkspacePage() {
     const workspaceId = useWorkspaceId()
     const [searchParams] = useSearchParams()
     const initialTab = useMemo(
-        () => (searchParams.get('tab') === 'questions' ? 'questions' : 'quizzes') as 'questions' | 'quizzes',
+        () => {
+            const tab = searchParams.get('tab')
+            return tab === 'questions' || tab === 'polls' ? tab : 'quizzes'
+        },
         // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on mount
         [],
     )
 
     const [workspace, setWorkspace] = useState<Workspace>({ guid: workspaceId, title: '' })
+    const [polls, setPolls] = useState<readonly PollListItem[]>([])
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
     const [availableQuestionTags, setAvailableQuestionTags] = useState<readonly string[]>([])
     const [questionFilter, setQuestionFilter] = useState('')
@@ -42,7 +53,7 @@ export function WorkspacePage() {
     const [quizPageSize, setQuizPageSize] = useState(0)
     const [quizTotalPages, setQuizTotalPages] = useState(1)
     const [quizToDelete, setQuizToDelete] = useState<{ id: number; title: string } | null>(null)
-    const [activeTab, setActiveTab] = useState<'quizzes' | 'questions'>(initialTab)
+    const [activeTab, setActiveTab] = useState<'quizzes' | 'questions' | 'polls'>(initialTab)
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
 
@@ -101,6 +112,10 @@ export function WorkspacePage() {
         [workspaceId],
     )
 
+    const loadPolls = useCallback(async () => {
+        setPolls(await fetchWorkspacePolls(workspaceId))
+    }, [workspaceId])
+
     // Stable reference used by WorkspaceRobinAiHelper to refresh questions after AI generation.
     const refreshQuestions = useCallback(async () => {
         await loadQuestionPage(0, debouncedQuestionFilter, selectedQuestionTags)
@@ -124,6 +139,10 @@ export function WorkspacePage() {
         void loadQuizPage(0, debouncedQuizFilter)
     }, [debouncedQuizFilter, loadQuizPage])
 
+    useEffect(() => {
+        void loadPolls()
+    }, [loadPolls])
+
     const onDeleteQuestion = async (id: number) => {
         await deleteQuestion(workspaceId, String(id))
         await loadQuestionPage(questionPage, debouncedQuestionFilter, selectedQuestionTags)
@@ -142,6 +161,7 @@ export function WorkspacePage() {
 
     const hasQuestions = questions.length > 0
     const hasQuizzes = quizzes.length > 0
+    const hasPolls = polls.length > 0
     const hasActiveQuestionFilters = debouncedQuestionFilter.length > 0 || selectedQuestionTags.length > 0
     const toggleQuestionTag = (tag: string) => {
         setSelectedQuestionTags(current =>
@@ -189,7 +209,31 @@ export function WorkspacePage() {
                 >
                     Questions
                 </button>
+                <button
+                    type="button"
+                    className="workspace-tab"
+                    role="tab"
+                    aria-selected={activeTab === 'polls'}
+                    onClick={() => setActiveTab('polls')}
+                >
+                    Polls
+                </button>
             </div>
+
+            {activeTab === 'polls' && (
+                <section className="workspace-section workspace-section--polls">
+                    <ItemList title="My Polls">
+                        {hasPolls ? (
+                            polls.map(poll => <PollItem key={poll.id} poll={poll} />)
+                        ) : (
+                            <div className="workspace-empty-state workspace-empty-state--polls">
+                                <h3>No polls yet</h3>
+                                <p>Create a poll first, then come back here to inspect its results.</p>
+                            </div>
+                        )}
+                    </ItemList>
+                </section>
+            )}
 
             {activeTab === 'questions' && (
                 <section className="workspace-section workspace-section--questions">

@@ -39,7 +39,7 @@ export class WorkspacePage {
     // overlay (e.g. the Robin AI chat sheet docked over the page) can cover the
     // tab bar and block a real click; dispatchEvent flips the tab regardless.
     // The real tab-click UX is covered by the Workspace.Tabs scenarios.
-    private activateTab = async (name: 'Questions' | 'Quizzes') => {
+    private activateTab = async (name: 'Questions' | 'Quizzes' | 'Polls') => {
         const tab = this.tabLocator(name)
         await expect(tab).toBeVisible()
 
@@ -52,6 +52,7 @@ export class WorkspacePage {
 
     private showQuestions = () => this.activateTab('Questions')
     private showQuizzes = () => this.activateTab('Quizzes')
+    private showPolls = () => this.activateTab('Polls')
 
     // ── Section visibility (asserts the gating; does NOT switch tabs) ──
 
@@ -265,6 +266,20 @@ export class WorkspacePage {
     expectQuestionCreateButtonInSection = (section: string) =>
         expect(this.sectionLocator(section).locator('#create-question')).toBeVisible()
     expectQuestionCreateButtonHidden = () => expect(this.page.locator('#create-question')).toBeHidden()
+
+    // ── Poll list (gated → activate Polls tab first) ──
+
+    private pollLocator = (pollQuestion: string) => this.page.locator('.poll-item').filter({ hasText: pollQuestion })
+
+    expectPollVisible = async (pollQuestion: string) => {
+        await this.showPolls()
+        await expect(this.pollLocator(pollQuestion)).toBeVisible()
+    }
+
+    openPollResults = async (pollQuestion: string) => {
+        await this.showPolls()
+        await this.pollLocator(pollQuestion).getByRole('link', { name: 'Results' }).click()
+    }
 
     // ── Quiz list (gated → activate Quizzes tab first) ──
 
