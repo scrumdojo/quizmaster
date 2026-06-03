@@ -64,3 +64,9 @@ Feature: Background animation preferences
     Given I am on the home page
     When I open the background game dropdown
     Then I see all animation options in the dropdown
+
+
+  Scenario: Cave throat singing plays during the mammoth battle
+    Given I am on the home page
+    When I switch the animation to the mammoths theme
+    Then cave throat singing audio plays during the battle

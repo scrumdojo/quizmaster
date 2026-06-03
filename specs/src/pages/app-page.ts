@@ -84,4 +84,6 @@ export class AppPage {
 
     expectMammothScoreboardSide = (side: string) =>
         expect(this.canvas()).toHaveAttribute('data-mammoth-scoreboard-side', side)
+
+    expectBattleAudio = () => expect(this.canvas()).toHaveAttribute('data-battle-audio', 'cave_throat_singing')
 }

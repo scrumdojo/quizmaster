@@ -1041,6 +1041,18 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
     for (let i = 0; i < 5; i++) mammoths.push(makeMammoth(w, h))
     for (let i = 0; i < 4; i++) hunters.push(makeHunter(w, h))
 
+    const battleAudio = new Audio('/cave_throat_singing.mp3')
+    battleAudio.loop = true
+    battleAudio.volume = 1
+    canvas.dataset.battleAudio = 'cave_throat_singing'
+
+    const resumeOnClick = () => {
+        if (battleAudio.paused) battleAudio.play().catch(() => {})
+    }
+    window.addEventListener('click', resumeOnClick)
+
+    battleAudio.play().catch(() => {})
+
     function tick() {
         if (cancelled) return
         ctx.clearRect(0, 0, w, h)
@@ -1349,8 +1361,12 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
 
     return () => {
         cancelled = true
+        battleAudio.pause()
+        battleAudio.currentTime = 0
+        delete canvas.dataset.battleAudio
         window.removeEventListener('resize', onResize)
         window.removeEventListener('click', onCanvasClick)
+        window.removeEventListener('click', resumeOnClick)
         window.removeEventListener('mousemove', onMouseMove)
         document.documentElement.style.cursor = ''
     }

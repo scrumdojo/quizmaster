@@ -95,3 +95,7 @@ Then('the Hunters scoreboard is on the {word} side', async function (side: strin
 Then('the Mammoths scoreboard is on the {word} side', async function (side: string) {
     await this.appPage.expectMammothScoreboardSide(side)
 })
+
+Then('cave throat singing audio plays during the battle', async function () {
+    await this.appPage.expectBattleAudio()
+})
