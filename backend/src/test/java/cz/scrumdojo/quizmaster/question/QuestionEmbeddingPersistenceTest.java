@@ -94,6 +94,69 @@ class QuestionEmbeddingPersistenceTest {
         assertThat(updated.getEmbeddingTextHash()).isNotEqualTo(QuestionEmbeddingText.hash("What is Scrum?"));
     }
 
+    @Test
+    void creatingQuestionSkipsEmbeddingWhenSkipHeaderSet() throws Exception {
+        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
+
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        IdResponse response = objectMapper.readValue(
+            mockMvc
+                .perform(
+                    post("/api/workspaces/{guid}/questions", workspace.getGuid())
+                        .header("X-Skip-Embedding", "true")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(questionJson("Which country is the largest producer of coffee?"))
+                )
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            IdResponse.class
+        );
+
+        Question question = questionRepository.findById(response.id()).orElseThrow();
+        assertThat(question.getEmbedding()).isNullOrEmpty();
+        assertThat(question.getEmbeddingModel()).isNull();
+        assertThat(question.getEmbeddingTextHash()).isNull();
+    }
+
+    @Test
+    void updatingQuestionSkipsEmbeddingWhenSkipHeaderSet() throws Exception {
+        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
+
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        IdResponse created = objectMapper.readValue(
+            mockMvc
+                .perform(
+                    post("/api/workspaces/{guid}/questions", workspace.getGuid())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(questionJson("What is Scrum?"))
+                )
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            IdResponse.class
+        );
+        assertThat(waitForEmbedding(created.id()).getEmbedding()).isNotEmpty();
+
+        mockMvc
+            .perform(
+                patch("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), created.id())
+                    .header("X-Skip-Embedding", "true")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(questionJson("What is Kanban?"))
+            )
+            .andExpect(status().isOk());
+
+        Question updated = questionRepository.findById(created.id()).orElseThrow();
+        assertThat(updated.getEmbedding()).isNullOrEmpty();
+        assertThat(updated.getEmbeddingModel()).isNull();
+        assertThat(updated.getEmbeddingTextHash()).isNull();
+    }
+
     private Question waitForEmbedding(Integer questionId) throws InterruptedException {
         long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
         while (System.nanoTime() < deadline) {

@@ -12,6 +12,7 @@ import type { PollTake, PollVoteRequest } from '#shared/types/poll.ts'
 import type { QuestionRequest } from '#shared/types/question.ts'
 import type { Quiz, QuizRequest } from '#shared/types/quiz.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
+import { skipEmbeddingHeaders } from '#steps/shared/embedding.ts'
 import type { PollSpec, QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
@@ -78,6 +79,7 @@ export const createQuestionViaRest = async (
     const url = `/api/workspaces/${workspaceGuid}/questions`
     const response = await world.page.request.post(url, {
         data: toQuestionPayload(spec),
+        headers: skipEmbeddingHeaders(world.testInfo),
     })
     if (!response.ok()) {
         throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)

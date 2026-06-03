@@ -47,6 +47,15 @@ The cached embedding is invalidated whenever the embedding model or the
 canonical question text changes, so swapping the model in configuration
 forces re-embedding without manual intervention.
 
+Embedding a saved question is a background OpenRouter round-trip, scheduled
+after the write commits — but it still costs tokens on every question created
+or updated. The question create/update endpoints therefore accept an optional
+`X-Skip-Embedding: true` header that suppresses scheduling it. This is a test
+affordance: E2E scenarios that don't exercise Robin send it so bulk question
+setup spends no OpenRouter tokens. Production clients never send it, so the
+default stays "embed" — and a question saved without an embedding is invisible
+to dedup until it is re-saved.
+
 ## OpenRouter is reached through two endpoints with one token
 
 Drafting and embedding are different OpenRouter endpoints with different

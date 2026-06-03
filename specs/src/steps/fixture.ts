@@ -1,9 +1,11 @@
+import { Page } from '@playwright/test'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { test as base, createBdd } from 'playwright-bdd'
 
 import { mcr } from '#coverage/mcr.config.ts'
 import { initServerClock } from '#steps/clock.ts'
+import { SKIP_EMBEDDING_HEADER } from '#steps/shared/embedding.ts'
 import { QuizmasterWorld } from '#steps/world/world.ts'
 
 export const test = base.extend<{ world: QuizmasterWorld }>({
@@ -49,6 +51,8 @@ BeforeScenario(async function ({ $tags, $test }) {
     if (hasNotFeatureFlag && FEATURE_FLAG_ENABLED) $test.skip()
     if (isAi && !AI_ENABLED) $test.skip()
 
+    if (!isAi) await skipEmbedding(this.page)
+
     await initServerClock(this)
 
     if (!ENABLE_COVERAGE) return
@@ -57,6 +61,17 @@ BeforeScenario(async function ({ $tags, $test }) {
         resetOnNavigation: false,
     })
 })
+
+const skipEmbedding = (page: Page) =>
+    page.route(/\/api\/workspaces\/[^/]+\/questions(\/\d+)?$/, async route => {
+        const method = route.request().method()
+        const headers = route.request().headers()
+
+        if (method === 'POST' || method === 'PATCH' || method === 'PUT') {
+            headers[SKIP_EMBEDDING_HEADER] = 'true'
+        }
+        await route.continue({ headers })
+    })
 
 const screenshotsDir = path.join(__dirname, '../../../site/docs/screenshots')
 fs.mkdir(screenshotsDir, { recursive: true })

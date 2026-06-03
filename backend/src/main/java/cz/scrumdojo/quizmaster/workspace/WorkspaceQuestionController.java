@@ -37,6 +37,18 @@ public class WorkspaceQuestionController {
 
     private static final int PAGE_SIZE = 10;
 
+    /**
+     * Request header that lets a caller create or update a question without computing its embedding.
+     *
+     * <p>Embeddings exist solely to feed Robin's AI duplicate detection. A question write schedules one
+     * via a background OpenRouter call after the transaction commits. Our E2E suite creates many questions
+     * per scenario as plain setup (no AI involved), and with a real API key in CI every one of those writes
+     * would fire a billable embedding call for nothing. This header lets non-{@code @ai} scenarios opt out
+     * of scheduling embeddings so the suite spends no OpenRouter tokens on setup; production callers never
+     * send it, so the default behaviour (embed) is unchanged.
+     */
+    static final String SKIP_EMBEDDING_HEADER = "X-Skip-Embedding";
+
     @Transactional(readOnly = true)
     @GetMapping
     public ResponseEntity<QuestionPageResponse> getWorkspaceQuestions(
@@ -117,13 +129,16 @@ public class WorkspaceQuestionController {
     @PostMapping
     public ResponseEntity<IdResponse> createWorkspaceQuestion(
         @PathVariable String workspaceGuid,
-        @Valid @RequestBody QuestionRequest request
+        @Valid @RequestBody QuestionRequest request,
+        @RequestHeader(value = SKIP_EMBEDDING_HEADER, defaultValue = "false") boolean skipEmbedding
     ) {
         workspaceGuard.requireExists(workspaceGuid);
 
         var question = request.toEntity(workspaceGuid);
         var created = questionRepository.save(question);
-        questionEmbeddingService.scheduleEmbedding(created.getId());
+        if (!skipEmbedding) {
+            questionEmbeddingService.scheduleEmbedding(created.getId());
+        }
         return ResponseEntity.ok(new IdResponse(created.getId()));
     }
 
@@ -132,7 +147,8 @@ public class WorkspaceQuestionController {
     public ResponseEntity<IdResponse> updateWorkspaceQuestion(
         @PathVariable String workspaceGuid,
         @PathVariable Integer id,
-        @Valid @RequestBody QuestionRequest request
+        @Valid @RequestBody QuestionRequest request,
+        @RequestHeader(value = SKIP_EMBEDDING_HEADER, defaultValue = "false") boolean skipEmbedding
     ) {
         workspaceGuard.requireExists(workspaceGuid);
 
@@ -142,7 +158,9 @@ public class WorkspaceQuestionController {
                 var question = request.toEntity(workspaceGuid);
                 question.setId(existing.getId());
                 questionRepository.save(question);
-                questionEmbeddingService.scheduleEmbedding(existing.getId());
+                if (!skipEmbedding) {
+                    questionEmbeddingService.scheduleEmbedding(existing.getId());
+                }
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
             })
             .orElse(ResponseEntity.notFound().build());
