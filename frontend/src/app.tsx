@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router'
 
 import { CreateQuestionPage } from '#fe/make/create-question/create-question-page.tsx'
@@ -31,63 +31,75 @@ const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] 
     { value: 'mammoths', label: 'Mammoths', cursor: SPEAR_CURSOR },
 ]
 
-const AnimationSettings = () => {
+const ICONS = ['🦣', '😇'] as const
+
+const BackgroundGameFab = () => {
     const [theme, setTheme] = useState<AnimationTheme>(() => {
         const v = localStorage.getItem('animation-theme')
         return v === 'mammoths' || v === 'off' ? v : 'angels'
     })
+    const [open, setOpen] = useState(false)
+    const [iconIdx, setIconIdx] = useState(0)
+    const ref = useRef<HTMLDivElement>(null)
+
+    // Alternate icons every 2 s
+    useEffect(() => {
+        const id = window.setInterval(() => setIconIdx(i => 1 - i), 2000)
+        return () => window.clearInterval(id)
+    }, [])
+
+    // Close on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
 
     const select = (t: AnimationTheme) => {
         window.__setAnimationTheme?.(t)
         setTheme(t)
+        setOpen(false)
     }
 
     return (
-        <div
-            data-testid="animation-settings"
-            style={{
-                position: 'fixed',
-                top: 16,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 10,
-                display: 'flex',
-                background: 'rgba(255,255,255,0.92)',
-                borderRadius: 999,
-                border: '2px solid rgba(37,99,235,0.18)',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.14)',
-                padding: 4,
-                gap: 2,
-                backdropFilter: 'blur(8px)',
-            }}
-        >
-            {THEME_OPTIONS.map(({ value, label, cursor }) => (
-                <button
-                    key={value}
-                    type="button"
-                    aria-label={label}
-                    aria-pressed={theme === value}
-                    onClick={() => select(value)}
-                    style={{
-                        padding: '10px 20px',
-                        borderRadius: 999,
-                        border: 'none',
-                        background:
-                            theme === value
-                                ? 'linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 60%, #4338ca 100%)'
-                                : 'transparent',
-                        fontWeight: 700,
-                        fontSize: 15,
-                        cursor,
-                        whiteSpace: 'nowrap',
-                        color: theme === value ? '#fff' : '#10233f',
-                        boxShadow: theme === value ? '0 2px 8px rgba(37,99,235,0.28)' : 'none',
-                        transition: 'background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease',
-                    }}
-                >
-                    {label}
-                </button>
-            ))}
+        <div ref={ref} data-testid="animation-settings" className="bg-game-fab">
+            <div className="bg-game-label">Background game</div>
+            <button
+                type="button"
+                className="bg-game-trigger"
+                aria-label="Background game"
+                onClick={() => setOpen(v => !v)}
+            >
+                {ICONS.map((icon, i) => (
+                    <span
+                        key={icon}
+                        className="bg-game-icon"
+                        style={{ opacity: iconIdx === i ? 1 : 0 }}
+                        aria-hidden="true"
+                    >
+                        {icon}
+                    </span>
+                ))}
+            </button>
+            {open && (
+                <div className="bg-game-dropdown">
+                    {THEME_OPTIONS.map(({ value, label, cursor }) => (
+                        <button
+                            key={value}
+                            type="button"
+                            aria-label={label}
+                            aria-pressed={theme === value}
+                            onClick={() => select(value)}
+                            className={`bg-game-option${theme === value ? ' bg-game-option--active' : ''}`}
+                            style={{ cursor }}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
@@ -186,7 +198,7 @@ export const App = () => {
                 </Routes>
             </div>
             <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />
-            <AnimationSettings />
+            <BackgroundGameFab />
         </BrowserRouter>
     )
 }

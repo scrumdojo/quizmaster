@@ -42,7 +42,13 @@ Feature: Background animation preferences
     Then the active workspace tab has a spear cursor
 
 
-  Scenario: Animation settings control is always visible without hovering
+  Scenario: Background game FAB is always visible with its label
     Given I am on the home page
     Then the animation settings control is visible
-    And I see all animation options without hovering
+    And the background game FAB label reads "Background game"
+
+
+  Scenario: Background game FAB opens a dropdown with all animation options
+    Given I am on the home page
+    When I open the background game dropdown
+    Then I see all animation options in the dropdown

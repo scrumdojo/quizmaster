@@ -117,3 +117,107 @@ body {
         }
     }
 }
+
+// ── Background game FAB ───────────────────────────────────────────────────────
+
+.bg-game-fab {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.bg-game-label {
+    background: white;
+    color: #7c3aed;
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.bg-game-trigger {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    box-shadow: 0 4px 18px rgba(124, 58, 237, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.5);
+    }
+}
+
+.bg-game-icon {
+    position: absolute;
+    font-size: 32px;
+    line-height: 1;
+    transition: opacity 0.6s ease;
+    user-select: none;
+}
+
+.bg-game-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(124, 58, 237, 0.22);
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+    padding: 6px;
+    backdrop-filter: blur(8px);
+    animation: bgGameSlideUp 0.18s ease-out;
+    min-width: 160px;
+}
+
+@keyframes bgGameSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bg-game-option {
+    padding: 9px 16px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: #10233f;
+    text-align: left;
+    white-space: nowrap;
+    transition: background 0.12s ease;
+
+    &:hover {
+        background: rgba(124, 58, 237, 0.08);
+    }
+
+    &.bg-game-option--active {
+        background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+        color: #fff;
+    }
+}

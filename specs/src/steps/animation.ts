@@ -36,8 +36,16 @@ Then('the animation settings control is visible', async function () {
     await this.appPage.expectAnimationSettingsAlwaysVisible()
 })
 
-Then('I see all animation options without hovering', async function () {
-    await this.appPage.expectAnimationSettingsAlwaysVisible()
+Then('the background game FAB label reads {string}', async function (label: string) {
+    await this.appPage.expectBackgroundGameFabLabel(label)
+})
+
+When('I open the background game dropdown', async function () {
+    await this.appPage.openAnimationSettings()
+})
+
+Then('I see all animation options in the dropdown', async function () {
+    await this.appPage.expectDropdownOptionsVisible()
 })
 
 When('I hover over the mammoth animation option', async function () {

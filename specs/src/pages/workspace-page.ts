@@ -199,10 +199,12 @@ export class WorkspacePage {
     createNewQuiz = async () => {
         await this.showQuizzes()
         await this.page.locator('#create-quiz').click()
+        await this.page.waitForLoadState('networkidle')
     }
     clickQuizCreateButton = async () => {
         await this.showQuizzes()
         await this.page.locator('#create-quiz').click()
+        await this.page.waitForLoadState('networkidle')
     }
     expectInfoMessage = (message: string) => expect(this.page.locator('.workspace-info-message')).toHaveText(message)
 

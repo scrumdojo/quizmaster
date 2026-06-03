@@ -6,7 +6,12 @@ export class AppPage {
     private settingsPanel = () => this.page.locator('[data-testid="animation-settings"]')
     private canvas = () => this.page.locator('#crazy-bg')
 
-    openAnimationSettings = () => this.settingsPanel().hover()
+    // Opens the dropdown by clicking the FAB trigger button
+    openAnimationSettings = async () => {
+        const trigger = this.settingsPanel().locator('.bg-game-trigger')
+        const isOpen = await this.settingsPanel().locator('.bg-game-dropdown').isVisible()
+        if (!isOpen) await trigger.click()
+    }
 
     turnOffAnimation = async () => {
         await this.openAnimationSettings()
@@ -32,6 +37,14 @@ export class AppPage {
 
     expectAnimationSettingsAlwaysVisible = async () => {
         await expect(this.settingsPanel()).toBeVisible()
+    }
+
+    expectBackgroundGameFabLabel = async (label: string) => {
+        await expect(this.settingsPanel().locator('.bg-game-label')).toHaveText(label)
+    }
+
+    expectDropdownOptionsVisible = async () => {
+        await this.openAnimationSettings()
         await expect(this.page.getByRole('button', { name: 'Mammoths' })).toBeVisible()
         await expect(this.page.getByRole('button', { name: 'Angels & Devils' })).toBeVisible()
         await expect(this.page.getByRole('button', { name: 'Turn off' })).toBeVisible()
