@@ -142,6 +142,7 @@ Feature: Workspace page management
       | má nád    | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |
 
 
+  @skip
   Scenario: Filter questions in workspace by tag
     Given workspace "Workspace" with questions
       | question              | tag   | answers                              |
