@@ -14,7 +14,7 @@ public record QuestionResponse(
     boolean isEasy,
     String imageUrl,
     Double tolerance,
-    String questionType,
+    QuestionType questionType,
     String[] tags
 ) {
     public static QuestionResponse from(Question q) {
@@ -58,7 +58,7 @@ public record QuestionResponse(
         String[] explanations,
         String questionExplanation,
         Double tolerance,
-        String questionType
+        QuestionType questionType
     ) {
         return new QuestionResponse(
             null,

@@ -22,7 +22,7 @@ public class Question {
     private String question;
 
     @Column(name = "question_type")
-    private String questionType;
+    private QuestionType questionType;
 
     @Column(name = "answers", columnDefinition = "text[]")
     @JdbcTypeCode(SqlTypes.ARRAY)

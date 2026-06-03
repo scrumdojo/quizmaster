@@ -8,6 +8,7 @@ import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
+import cz.scrumdojo.quizmaster.question.QuestionType;
 import cz.scrumdojo.quizmaster.quiz.Difficulty;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
@@ -45,7 +46,7 @@ public class TestFixtures {
             .correctAnswers(new int[] { 1 })
             .explanations(new String[] { "No", "Correct!", "No", "No" })
             .isEasy(false)
-            .questionType("single")
+            .questionType(QuestionType.SINGLE)
             .tags(new String[0]);
     }
 
@@ -62,7 +63,7 @@ public class TestFixtures {
             null,
             false,
             null,
-            "single",
+            QuestionType.SINGLE,
             null,
             new String[0]
         );
@@ -77,7 +78,7 @@ public class TestFixtures {
             null,
             false,
             null,
-            "multiple",
+            QuestionType.MULTIPLE,
             null,
             new String[0]
         );
@@ -92,7 +93,7 @@ public class TestFixtures {
             null,
             false,
             imageUrl,
-            "single",
+            QuestionType.SINGLE,
             null,
             new String[0]
         );
@@ -122,7 +123,7 @@ public class TestFixtures {
             .correctAnswers(new int[] { 0, 1 })
             .explanations(new String[] { "Yes!", "Yes!", "No, France", "No, Germany" })
             .isEasy(false)
-            .questionType("multiple")
+            .questionType(QuestionType.MULTIPLE)
             .tags(new String[0]);
     }
 

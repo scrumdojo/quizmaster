@@ -49,7 +49,7 @@ class QuestionScoringServiceTest {
     @Test
     void numericalWithEmptyQuestionAnswersIsIncorrect() {
         Question question = Question.builder()
-            .questionType("numerical")
+            .questionType(QuestionType.NUMERICAL)
             .answers(new String[] {})
             .tolerance(0.0)
             .build();
@@ -58,13 +58,13 @@ class QuestionScoringServiceTest {
 
     @Test
     void numericalWithNullQuestionAnswersIsIncorrect() {
-        Question question = Question.builder().questionType("numerical").tolerance(0.0).build();
+        Question question = Question.builder().questionType(QuestionType.NUMERICAL).tolerance(0.0).build();
         assertThat(service.score(question, value(3.14))).isEqualTo(AnswerStatus.INCORRECT);
     }
 
     private static Question numerical(String correctAnswer, Double tolerance) {
         return Question.builder()
-            .questionType("numerical")
+            .questionType(QuestionType.NUMERICAL)
             .answers(new String[] { correctAnswer })
             .correctAnswers(new int[] { 0 })
             .tolerance(tolerance)

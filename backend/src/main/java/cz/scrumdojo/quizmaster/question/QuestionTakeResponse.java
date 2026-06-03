@@ -6,14 +6,15 @@ public record QuestionTakeResponse(
     String[] answers,
     boolean isEasy,
     String imageUrl,
-    String questionType,
+    QuestionType questionType,
     String[] tags,
     int correctAnswerCount,
     int requiredDecimalDigits
 ) {
     public static QuestionTakeResponse from(Question question) {
         var type = question.getQuestionType();
-        var answers = "numerical".equals(type) ? new String[0] : question.getAnswers();
+        boolean isNumerical = type == QuestionType.NUMERICAL;
+        var answers = isNumerical ? new String[0] : question.getAnswers();
         var correctAnswers = question.getCorrectAnswers();
         return new QuestionTakeResponse(
             question.getId(),
@@ -24,7 +25,7 @@ public record QuestionTakeResponse(
             type,
             question.getTags(),
             correctAnswers != null ? correctAnswers.length : 0,
-            "numerical".equals(type) ? requiredDecimalDigits(question) : 0
+            isNumerical ? requiredDecimalDigits(question) : 0
         );
     }
 

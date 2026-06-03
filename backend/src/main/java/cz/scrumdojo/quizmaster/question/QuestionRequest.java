@@ -10,7 +10,7 @@ public record QuestionRequest(
     String questionExplanation,
     boolean isEasy,
     String imageUrl,
-    String questionType,
+    QuestionType questionType,
     Double tolerance,
     String[] tags
 ) {
@@ -30,12 +30,12 @@ public record QuestionRequest(
             .build();
     }
 
-    private String resolveQuestionType() {
+    private QuestionType resolveQuestionType() {
         if (questionType != null) return questionType;
-        if (correctAnswers != null && correctAnswers.length >= 2) return "multiple";
+        if (correctAnswers != null && correctAnswers.length >= 2) return QuestionType.MULTIPLE;
         if (
             answers != null && answers.length == 1 && correctAnswers != null && correctAnswers.length == 1
-        ) return "numerical";
-        return "single";
+        ) return QuestionType.NUMERICAL;
+        return QuestionType.SINGLE;
     }
 }

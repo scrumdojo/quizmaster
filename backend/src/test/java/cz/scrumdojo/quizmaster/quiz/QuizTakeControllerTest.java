@@ -11,6 +11,7 @@ import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.question.QuestionType;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -456,7 +457,7 @@ public class QuizTakeControllerTest {
                 .answers(new String[] { "Naples", "Rome", "Paris", "Berlin" })
                 .correctAnswers(new int[] { 0, 1 })
                 .explanations(new String[] { "Yes", "Yes", "No", "No" })
-                .questionType("multiple")
+                .questionType(QuestionType.MULTIPLE)
         );
         Quiz quiz = fixtures.save(
             fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build()

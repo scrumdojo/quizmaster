@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
+import cz.scrumdojo.quizmaster.question.QuestionType;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -15,7 +16,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -27,8 +27,6 @@ public class AiAssistantService {
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
     private static final Duration TIMEOUT = Duration.ofSeconds(60);
-
-    static final Set<String> KNOWN_TYPES = Set.of("single", "multiple", "numerical");
 
     private final ObjectMapper objectMapper;
     private final QuestionEmbeddingService questionEmbeddingService;
@@ -86,7 +84,7 @@ public class AiAssistantService {
         Integer excludedQuestionId
     ) {
         validatePromptAndToken(prompt);
-        String resolvedType = resolveType(questionType);
+        QuestionType resolvedType = resolveType(questionType);
         List<String> allQuestionTexts = questionEmbeddingService.workspaceQuestionTexts(
             workspaceGuid,
             excludedQuestionId
@@ -117,7 +115,7 @@ public class AiAssistantService {
 
     public QuestionResponse[] generateQuestions(String prompt, String questionType, String workspaceGuid) {
         validatePromptAndToken(prompt);
-        String resolvedType = resolveType(questionType);
+        QuestionType resolvedType = resolveType(questionType);
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
             questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, null);
 
@@ -194,7 +192,7 @@ public class AiAssistantService {
 
     private AssistantResponse generateCandidate(
         String prompt,
-        String resolvedType,
+        QuestionType resolvedType,
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
         DuplicateMatch retryFeedback
     ) {
@@ -205,7 +203,7 @@ public class AiAssistantService {
 
     private AssistantBatchResponse generateBatchCandidate(
         String prompt,
-        String resolvedType,
+        QuestionType resolvedType,
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
         DuplicateMatch retryFeedback
     ) {
@@ -339,7 +337,7 @@ public class AiAssistantService {
         return rule.toString();
     }
 
-    private static QuestionResponse[] toDraftResponses(AssistantResponse[] responses, String resolvedType) {
+    private static QuestionResponse[] toDraftResponses(AssistantResponse[] responses, QuestionType resolvedType) {
         return Arrays.stream(responses)
             .map(response -> toDraftResponse(response, normalizeExplanations(response), resolvedType))
             .toArray(QuestionResponse[]::new);
@@ -362,45 +360,42 @@ public class AiAssistantService {
         }
     }
 
-    private static String resolveType(String questionType) {
+    private static QuestionType resolveType(String questionType) {
         if (questionType == null || questionType.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "questionType is required.");
         }
-        String normalized = questionType.trim().toLowerCase();
-        if (!KNOWN_TYPES.contains(normalized)) {
+        try {
+            return QuestionType.fromWire(questionType);
+        } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown questionType: " + questionType);
         }
-        return normalized;
     }
 
-    private String chooseSystemPrompt(String resolvedType) {
+    private String chooseSystemPrompt(QuestionType resolvedType) {
         return switch (resolvedType) {
-            case "single" -> singleChoicePrompt;
-            case "multiple" -> multipleChoicePrompt;
-            case "numerical" -> numericalPrompt;
-            default -> throw new IllegalStateException("Unhandled questionType: " + resolvedType);
+            case SINGLE -> singleChoicePrompt;
+            case MULTIPLE -> multipleChoicePrompt;
+            case NUMERICAL -> numericalPrompt;
         };
     }
 
-    private String chooseBatchSystemPrompt(String resolvedType) {
+    private String chooseBatchSystemPrompt(QuestionType resolvedType) {
         return switch (resolvedType) {
-            case "single" -> singleChoiceBatchPrompt;
-            case "multiple" -> multipleChoiceBatchPrompt;
-            case "numerical" -> numericalBatchPrompt;
-            default -> throw new IllegalStateException("Unhandled questionType: " + resolvedType);
+            case SINGLE -> singleChoiceBatchPrompt;
+            case MULTIPLE -> multipleChoiceBatchPrompt;
+            case NUMERICAL -> numericalBatchPrompt;
         };
     }
 
-    private static void validateForType(AssistantResponse response, String resolvedType) {
+    private static void validateForType(AssistantResponse response, QuestionType resolvedType) {
         switch (resolvedType) {
-            case "single" -> validateSingleChoiceResponse(response);
-            case "multiple" -> validateMultipleChoiceResponse(response);
-            case "numerical" -> validateNumericalResponse(response);
-            default -> throw new IllegalStateException("Unhandled questionType: " + resolvedType);
+            case SINGLE -> validateSingleChoiceResponse(response);
+            case MULTIPLE -> validateMultipleChoiceResponse(response);
+            case NUMERICAL -> validateNumericalResponse(response);
         }
     }
 
-    static void validateBatchResponses(AssistantResponse[] responses, String resolvedType) {
+    static void validateBatchResponses(AssistantResponse[] responses, QuestionType resolvedType) {
         if (responses == null || responses.length < 1) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_GATEWAY,
@@ -537,7 +532,7 @@ public class AiAssistantService {
     private static QuestionResponse toDraftResponse(
         AssistantResponse assistantResponse,
         String[] explanations,
-        String resolvedType
+        QuestionType resolvedType
     ) {
         return QuestionResponse.draft(
             assistantResponse.question(),

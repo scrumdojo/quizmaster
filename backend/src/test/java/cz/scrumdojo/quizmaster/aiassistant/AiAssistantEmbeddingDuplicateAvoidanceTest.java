@@ -7,6 +7,7 @@ import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
+import cz.scrumdojo.quizmaster.question.QuestionType;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
@@ -102,7 +103,7 @@ class AiAssistantEmbeddingDuplicateAvoidanceTest {
         assertThat(response.answers()).hasSizeGreaterThanOrEqualTo(2);
         assertThat(response.correctAnswers()).hasSize(1);
         assertThat(response.explanations()).hasSize(response.answers().length);
-        assertThat(response.questionType()).isEqualTo("single");
+        assertThat(response.questionType()).isEqualTo(QuestionType.SINGLE);
     }
 
     private static String normalize(String value) {

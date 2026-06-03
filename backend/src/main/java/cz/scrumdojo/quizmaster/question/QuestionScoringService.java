@@ -15,7 +15,7 @@ public class QuestionScoringService {
     }
 
     public AnswerStatus score(Question question, QuestionAnswerRequest answer) {
-        return "numerical".equals(question.getQuestionType())
+        return question.getQuestionType() == QuestionType.NUMERICAL
             ? scoreNumerical(question, answer)
             : scoreChoice(question, answer);
     }

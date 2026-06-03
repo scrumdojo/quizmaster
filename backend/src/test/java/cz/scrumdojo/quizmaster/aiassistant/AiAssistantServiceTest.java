@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
+import cz.scrumdojo.quizmaster.question.QuestionType;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
@@ -97,7 +98,7 @@ public class AiAssistantServiceTest {
 
         assertGeneralChoiceResponse(response);
         assertEquals(1, response.correctAnswers().length);
-        assertEquals("single", response.questionType());
+        assertEquals(QuestionType.SINGLE, response.questionType());
     }
 
     @Tag("ai")
@@ -112,7 +113,7 @@ public class AiAssistantServiceTest {
 
         assertGeneralChoiceResponse(response);
         assertTrue(response.correctAnswers().length >= 2, "Expected at least 2 correct answers");
-        assertEquals("multiple", response.questionType());
+        assertEquals(QuestionType.MULTIPLE, response.questionType());
     }
 
     @Tag("ai")
@@ -130,7 +131,7 @@ public class AiAssistantServiceTest {
         assertEquals(1, response.answers().length, "Numerical must have exactly 1 answer");
         assertDoesNotThrow(() -> Double.parseDouble(response.answers()[0].trim()));
         assertArrayEquals(new int[] { 0 }, response.correctAnswers());
-        assertEquals("numerical", response.questionType());
+        assertEquals(QuestionType.NUMERICAL, response.questionType());
     }
 
     @Tag("ai")
@@ -402,7 +403,7 @@ public class AiAssistantServiceTest {
                         null
                     ),
                 },
-                "single"
+                QuestionType.SINGLE
             )
         );
     }
@@ -410,7 +411,10 @@ public class AiAssistantServiceTest {
     @Test
     void validateBatchResponses_requiresAtLeastTwoQuestions() {
         assertThrows(ResponseStatusException.class, () ->
-            AiAssistantService.validateBatchResponses(new AiAssistantService.AssistantResponse[] {}, "single")
+            AiAssistantService.validateBatchResponses(
+                new AiAssistantService.AssistantResponse[] {},
+                QuestionType.SINGLE
+            )
         );
     }
 

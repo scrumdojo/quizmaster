@@ -59,7 +59,7 @@ public class QuestionTakeControllerTest {
                 .question("What is pi rounded to two decimals?")
                 .answers(new String[] { "3.14" })
                 .correctAnswers(new int[] { 0 })
-                .questionType("numerical")
+                .questionType(QuestionType.NUMERICAL)
                 .tolerance(0.01)
         );
 
@@ -132,7 +132,7 @@ public class QuestionTakeControllerTest {
                 .question("What is pi rounded to two decimals?")
                 .answers(new String[] { "3.14" })
                 .correctAnswers(new int[] { 0 })
-                .questionType("numerical")
+                .questionType(QuestionType.NUMERICAL)
                 .tolerance(0.01)
         );
 
@@ -174,7 +174,7 @@ public class QuestionTakeControllerTest {
                 .question("What is pi rounded to two decimals?")
                 .answers(new String[] { "3.14" })
                 .correctAnswers(new int[] { 0 })
-                .questionType("numerical")
+                .questionType(QuestionType.NUMERICAL)
                 .tolerance(0.01)
         );
 
