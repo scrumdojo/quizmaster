@@ -8,6 +8,7 @@ import {
 import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
 import type { Difficulty, QuestionType, QuizMode } from '#shared/types/enums.ts'
 import type { IdResponse } from '#shared/types/id-response.ts'
+import type { PollTake, PollVoteRequest } from '#shared/types/poll.ts'
 import type { QuestionRequest } from '#shared/types/question.ts'
 import type { Quiz, QuizRequest } from '#shared/types/quiz.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
@@ -102,6 +103,33 @@ export const createPollViaRest = async (
     }
     const { id } = (await response.json()) as IdResponse
     return id
+}
+
+export const fetchWorkspacePollViaRest = async (world: QuizmasterWorld, pollBookmark: string): Promise<PollTake> => {
+    const pollId = world.pollIds[pollBookmark]
+    if (pollId === undefined) {
+        throw new Error(`Poll bookmark "${pollBookmark}" has no REST-assigned id`)
+    }
+
+    const url = `/api/workspaces/${world.workspaceGuid}/polls/${pollId}`
+    const response = await world.page.request.get(url)
+    if (!response.ok()) {
+        throw new Error(`GET ${url} failed: ${response.status()} ${await response.text()}`)
+    }
+    return (await response.json()) as PollTake
+}
+
+export const submitPollVoteViaRest = async (
+    world: QuizmasterWorld,
+    pollId: number,
+    selectedAnswerId: number,
+): Promise<void> => {
+    const url = `/api/poll/${pollId}/submit`
+    const body: PollVoteRequest = { selectedAnswerId }
+    const response = await world.page.request.post(url, { data: body })
+    if (!response.ok()) {
+        throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)
+    }
 }
 
 // Feature files use display labels ("Keep Question"); the API takes enum values.

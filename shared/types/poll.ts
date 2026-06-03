@@ -9,6 +9,17 @@ export interface PollTake {
     readonly answers: readonly PollAnswer[]
 }
 
+export interface PollResultItem {
+    readonly answerId: number
+    readonly text: string
+    readonly voteCount: number
+}
+
+export interface PollResultsResponse {
+    readonly pollId: number
+    readonly answers: readonly PollResultItem[]
+}
+
 export interface PollVoteRequest {
     readonly selectedAnswerId: number
 }

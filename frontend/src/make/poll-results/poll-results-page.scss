@@ -1,0 +1,34 @@
+.poll-results {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.poll-results__question {
+    margin: 0;
+}
+
+.poll-results__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.poll-results__table caption {
+    padding: 1rem 1.25rem 0;
+    text-align: left;
+    font-weight: 700;
+}
+
+.poll-results__table th,
+.poll-results__table td {
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid rgba(16, 35, 63, 0.12);
+    text-align: left;
+}
+
+.poll-results__table tbody tr:last-child th,
+.poll-results__table tbody tr:last-child td {
+    border-bottom: none;
+}

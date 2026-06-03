@@ -127,7 +127,7 @@ Controllers are the source of truth: workspace authoring lives in
 The router lives in `frontend/src/`. Path families:
 
 - `/` — home.
-- `/workspace/...` — maker views (workspace, question, quiz CRUD, stats).
+- `/workspace/...` — maker views (workspace, question, quiz CRUD, poll results, stats).
 - `/quiz/:id`, `/quiz/:id/questions/:questionId?` — taker views for quizzes.
 - `/question/:id` — taker view for a standalone question.
 - `/poll/:id` — taker view for a standalone poll.
