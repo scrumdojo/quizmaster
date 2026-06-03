@@ -1,4 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react'
+import type { CSSProperties, MouseEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams } from 'react-router'
@@ -40,6 +41,9 @@ const QR_THEME_IMAGES: Record<QrThemeImage, string> = {
     mammoth: qrThemeImage('🦣', 'mammoth'),
 }
 
+const SHARE_BIRD_GIF_URL =
+    'https://cdn.prod.website-files.com/6334dbcbbe4129ee195573c1/6543fb118d9abe3cc96e2fb8_8_IUQSWVLwaajCn5eWped71A4u6ziuWXFzP9w70bSA42oHEPLRWVf1p_F1HVELN7yJSDunSFBhQrrPNO4MmtFNxj5U8QCiCxfbPppby20iY0x5IFOyhbOHhe_Jn24PGgI1qd6OsjXGgnqC90DNj-dz8.gif'
+
 const currentAnimationTheme = (): AnimationTheme => {
     const theme = localStorage.getItem('animation-theme')
     return theme === 'mammoths' || theme === 'off' ? theme : 'angels'
@@ -64,6 +68,16 @@ interface CohortInlineError {
     readonly target: CohortErrorTarget
 }
 
+interface ShareBird {
+    readonly id: number
+    readonly startX: number
+    readonly startY: number
+    readonly midX: number
+    readonly midY: number
+    readonly endX: number
+    readonly endY: number
+}
+
 export const QuizSharePage = () => {
     const workspaceId = useWorkspaceId()
     const { id: quizId } = useParams()
@@ -74,6 +88,7 @@ export const QuizSharePage = () => {
     const [activeQrCode, setActiveQrCode] = useState<ActiveQrCode | null>(null)
     const [copiedKey, setCopiedKey] = useState<string | null>(null)
     const [editing, setEditing] = useState<{ readonly guid: string; readonly name: string } | null>(null)
+    const [shareBirds, setShareBirds] = useState<readonly ShareBird[]>([])
 
     useApi(
         quizId,
@@ -123,6 +138,33 @@ export const QuizSharePage = () => {
     const copyLink = async (key: string, url: string) => {
         await navigator.clipboard.writeText(url)
         setCopiedKey(key)
+    }
+
+    const launchShareBird = (event: MouseEvent<HTMLButtonElement>) => {
+        const rect = event.currentTarget.getBoundingClientRect()
+        const startX = rect.left + rect.width / 2
+        const startY = rect.top + rect.height / 2
+        const endX = window.innerWidth - 36
+        const endY = 34
+        const bird: ShareBird = {
+            id: Date.now() + Math.random(),
+            startX,
+            startY,
+            midX: startX + (endX - startX) * 0.5,
+            midY: Math.min(startY - 120, startY + (endY - startY) * 0.35),
+            endX,
+            endY,
+        }
+
+        setShareBirds(current => [...current, bird])
+        window.setTimeout(() => {
+            setShareBirds(current => current.filter(currentBird => currentBird.id !== bird.id))
+        }, 1600)
+    }
+
+    const handleShareClick = async (event: MouseEvent<HTMLButtonElement>, key: string, url: string) => {
+        launchShareBird(event)
+        await copyLink(key, url)
     }
 
     const handleAdd = async () => {
@@ -182,7 +224,7 @@ export const QuizSharePage = () => {
             >
                 Show QR code
             </Button>
-            <Button className="button secondary" onClick={() => copyLink(key, url)}>
+            <Button className="button secondary" onClick={event => void handleShareClick(event, key, url)}>
                 {copiedKey === key ? 'Copied' : 'Share'}
             </Button>
             <HelpTooltip label={`Share ${label}`}>Copies the take link to the clipboard.</HelpTooltip>
@@ -230,12 +272,41 @@ export const QuizSharePage = () => {
         )
     }
 
+    const renderShareBirds = () =>
+        createPortal(
+            <>
+                {shareBirds.map(bird => (
+                    <span
+                        key={bird.id}
+                        className="share-bird"
+                        data-testid="share-bird"
+                        data-flight-target="top-right"
+                        style={
+                            {
+                                '--share-bird-x': `${bird.startX}px`,
+                                '--share-bird-y': `${bird.startY}px`,
+                                '--share-bird-mid-x': `${bird.midX}px`,
+                                '--share-bird-mid-y': `${bird.midY}px`,
+                                '--share-bird-end-x': `${bird.endX}px`,
+                                '--share-bird-end-y': `${bird.endY}px`,
+                            } as CSSProperties
+                        }
+                        aria-hidden="true"
+                    >
+                        <img className="share-bird__image" src={SHARE_BIRD_GIF_URL} alt="" />
+                    </span>
+                ))}
+            </>,
+            document.body,
+        )
+
     return (
         <Page
             title={`Share ${quiz.title}`}
             id="share-page"
             back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
         >
+            {renderShareBirds()}
             <section>
                 <h2>Take link</h2>
                 <FieldNote id="general-take-link-note">

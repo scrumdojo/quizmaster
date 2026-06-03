@@ -1,5 +1,5 @@
 export interface WithOnClick {
-    readonly onClick: () => void
+    readonly onClick: React.MouseEventHandler<HTMLButtonElement>
 }
 
 interface ButtonProps extends WithOnClick {

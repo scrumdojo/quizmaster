@@ -59,6 +59,27 @@
     align-items: center;
 }
 
+.share-bird {
+    position: fixed;
+    z-index: 1200;
+    left: var(--share-bird-x);
+    top: var(--share-bird-y);
+    width: 4rem;
+    height: 4rem;
+    pointer-events: none;
+    filter: drop-shadow(0 0.4rem 0.45rem rgba(15, 23, 42, 0.18));
+    transform: translate(-50%, -50%);
+    transform-origin: 50% 50%;
+    animation: share-bird-fly 1.365s cubic-bezier(0.22, 0.9, 0.3, 1) 120ms both;
+}
+
+.share-bird__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .cohort-edit,
 .cohort-add {
     display: flex;
@@ -153,5 +174,34 @@
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes share-bird-fly {
+    0% {
+        left: var(--share-bird-x);
+        top: var(--share-bird-y);
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.75) rotate(-8deg);
+    }
+
+    58% {
+        left: var(--share-bird-mid-x);
+        top: var(--share-bird-mid-y);
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.16) rotate(10deg);
+    }
+
+    100% {
+        left: var(--share-bird-end-x);
+        top: var(--share-bird-end-y);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.42) rotate(24deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .share-bird {
+        animation-duration: 0.25s;
     }
 }

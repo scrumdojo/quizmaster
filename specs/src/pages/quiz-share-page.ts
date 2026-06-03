@@ -1,6 +1,8 @@
 import { expect, type Page } from '@playwright/test'
 
 export class QuizSharePage {
+    private lastShareButtonCenter: { readonly x: number; readonly y: number } | null = null
+
     constructor(private page: Page) {}
 
     private takeLinkLocator = () => this.page.locator('#quiz-take-link')
@@ -9,6 +11,8 @@ export class QuizSharePage {
     private quizTakeQrLocator = () => this.page.getByTestId('quiz-take-qr')
     private qrCodeLocator = () => this.page.locator('.share-qr-code')
     private qrThemeImageLocator = () => this.qrCodeLocator().locator('svg image')
+    private shareBirdLocator = () => this.page.getByTestId('share-bird')
+    private shareBirdImageLocator = () => this.shareBirdLocator().locator('img')
 
     private cohortRowLocator = (name: string) => this.page.locator(`.cohort-row[data-name="${name}"]`)
 
@@ -67,10 +71,17 @@ export class QuizSharePage {
 
     showCohortQr = (name: string) => this.cohortRowLocator(name).getByRole('button', { name: 'Show QR code' }).click()
 
-    copyQuizTakeLink = () => this.page.getByRole('button', { name: 'Share', exact: true }).first().click()
+    copyQuizTakeLink = async () => {
+        const button = this.page.getByRole('button', { name: 'Share', exact: true }).first()
+        await this.rememberShareButtonCenter(button)
+        await button.click()
+    }
 
-    copyCohortLink = (name: string) =>
-        this.cohortRowLocator(name).getByRole('button', { name: 'Share', exact: true }).click()
+    copyCohortLink = async (name: string) => {
+        const button = this.cohortRowLocator(name).getByRole('button', { name: 'Share', exact: true })
+        await this.rememberShareButtonCenter(button)
+        await button.click()
+    }
 
     startRenameCohort = (name: string) => this.cohortRowLocator(name).getByRole('button', { name: 'Edit' }).click()
 
@@ -157,6 +168,46 @@ export class QuizSharePage {
 
     expectQuizTakeCopied = () => expect(this.page.getByRole('button', { name: 'Copied' }).first()).toBeVisible()
 
+    expectShareBirdStartedFromQuizShareButton = async () => {
+        await this.expectShareBirdStartedFromLastShareButton()
+    }
+
+    expectShareBirdStartedFromCohortShareButton = async (_name: string) => {
+        await this.expectShareBirdStartedFromLastShareButton()
+    }
+
+    expectAnimatedShareBird = async () => {
+        await expect(this.shareBirdImageLocator()).toBeVisible()
+        await expect(this.shareBirdImageLocator()).toHaveAttribute('src', /\.gif$/)
+    }
+
+    expectShareBirdFlyingToTopRight = async () => {
+        await expect(this.shareBirdLocator()).toBeVisible()
+        await expect(this.shareBirdLocator()).toHaveAttribute('data-flight-target', 'top-right')
+        const style = (await this.shareBirdLocator().getAttribute('style')) ?? ''
+        const startX = Number.parseFloat(style.match(/--share-bird-x:\s*([0-9.]+)px/)?.[1] ?? '0')
+        const startY = Number.parseFloat(style.match(/--share-bird-y:\s*([0-9.]+)px/)?.[1] ?? '0')
+        const endX = Number.parseFloat(style.match(/--share-bird-end-x:\s*([0-9.]+)px/)?.[1] ?? '0')
+        const endY = Number.parseFloat(style.match(/--share-bird-end-y:\s*([0-9.]+)px/)?.[1] ?? '0')
+        const viewport = this.page.viewportSize()
+
+        expect(viewport).not.toBeNull()
+        expect(Math.abs(endX - (viewport!.width - 36))).toBeLessThan(2)
+        expect(Math.abs(endY - 34)).toBeLessThan(2)
+        await expect
+            .poll(async () => {
+                const box = await this.shareBirdLocator().boundingBox()
+                if (!box) return false
+
+                return box.x + box.width / 2 > startX + 20 && box.y + box.height / 2 < startY - 20
+            })
+            .toBe(true)
+    }
+
+    expectShareBirdGone = async () => {
+        await expect(this.shareBirdLocator()).toHaveCount(0, { timeout: 2000 })
+    }
+
     expectCohortCopied = (name: string) =>
         expect(this.cohortRowLocator(name).getByRole('button', { name: 'Copied' })).toBeVisible()
 
@@ -167,4 +218,28 @@ export class QuizSharePage {
     expectCohortTakeLinkNote = () => expect(this.page.locator('#cohort-take-link-note')).toBeVisible()
     expectCohortDeleteNote = (name: string) =>
         expect(this.cohortRowLocator(name).getByText('Cohorts with attempts cannot be deleted.')).toBeVisible()
+
+    private rememberShareButtonCenter = async (button: ReturnType<Page['getByRole']>) => {
+        const buttonBox = await button.boundingBox()
+        expect(buttonBox).not.toBeNull()
+        this.lastShareButtonCenter = {
+            x: buttonBox!.x + buttonBox!.width / 2,
+            y: buttonBox!.y + buttonBox!.height / 2,
+        }
+    }
+
+    private expectShareBirdStartedFromLastShareButton = async () => {
+        await expect(this.shareBirdLocator()).toBeVisible()
+        expect(this.lastShareButtonCenter).not.toBeNull()
+        const style = (await this.shareBirdLocator().getAttribute('style')) ?? ''
+        const startX = Number.parseFloat(style.match(/--share-bird-x:\s*([0-9.]+)px/)?.[1] ?? '0')
+        const startY = Number.parseFloat(style.match(/--share-bird-y:\s*([0-9.]+)px/)?.[1] ?? '0')
+        const birdBox = await this.shareBirdLocator().boundingBox()
+
+        expect(Math.abs(startX - this.lastShareButtonCenter!.x)).toBeLessThan(2)
+        expect(Math.abs(startY - this.lastShareButtonCenter!.y)).toBeLessThan(2)
+        expect(birdBox).not.toBeNull()
+        expect(Math.abs(birdBox!.x + birdBox!.width / 2 - this.lastShareButtonCenter!.x)).toBeLessThan(8)
+        expect(Math.abs(birdBox!.y + birdBox!.height / 2 - this.lastShareButtonCenter!.y)).toBeLessThan(8)
+    }
 }

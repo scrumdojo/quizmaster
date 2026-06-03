@@ -96,6 +96,25 @@ Feature: Share Quiz
     * I see that the quiz take link was copied
 
 
+  Scenario: Animate sharing the quiz take link
+    When I navigate to share quiz "Cohort Quiz"
+    * I copy the quiz take link
+    Then I see a share bird starting from the quiz share button
+    * I see an animated share bird
+    * I see a share bird flying to the top-right corner
+    * the share bird disappears
+
+
+  Scenario: Animate sharing a cohort take link
+    Given quiz "Cohort Quiz" has a cohort named "Boyz"
+    When I navigate to share quiz "Cohort Quiz"
+    * I copy the take link for cohort "Boyz"
+    Then I see a share bird starting from the share button for cohort "Boyz"
+    * I see an animated share bird
+    * I see a share bird flying to the top-right corner
+    * the share bird disappears
+
+
   Scenario: Copy a cohort take link
     Given quiz "Cohort Quiz" has a cohort named "Boyz"
     * quiz "Cohort Quiz" has a cohort named "Girlz"

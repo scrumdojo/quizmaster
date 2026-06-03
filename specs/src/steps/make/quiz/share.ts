@@ -110,6 +110,26 @@ Then('I see that the quiz take link was copied', async function () {
     await this.quizSharePage.expectQuizTakeCopied()
 })
 
+Then('I see a share bird starting from the quiz share button', async function () {
+    await this.quizSharePage.expectShareBirdStartedFromQuizShareButton()
+})
+
+Then('I see a share bird starting from the share button for cohort {string}', async function (cohortName: string) {
+    await this.quizSharePage.expectShareBirdStartedFromCohortShareButton(cohortName)
+})
+
+Then('I see an animated share bird', async function () {
+    await this.quizSharePage.expectAnimatedShareBird()
+})
+
+Then('I see a share bird flying to the top-right corner', async function () {
+    await this.quizSharePage.expectShareBirdFlyingToTopRight()
+})
+
+Then('the share bird disappears', async function () {
+    await this.quizSharePage.expectShareBirdGone()
+})
+
 When('I copy the take link for cohort {string}', async function (cohortName: string) {
     await this.quizSharePage.copyCohortLink(cohortName)
 })
