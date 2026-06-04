@@ -13,7 +13,7 @@ public record QuestionResponse(
     String workspaceGuid,
     boolean isEasy,
     String imageUrl,
-    Double tolerance,
+    double tolerance,
     QuestionType questionType,
     String[] tags
 ) {
@@ -61,7 +61,7 @@ public record QuestionResponse(
         int[] correctAnswers,
         String[] explanations,
         String questionExplanation,
-        Double tolerance,
+        double tolerance,
         QuestionType questionType
     ) {
         return new QuestionResponse(

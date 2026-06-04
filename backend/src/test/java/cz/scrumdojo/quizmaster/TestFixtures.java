@@ -64,7 +64,7 @@ public class TestFixtures {
             false,
             null,
             QuestionType.SINGLE,
-            null,
+            0.0,
             new String[0]
         );
     }
@@ -79,7 +79,7 @@ public class TestFixtures {
             false,
             null,
             QuestionType.MULTIPLE,
-            null,
+            0.0,
             new String[0]
         );
     }
@@ -94,7 +94,7 @@ public class TestFixtures {
             false,
             imageUrl,
             QuestionType.SINGLE,
-            null,
+            0.0,
             new String[0]
         );
     }

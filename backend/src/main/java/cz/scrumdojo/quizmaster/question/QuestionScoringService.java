@@ -30,8 +30,7 @@ public class QuestionScoringService {
             return AnswerStatus.INCORRECT;
         }
         double correct = Double.parseDouble(question.getAnswers()[0]);
-        double tolerance = question.getTolerance() != null ? question.getTolerance() : 0;
-        return Math.abs(answer.value() - correct) <= tolerance + FLOAT_EPSILON
+        return Math.abs(answer.value() - correct) <= question.getTolerance() + FLOAT_EPSILON
             ? AnswerStatus.CORRECT
             : AnswerStatus.INCORRECT;
     }

@@ -540,7 +540,7 @@ public class AiAssistantService {
             assistantResponse.correctAnswers(),
             explanations,
             assistantResponse.questionExplanation(),
-            assistantResponse.tolerance(),
+            assistantResponse.tolerance() != null ? assistantResponse.tolerance() : 0.0,
             resolvedType
         );
     }

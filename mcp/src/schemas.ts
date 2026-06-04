@@ -44,7 +44,7 @@ const questionPayloadShape = {
     questionType: questionTypeSchema,
     isEasy: z.boolean().default(false),
     imageUrl: z.string().nullable().optional(),
-    tolerance: z.number().nullable().optional(),
+    tolerance: z.number().default(0),
     tags: z.array(z.string()).default([]),
 }
 
@@ -73,7 +73,7 @@ const addQuestionIssues = (value: QuestionInputForValidation, ctx: z.RefinementC
                 message: 'Numerical questions must have correctAnswers set to [0].',
             })
         }
-        if (value.tolerance !== undefined && value.tolerance !== null && value.tolerance < 0) {
+        if (value.tolerance < 0) {
             ctx.addIssue({ code: 'custom', path: ['tolerance'], message: 'Tolerance must be non-negative.' })
         }
         return
@@ -204,7 +204,7 @@ export const toQuestionRequest = (input: CreateQuestionInput | UpdateQuestionInp
     questionType: input.questionType,
     isEasy: input.questionType === 'multiple' ? input.isEasy : false,
     imageUrl: input.imageUrl ?? undefined,
-    tolerance: input.tolerance ?? undefined,
+    tolerance: input.tolerance,
     tags: input.tags,
 })
 

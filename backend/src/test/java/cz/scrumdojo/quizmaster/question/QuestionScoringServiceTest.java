@@ -11,7 +11,7 @@ class QuestionScoringServiceTest {
 
     @Test
     void numericalExactMatchIsCorrect() {
-        assertThat(service.score(numerical("3.14", null), value(3.14))).isEqualTo(AnswerStatus.CORRECT);
+        assertThat(service.score(numerical("3.14", 0.0), value(3.14))).isEqualTo(AnswerStatus.CORRECT);
     }
 
     @Test
@@ -35,7 +35,7 @@ class QuestionScoringServiceTest {
 
     @Test
     void numericalWithoutToleranceRejectsApproximateAnswer() {
-        assertThat(service.score(numerical("56", null), value(57.0))).isEqualTo(AnswerStatus.INCORRECT);
+        assertThat(service.score(numerical("56", 0.0), value(57.0))).isEqualTo(AnswerStatus.INCORRECT);
         assertThat(service.score(numerical("56", 0.0), value(56.0))).isEqualTo(AnswerStatus.CORRECT);
     }
 
@@ -62,7 +62,7 @@ class QuestionScoringServiceTest {
         assertThat(service.score(question, value(3.14))).isEqualTo(AnswerStatus.INCORRECT);
     }
 
-    private static Question numerical(String correctAnswer, Double tolerance) {
+    private static Question numerical(String correctAnswer, double tolerance) {
         return Question.builder()
             .questionType(QuestionType.NUMERICAL)
             .answers(new String[] { correctAnswer })

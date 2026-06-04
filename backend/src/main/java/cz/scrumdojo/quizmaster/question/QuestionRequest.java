@@ -11,7 +11,7 @@ public record QuestionRequest(
     boolean isEasy,
     String imageUrl,
     QuestionType questionType,
-    Double tolerance,
+    double tolerance,
     String[] tags
 ) {
     public Question toEntity(String workspaceGuid) {

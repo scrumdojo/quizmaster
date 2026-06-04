@@ -49,8 +49,8 @@ public class Question {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "tolerance")
-    private Double tolerance;
+    @Column(name = "tolerance", nullable = false)
+    private double tolerance;
 
     @Column(name = "tags", columnDefinition = "text[]")
     @JdbcTypeCode(SqlTypes.ARRAY)
