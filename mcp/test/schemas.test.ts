@@ -8,8 +8,13 @@ import {
 } from '../src/schemas.ts'
 
 describe('Quizmaster MCP schemas', () => {
-    it('validates multiple-choice questions need at least two correct answers', () => {
-        const result = createQuestionInputSchema.safeParse({
+    it('hands off per-type and shape rules to the backend (only generic shape is checked)', () => {
+        // Per-type invariants (numerical needs answers length 1, multiple needs at
+        // least two correct answers, etc.) live in the backend's DB CHECK
+        // constraints. MCP only validates generic field types so that obviously
+        // malformed payloads fail fast; semantic violations reach the backend and
+        // come back as 400. See docs/mcp/overview.md.
+        const malformedMultipleChoice = createQuestionInputSchema.safeParse({
             workspaceGuid: 'workspace-guid',
             question: 'Pick the agile values.',
             answers: ['Focus', 'Courage', 'Waterfall'],
@@ -20,15 +25,7 @@ describe('Quizmaster MCP schemas', () => {
             isEasy: false,
             tags: ['agile'],
         })
-
-        expect(result.success).toBe(false)
-        expect(result.error?.issues.map(issue => issue.message)).toContain(
-            'Multiple-choice questions must have at least two correct answers.',
-        )
-    })
-
-    it('validates numerical question shape and tolerance', () => {
-        const result = createQuestionInputSchema.safeParse({
+        const malformedNumerical = createQuestionInputSchema.safeParse({
             workspaceGuid: 'workspace-guid',
             question: 'How many events are in Scrum?',
             answers: ['5'],
@@ -41,11 +38,11 @@ describe('Quizmaster MCP schemas', () => {
             tags: [],
         })
 
-        expect(result.success).toBe(false)
-        expect(result.error?.issues.map(issue => issue.message)).toContain('Tolerance must be non-negative.')
+        expect(malformedMultipleChoice.success).toBe(true)
+        expect(malformedNumerical.success).toBe(true)
     })
 
-    it('normalizes nullable question fields before sending REST payloads', () => {
+    it('normalizes nullable question fields and defaults tolerance to 0', () => {
         const input = createQuestionInputSchema.parse({
             workspaceGuid: 'workspace-guid',
             question: 'What is the capital of France?',
@@ -56,7 +53,6 @@ describe('Quizmaster MCP schemas', () => {
             questionType: 'single',
             isEasy: false,
             imageUrl: null,
-            tolerance: null,
         })
 
         expect(toQuestionRequest(input)).toEqual({
@@ -68,7 +64,7 @@ describe('Quizmaster MCP schemas', () => {
             questionType: 'single',
             isEasy: false,
             imageUrl: undefined,
-            tolerance: undefined,
+            tolerance: 0,
             tags: [],
         })
     })

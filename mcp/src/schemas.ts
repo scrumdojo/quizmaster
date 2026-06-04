@@ -48,89 +48,18 @@ const questionPayloadShape = {
     tags: z.array(z.string()).default([]),
 }
 
-type QuestionInputForValidation = z.output<z.ZodObject<typeof questionPayloadShape>>
+export const questionPayloadSchema = z.object(questionPayloadShape)
 
-const addQuestionIssues = (value: QuestionInputForValidation, ctx: z.RefinementCtx) => {
-    if (value.questionType === 'numerical') {
-        if (value.answers.length !== 1) {
-            ctx.addIssue({
-                code: 'custom',
-                path: ['answers'],
-                message: 'Numerical questions must have exactly one answer.',
-            })
-        }
-        if (value.explanations.length !== 1) {
-            ctx.addIssue({
-                code: 'custom',
-                path: ['explanations'],
-                message: 'Numerical questions must have exactly one explanation.',
-            })
-        }
-        if (value.correctAnswers.length !== 1 || value.correctAnswers[0] !== 0) {
-            ctx.addIssue({
-                code: 'custom',
-                path: ['correctAnswers'],
-                message: 'Numerical questions must have correctAnswers set to [0].',
-            })
-        }
-        if (value.tolerance < 0) {
-            ctx.addIssue({ code: 'custom', path: ['tolerance'], message: 'Tolerance must be non-negative.' })
-        }
-        return
-    }
+export const createQuestionInputSchema = z.object({
+    ...workspaceGuidShape,
+    ...questionPayloadShape,
+})
 
-    if (value.answers.length === 0) {
-        ctx.addIssue({ code: 'custom', path: ['answers'], message: 'Choice questions must have at least one answer.' })
-    }
-    if (value.answers.some(answer => answer.trim() === '')) {
-        ctx.addIssue({ code: 'custom', path: ['answers'], message: 'Answers must not be empty.' })
-    }
-    if (value.answers.length !== value.explanations.length) {
-        ctx.addIssue({
-            code: 'custom',
-            path: ['explanations'],
-            message: 'Answers and explanations must have the same length.',
-        })
-    }
-    if (value.correctAnswers.some(index => index >= value.answers.length)) {
-        ctx.addIssue({
-            code: 'custom',
-            path: ['correctAnswers'],
-            message: 'Correct answer indexes must point at existing answers.',
-        })
-    }
-    if (value.questionType === 'single' && value.correctAnswers.length !== 1) {
-        ctx.addIssue({
-            code: 'custom',
-            path: ['correctAnswers'],
-            message: 'Single-choice questions must have exactly one correct answer.',
-        })
-    }
-    if (value.questionType === 'multiple' && value.correctAnswers.length < 2) {
-        ctx.addIssue({
-            code: 'custom',
-            path: ['correctAnswers'],
-            message: 'Multiple-choice questions must have at least two correct answers.',
-        })
-    }
-}
-
-export const questionPayloadSchema = z.object(questionPayloadShape).superRefine(addQuestionIssues)
-
-export const createQuestionInputSchema = z
-    .object({
-        ...workspaceGuidShape,
-        ...questionPayloadShape,
-    })
-    .superRefine(addQuestionIssues)
-
-export const updateQuestionInputSchema = z
-    .object({
-        ...workspaceGuidShape,
-        questionId: idSchema('questionId'),
-        ...questionPayloadShape,
-    })
-    .superRefine(addQuestionIssues)
+export const updateQuestionInputSchema = z.object({
+    ...workspaceGuidShape,
+    questionId: idSchema('questionId'),
+    ...questionPayloadShape,
+})
 
 export const quizIdInputSchema = z.object({
     quizId: idSchema('quizId'),
