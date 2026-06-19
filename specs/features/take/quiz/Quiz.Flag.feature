@@ -37,7 +37,6 @@ Feature: Flag a quiz question as problematic
       | 2 / 2           | 100   | passed | 75         |
 
 
-  @skip
   Scenario: Remove a problematic flag
     When I start quiz "Quiz"
     * I flag question "1 + 1 = ?" as problematic
