@@ -22,6 +22,21 @@ Feature: Flag a quiz question as problematic
     Then I see question "1 + 1 = ?" flagged as problematic
 
 
+  Scenario: Evaluation waits for a pending flag save
+    When I start quiz "Quiz"
+    * I answer correctly
+    Then I see question "2 + 2 = ?"
+
+    When flag saves are delayed
+    * I flag question "2 + 2 = ?" as problematic
+    * I answer correctly
+    * I try to evaluate the quiz while the flag save is pending
+    * the delayed flag save completes
+    Then I see the quiz result
+      | Correct Answers | Score | Result | Pass Score |
+      | 2 / 2           | 100   | passed | 75         |
+
+
   @skip
   Scenario: Remove a problematic flag
     When I start quiz "Quiz"

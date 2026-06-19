@@ -1,4 +1,9 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, type Page, type Route } from '@playwright/test'
+
+interface DelayedFlagSave {
+    readonly waitForStarted: () => Promise<void>
+    readonly release: () => Promise<void>
+}
 
 export class QuestionPage {
     constructor(private page: Page) {}
@@ -18,6 +23,56 @@ export class QuestionPage {
     private bookmarkQuestionButtonLocator = () => this.page.locator('[data-testid="bookmark-toggle"]')
     private unBookmarkQuestionButtonLocator = (title: string) =>
         this.page.locator(`[data-testid="delete-bookmark-${title}"]`)
+
+    delayFlagSave = async (): Promise<DelayedFlagSave> => {
+        const flagUrl = /\/api\/quiz\/\d+\/attempts\/\d+\/questions\/\d+\/flag$/
+        const evaluateUrl = /\/api\/quiz\/\d+\/attempts\/\d+\/evaluate$/
+
+        let releaseFlagSave!: () => void
+        let markFlagSaveStarted!: () => void
+        let isReleased = false
+        const flagSaveReleased = new Promise<void>(resolve => {
+            releaseFlagSave = () => {
+                isReleased = true
+                resolve()
+            }
+        })
+        const flagSaveStarted = new Promise<void>(resolve => {
+            markFlagSaveStarted = resolve
+        })
+
+        const flagHandler = async (route: Route) => {
+            markFlagSaveStarted()
+            await flagSaveReleased
+            await route.continue()
+        }
+        const evaluateHandler = async (route: Route) => {
+            if (isReleased) {
+                await route.continue()
+                return
+            }
+
+            await route.fulfill({
+                status: 409,
+                contentType: 'application/json',
+                body: JSON.stringify({ message: 'Evaluation raced the pending flag save.' }),
+            })
+        }
+
+        await this.page.route(flagUrl, flagHandler)
+        await this.page.route(evaluateUrl, evaluateHandler)
+
+        return {
+            waitForStarted: async () => {
+                await flagSaveStarted
+            },
+            release: async () => {
+                releaseFlagSave()
+                await this.page.unroute(flagUrl, flagHandler)
+                await this.page.unroute(evaluateUrl, evaluateHandler)
+            },
+        }
+    }
 
     private progressBarLocator = () => this.page.locator('#progress-bar')
     private progressBarAttribute = async (name: 'value' | 'max') => {

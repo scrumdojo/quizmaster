@@ -21,6 +21,11 @@ import {
 import { QuizNicknamePage } from '#pages/quiz-nickname-page'
 import type { AnswerSpec, PollSpec, QuestionSpec } from '#steps/shared/specs.ts'
 
+interface DelayedFlagSave {
+    readonly waitForStarted: () => Promise<void>
+    readonly release: () => Promise<void>
+}
+
 export class QuizmasterWorld {
     constructor(
         public page: Page,
@@ -130,6 +135,7 @@ export class QuizmasterWorld {
     rememberedWorkspaceQuestionCount?: number
     rememberedCohortLink = ''
     lastClickedInQuizQuestion = ''
+    delayedFlagSave?: DelayedFlagSave
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())

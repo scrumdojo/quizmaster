@@ -1,5 +1,5 @@
 import './quiz-play.scss'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import type { QuizMode, QuizTake } from '#fe/shared/model/quiz.ts'
 import { recordTimeout, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
@@ -19,7 +19,7 @@ interface QuizPlayFormProps {
     readonly quiz: QuizTake
     readonly quizRunId: number
     readonly questionsBaseUrl: string
-    readonly onEvaluate: (quizAnswers: QuizAnswers) => void
+    readonly onEvaluate: (quizAnswers: QuizAnswers) => void | Promise<void>
 }
 
 const feedbackModeLabel = (mode: QuizMode): string => (mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end')
@@ -30,6 +30,8 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const bookmarks = useQuizBookmarkState()
     const flags = useQuizFlagState()
     const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs | undefined>(undefined)
+    const [isCompletingQuiz, setIsCompletingQuiz] = useState(false)
+    const isCompletingQuizRef = useRef(false)
 
     const answer = (questionAnswer: QuestionAnswer) => {
         answerQuestion(nav.currentQuestionIdx, questionAnswer)
@@ -44,16 +46,32 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
         onDelete: () => bookmarks.remove(questionIdx),
     }))
 
-    const evaluate = () => {
-        props.onEvaluate(quizAnswers)
+    const completeQuiz = async (answers: QuizAnswers) => {
+        if (isCompletingQuizRef.current) return
+
+        isCompletingQuizRef.current = true
+        setIsCompletingQuiz(true)
+
+        try {
+            await flags.waitForPendingSaves()
+            await props.onEvaluate(answers)
+        } catch (error) {
+            isCompletingQuizRef.current = false
+            setIsCompletingQuiz(false)
+            throw error
+        }
+    }
+
+    const evaluate = async () => {
+        await completeQuiz(quizAnswers)
     }
 
     const handleTimeOut = async () => {
         await recordTimeout(props.quiz.id, props.quizRunId)
     }
 
-    const evaluateTimedOut = () => {
-        props.onEvaluate(quizAnswers)
+    const evaluateTimedOut = async () => {
+        await completeQuiz(quizAnswers)
     }
 
     const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
@@ -78,7 +96,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
             const allAnswered = props.quiz.questions.every((_, idx) => updatedFinalAnswers[idx] !== undefined)
 
             if (allAnswered) {
-                props.onEvaluate({ firstAnswers: quizAnswers.firstAnswers, finalAnswers: updatedFinalAnswers })
+                await completeQuiz({ firstAnswers: quizAnswers.firstAnswers, finalAnswers: updatedFinalAnswers })
             } else {
                 nav.next()
             }
@@ -111,7 +129,11 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
                 <span className="feedback-mode-chip" id="feedback-mode" data-mode={props.quiz.mode}>
                     {feedbackModeLabel(props.quiz.mode)}
                 </span>
-                <TimeLimit timeLimit={props.quiz.timeLimit} onTimeOut={handleTimeOut} onConfirm={evaluateTimedOut} />
+                <TimeLimit
+                    timeLimit={props.quiz.timeLimit}
+                    onTimeOut={handleTimeOut}
+                    onConfirm={() => void evaluateTimedOut()}
+                />
             </div>
 
             <ProgressBar current={nav.currentQuestionIdx + 1} total={props.quiz.questions.length} />
@@ -135,7 +157,9 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
                 <BookmarkButton isBookmarked={bookmarks.has(nav.currentQuestionIdx)} onClick={bookmark} />
                 <FlagButton isFlagged={flags.has(nav.currentQuestionIdx)} onClick={toggleFlag} />
                 {nav.canNext && <NextButton onClick={() => void handleNextButton()} />}
-                {isAnswered && !nav.canNext && <EvaluateButton onClick={evaluate} />}
+                {isAnswered && !nav.canNext && (
+                    <EvaluateButton onClick={() => void evaluate()} disabled={isCompletingQuiz} />
+                )}
             </div>
 
             <BookmarkList bookmarks={bookmarkList} />

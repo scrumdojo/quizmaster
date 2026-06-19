@@ -7,8 +7,12 @@ export const NextButton = ({ onClick }: WithOnClick) => (
     </Button>
 )
 
-export const EvaluateButton = ({ onClick }: WithOnClick) => (
-    <Button id="evaluate" className="button primary" onClick={onClick}>
+interface EvaluateButtonProps extends WithOnClick {
+    readonly disabled?: boolean
+}
+
+export const EvaluateButton = ({ onClick, disabled = false }: EvaluateButtonProps) => (
+    <Button id="evaluate" className="button primary" onClick={onClick} disabled={disabled}>
         Evaluate
     </Button>
 )
