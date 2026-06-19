@@ -16,6 +16,19 @@ Install dependencies, Chromium browser for E2E tests, and create a default `.env
 pnpm install:all
 ```
 
+For a host-local Linux setup with system Chromium installed, use the local developer setup
+wrapper instead:
+
+```sh
+pnpm dev:setup
+```
+
+This keeps the normal package installs but skips the Playwright browser download when
+`chromium` is available on `PATH`. The local developer scripts default database connection
+values to `DB_HOST=localhost`, `DB_NAME=quizmaster`, `DB_USER=quizmaster`, and
+`DB_PASS=quizmaster` unless those variables are already set. When using system Chromium,
+they also set `PLAYWRIGHT_VIDEO=off` to avoid requiring Playwright's bundled `ffmpeg`.
+
 ## 🚀 Running Quizmaster
 
 ### Start Quizmaster
@@ -70,6 +83,12 @@ Default ports are `BE_PORT=8080` (backend) and `FE_PORT=5173` (Vite), configurab
 
 Vite proxies API requests to the backend and reloads the browser automatically on frontend changes.
 
+The host-local wrapper sets the same localhost defaults and then delegates to `pnpm start`:
+
+```sh
+pnpm dev:run
+```
+
 ## 🧪 Running end-to-end tests
 
 Run [Cucumber](https://cucumber.io/docs/guides/) + [Playwright](https://playwright.dev/) end-to-end tests:
@@ -79,11 +98,33 @@ pnpm test:e2e
 ```
 
 This builds the frontend, starts the backend, runs all E2E specs, and stops the backend.
+By default it resets Quizmaster app data in the configured database before the standalone
+test run so E2E records do not accumulate. Set `E2E_RESET_DB=0` to keep existing data.
 
 For development, with backend and Vite already running via `pnpm start`:
 
 - `pnpm test:e2e:dev` — run tests against the Vite dev server
 - `pnpm test:e2e:ui` — open Playwright UI at `http://localhost:3333`
+
+These running-server modes do not reset the database unless you explicitly set
+`E2E_RESET_DB=1`.
+
+For a CI-like local development gate, run:
+
+```sh
+pnpm dev:gate
+```
+
+It runs TypeScript/lint/format checks, MCP tests, a production frontend build, backend tests,
+and the Cucumber/Playwright E2E suite with `FEATURE_FLAG=true`. It defaults to
+`PW_WORKERS=1` for host-local stability; set `PW_WORKERS` yourself if you want a faster run.
+Because the gate runs the standalone E2E command, it also resets app data before the E2E phase.
+
+To reset app data manually while keeping the migrated schema:
+
+```sh
+pnpm dev:reset-db
+```
 
 ## 📊 Code coverage
 
