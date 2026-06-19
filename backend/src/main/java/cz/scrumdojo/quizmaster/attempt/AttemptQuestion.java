@@ -36,6 +36,7 @@ public class AttemptQuestion {
     @Column(name = "answered_at")
     private LocalDateTime answeredAt;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean flagged = false;
 
