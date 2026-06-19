@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import type { AttemptStatsRecord, QuestionStatsRecord, QuizStatsResponse, SummaryStats } from '#fe/make/model/stats.ts'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 
@@ -41,10 +43,23 @@ const attemptRow = (attempt: AttemptStatsRecord): string[] => {
         pct(attempt.partiallyCorrectAnswers, attempt.totalQuestions),
     ]
 }
-const questionRow = (question: QuestionStatsRecord): string[] => [
+const HIGH_ACCURACY_THRESHOLD = 0.75
+const MID_ACCURACY_THRESHOLD = 0.5
+type AccuracyBand = 'high' | 'mid' | 'low'
+const accuracyBand = (ratio: number): AccuracyBand =>
+    ratio >= HIGH_ACCURACY_THRESHOLD ? 'high' : ratio >= MID_ACCURACY_THRESHOLD ? 'mid' : 'low'
+const accuracyPill = (correctAnswers: number, answered: number): ReactNode => {
+    const ratio = answered > 0 ? correctAnswers / answered : 0
+    return (
+        <span className="accuracy-pill" data-band={accuracyBand(ratio)}>
+            {Math.round(ratio * 100)}%
+        </span>
+    )
+}
+const questionRow = (question: QuestionStatsRecord): ReactNode[] => [
     question.question,
     String(question.answered),
-    rate(question.correctAnswers, question.answered),
+    accuracyPill(question.correctAnswers, question.answered),
     pct(question.partiallyCorrectAnswers, question.answered),
     pct(question.incorrectAnswers, question.answered),
     String(question.unanswered),

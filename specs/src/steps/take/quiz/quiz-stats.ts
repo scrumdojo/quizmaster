@@ -23,3 +23,10 @@ Then('I see attempt stats table', async function (data: DataTable) {
 Then('I see question stats table', async function (data: DataTable) {
     await expectQuestionStatsTable(this.quizStatsPage, data)
 })
+
+Then(
+    'question {string} shows accuracy {string} in the {string} band',
+    async function (question: string, percent: string, band: string) {
+        await this.quizStatsPage.expectQuestionAccuracyBand(question, percent, band)
+    },
+)

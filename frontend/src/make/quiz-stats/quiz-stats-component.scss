@@ -238,3 +238,26 @@
         padding: 0.78rem 0.85rem;
     }
 }
+.quiz-stats .accuracy-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+.quiz-stats .accuracy-pill[data-band='high'] {
+    background: var(--feedback-correct-bg);
+    color: var(--feedback-correct-fg);
+}
+.quiz-stats .accuracy-pill[data-band='mid'] {
+    background: var(--feedback-partial-bg);
+    color: var(--feedback-partial-fg);
+}
+.quiz-stats .accuracy-pill[data-band='low'] {
+    background: var(--feedback-incorrect-bg);
+    color: var(--feedback-incorrect-fg);
+}

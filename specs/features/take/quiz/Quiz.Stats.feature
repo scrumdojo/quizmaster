@@ -269,3 +269,30 @@ Feature: Show stats
       | Score             | The final percentage score for the attempt.                                 |
       | Partially Correct | A multiple choice answer with exactly one mistake.                          |
       | Unanswered        | Questions not answered during the attempt.                                  |
+
+
+  Scenario: Per-question accuracy shows as a colour-coded pill
+    Given workspace "Diagnostics" with questions
+      | bookmark | question                      | answers                    |
+      | Strong   | What is 2 + 2?                | 4 (*), 3, 5                |
+      | Mixed    | What is the capital of Italy? | Rome (*), Naples, Florence |
+      | Weak     | What color is the sky?        | Blue (*), Green, Red       |
+    And quiz "Coloured Quiz" with all questions
+
+    # Two attempts: "Strong" always right, "Mixed" half right, "Weak" always wrong
+    When I start the quiz
+    * I answer "4"
+    * I answer "Rome"
+    * I answer "Green"
+    * I finish the quiz in 5 seconds
+
+    When I start the quiz
+    * I answer "4"
+    * I answer "Naples"
+    * I answer "Red"
+    * I finish the quiz in 5 seconds
+
+    When I open quiz "Coloured Quiz" statistics
+    Then question "What is 2 + 2?" shows accuracy "100%" in the "high" band
+    And question "What is the capital of Italy?" shows accuracy "50%" in the "mid" band
+    And question "What color is the sky?" shows accuracy "0%" in the "low" band

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Per-question accuracy — heat pill</title>
+<style>
+  body { font-family: Mulish, "Avenir Next", "Segoe UI", system-ui, sans-serif; color: #10233f; background: #f6f9ff; margin: 0; padding: 40px; }
+  h1 { font-size: 1.1rem; margin: 0 0 4px; }
+  p { color: #5e718d; margin: 0 0 24px; font-size: 0.9rem; }
+  table { border-collapse: collapse; background: #fff; border: 1px solid #e3e9f4; border-radius: 16px; overflow: hidden; }
+  th, td { padding: 12px 18px; text-align: center; font-size: 0.95rem; }
+  th { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #7a8aa3; background: #f3f6fc; }
+  td:first-child, th:first-child { text-align: left; }
+  .accuracy-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; padding: 5px 12px; border-radius: 999px; font-weight: 800; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  .accuracy-pill[data-band="high"] { background: #dcefdd; color: #1f6b1f; }
+  .accuracy-pill[data-band="mid"]  { background: #fcefb8; color: #8a6300; }
+  .accuracy-pill[data-band="low"]  { background: #fbdbdc; color: #8e1f25; }
+  .legend { margin-top: 18px; color: #5e718d; font-size: 0.8rem; display: flex; gap: 18px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+</style>
+</head>
+<body>
+  <h1>Per-question accuracy — heat pill</h1>
+  <p>The Correct column shows the correct rate as a coloured pill: green ≥ 75%, amber 50–74%, red &lt; 50%.</p>
+  <table>
+    <thead>
+      <tr><th>Question</th><th>Answered</th><th>Correct</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>What is 2 + 2?</td><td>40</td><td><span class="accuracy-pill" data-band="high">95%</span></td></tr>
+      <tr><td>What is the capital of Italy?</td><td>40</td><td><span class="accuracy-pill" data-band="mid">62%</span></td></tr>
+      <tr><td>What colour is the sky?</td><td>40</td><td><span class="accuracy-pill" data-band="low">28%</span></td></tr>
+    </tbody>
+  </table>
+  <div class="legend">
+    <span><span class="dot" style="background:#dcefdd"></span>≥ 75%</span>
+    <span><span class="dot" style="background:#fcefb8"></span>50–74%</span>
+    <span><span class="dot" style="background:#fbdbdc"></span>&lt; 50%</span>
+  </div>
+</body>
+</html>

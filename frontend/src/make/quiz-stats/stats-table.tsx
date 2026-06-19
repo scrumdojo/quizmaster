@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { HelpTooltip } from '#fe/shared'
 
 export interface StatsTableColumn {
@@ -9,7 +11,7 @@ interface StatsTableProps {
     readonly testId: string
     readonly caption: string
     readonly columns: readonly (string | StatsTableColumn)[]
-    readonly rows: readonly (readonly string[])[]
+    readonly rows: readonly (readonly ReactNode[])[]
 }
 
 const columnLabel = (column: string | StatsTableColumn) => (typeof column === 'string' ? column : column.label)

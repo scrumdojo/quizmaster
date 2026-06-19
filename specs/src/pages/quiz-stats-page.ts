@@ -33,6 +33,13 @@ export class QuizStatsPage {
             text,
         )
 
+    expectQuestionAccuracyBand = async (question: string, percent: string, band: string) => {
+        const row = this.tableBodyRowsLocator(this.questionStatsTableLocator()).filter({ hasText: question })
+        const pill = row.locator('.accuracy-pill')
+        await expectTextToBe(pill, percent)
+        await expect(pill).toHaveAttribute('data-band', band)
+    }
+
     expectLabeledTable = async (
         table: 'attempt' | 'question' | 'summary',
         captionText: string | undefined,
