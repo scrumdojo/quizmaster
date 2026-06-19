@@ -1,4 +1,4 @@
-import { expect, type Page, type Route } from '@playwright/test'
+import { expect, type Locator, type Page, type Route } from '@playwright/test'
 
 interface DelayedFlagSave {
     readonly waitForStarted: () => Promise<void>
@@ -75,6 +75,7 @@ export class QuestionPage {
     }
 
     private progressBarLocator = () => this.page.locator('#progress-bar')
+    private questionFormLocator = () => this.page.locator('#question-form')
     private progressBarAttribute = async (name: 'value' | 'max') => {
         await this.progressBarLocator().waitFor({ state: 'visible' })
         return this.progressBarLocator().getAttribute(name)
@@ -82,12 +83,21 @@ export class QuestionPage {
     progressCurrent = async () => Number.parseInt((await this.progressBarAttribute('value')) ?? '')
     progressMax = async () => Number.parseInt((await this.progressBarAttribute('max')) ?? '')
 
-    back = () => this.backButtonLocator().click()
+    private navigateToDifferentQuestion = async (locator: Locator) => {
+        const previousUrl = this.page.url()
+        const previousQuestionForm = await this.questionFormLocator().elementHandle()
+
+        await Promise.all([this.page.waitForURL(url => url.href !== previousUrl), locator.click()])
+        await previousQuestionForm?.waitForElementState('hidden')
+        await this.questionFormLocator().waitFor({ state: 'visible' })
+    }
+
+    back = () => this.navigateToDifferentQuestion(this.backButtonLocator())
     flag = () => this.flagQuestionButtonLocator().click()
     unflag = () => this.flagQuestionButtonLocator().click()
     bookmark = () => this.bookmarkQuestionButtonLocator().click()
     unBookmark = (title: string) => this.unBookmarkQuestionButtonLocator(title).click()
-    next = () => this.nextButtonLocator().click()
+    next = () => this.navigateToDifferentQuestion(this.nextButtonLocator())
     evaluate = async () => {
         const dialog = this.page.locator('dialog')
         const isDialogVisible = await dialog.isVisible()

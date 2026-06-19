@@ -79,9 +79,9 @@ When('I skip the question', async function () {
         .catch(() => false)
     if (visible) {
         if (await nextButton.isVisible()) {
-            await nextButton.click()
+            await this.questionPage.next()
         } else {
-            await evaluateButton.click()
+            await this.questionPage.evaluate()
         }
     }
 })

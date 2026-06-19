@@ -68,6 +68,15 @@ const isQuizQuestionSubmitResponse = (response: PlaywrightResponse) => {
     )
 }
 
+const isQuizEvaluateResponse = (response: PlaywrightResponse) => {
+    const url = new URL(response.url())
+    return (
+        response.request().method() === 'POST' &&
+        /\/api\/quiz\/\d+\/attempts\/\d+\/evaluate$/.test(url.pathname) &&
+        response.status() < 400
+    )
+}
+
 const waitForAnswerSettled = async (world: QuizmasterWorld, questionTextBefore: string) => {
     const signals = [
         world.takeQuestionPage.questionFeedbackLocator().waitFor({ state: 'visible' }),
@@ -98,7 +107,9 @@ export const repeatAsync = async (n: number, fn: () => Promise<void>) => {
 
 export const finishQuizInSeconds = async (world: QuizmasterWorld, seconds: number) => {
     await advanceServerClock(world, seconds)
+    const evaluateResponse = world.page.waitForResponse(isQuizEvaluateResponse)
     await world.questionPage.evaluateButtonLocator().click()
+    await evaluateResponse
     await world.workspacePage.goto(world.workspaceGuid)
 }
 
