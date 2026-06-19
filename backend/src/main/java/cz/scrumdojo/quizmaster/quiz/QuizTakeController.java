@@ -180,7 +180,10 @@ public class QuizTakeController {
     }
 
     private int[] weightsFor(Quiz quiz, List<AttemptQuestion> rows) {
-        return rows.stream().mapToInt(row -> quiz.weightForQuestion(row.getQuestionId())).toArray();
+        return rows
+            .stream()
+            .mapToInt(row -> quiz.weightForQuestion(row.getQuestionId()))
+            .toArray();
     }
 
     private LocalDateTime now() {

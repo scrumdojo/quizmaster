@@ -14,7 +14,11 @@ public record QuizEvaluationResponse(
     int totalWeight,
     QuestionEvaluationResponse[] questions
 ) {
-    public static QuizEvaluationResponse from(List<AttemptQuestion> rows, List<Question> orderedQuestions, int[] weights) {
+    public static QuizEvaluationResponse from(
+        List<AttemptQuestion> rows,
+        List<Question> orderedQuestions,
+        int[] weights
+    ) {
         QuestionEvaluationResponse[] perQuestion = IntStream.range(0, orderedQuestions.size())
             .mapToObj(i ->
                 QuestionEvaluationResponse.from(

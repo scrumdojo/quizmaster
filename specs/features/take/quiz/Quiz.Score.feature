@@ -81,7 +81,6 @@ Feature: Evaluate quiz score
       | 1 / 2           | 50    | failed | 100        |
 
 
-
   Scenario: Heavier question contributes more points to the score
     Given workspace "Weighted" with questions
       | question  | answers  |
@@ -98,7 +97,6 @@ Feature: Evaluate quiz score
     Then I see the quiz result
       | Correct Answers | Score | Weighted Score | Result | Pass Score |
       | 1 / 2           | 75    | 3 / 4          | passed | 50         |
-
 
 
   Scenario: All questions with weight 1 scores the same as unweighted

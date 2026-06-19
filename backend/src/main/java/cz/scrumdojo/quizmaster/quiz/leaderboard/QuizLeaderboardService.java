@@ -142,7 +142,10 @@ public class QuizLeaderboardService {
     }
 
     private int[] weightsFor(Quiz quiz, List<AttemptQuestion> rows) {
-        return rows.stream().mapToInt(row -> quiz.weightForQuestion(row.getQuestionId())).toArray();
+        return rows
+            .stream()
+            .mapToInt(row -> quiz.weightForQuestion(row.getQuestionId()))
+            .toArray();
     }
 
     private int averageScore(List<Integer> scores) {
