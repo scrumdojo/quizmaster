@@ -2,14 +2,25 @@ import './question-select.scss'
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import { tagToColor } from '#fe/make/model/tag.ts'
 
+const MIN_WEIGHT = 1
+const MAX_WEIGHT = 5
+
 interface QuestionItemProps {
     readonly question: QuestionListItem
     readonly selected: boolean
+    readonly weight: number
     readonly onSelect: (id: number) => void
+    readonly onWeightChange: (id: number, weight: number) => void
 }
 
-export const QuestionItem = ({ question, selected, onSelect }: QuestionItemProps) => {
+export const QuestionItem = ({ question, selected, weight, onSelect, onWeightChange }: QuestionItemProps) => {
     const inputId = `question-select-${question.id}`
+    const weightId = `question-weight-${question.id}`
+
+    const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = Number(e.target.value)
+        onWeightChange(question.id, value)
+    }
 
     return (
         <div key={question.id} className="question-item">
@@ -24,6 +35,18 @@ export const QuestionItem = ({ question, selected, onSelect }: QuestionItemProps
             )}
             <input id={inputId} type="checkbox" checked={selected} onChange={() => onSelect(question.id)} />
             <label htmlFor={inputId}>{question.question}</label>
+            <label className="question-weight-label">
+                Weight:
+                <input
+                    id={weightId}
+                    type="number"
+                    className="question-weight-input"
+                    min={MIN_WEIGHT}
+                    max={MAX_WEIGHT}
+                    value={weight}
+                    onChange={handleWeightChange}
+                />
+            </label>
         </div>
     )
 }
@@ -31,17 +54,21 @@ export const QuestionItem = ({ question, selected, onSelect }: QuestionItemProps
 interface QuestionSelectProps {
     readonly questions: readonly QuestionListItem[]
     readonly selectedIds: ReadonlySet<number>
+    readonly weights: ReadonlyMap<number, number>
     readonly onSelect: (id: number) => void
+    readonly onWeightChange: (id: number, weight: number) => void
 }
 
-export const QuestionSelect = ({ questions, selectedIds, onSelect }: QuestionSelectProps) => (
+export const QuestionSelect = ({ questions, selectedIds, weights, onSelect, onWeightChange }: QuestionSelectProps) => (
     <div className="question-select">
         {questions.map(question => (
             <QuestionItem
                 key={question.id}
                 question={question}
                 selected={selectedIds.has(question.id)}
+                weight={weights.get(question.id) ?? 1}
                 onSelect={onSelect}
+                onWeightChange={onWeightChange}
             />
         ))}
     </div>

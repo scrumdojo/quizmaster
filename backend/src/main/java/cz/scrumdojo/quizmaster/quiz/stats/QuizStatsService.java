@@ -114,6 +114,7 @@ public class QuizStatsService {
             attempt.getFinishedAt() != null
                 ? totalQuestions - correctAnswers - partiallyCorrectAnswers
                 : countByStatus(scores, AnswerStatus.INCORRECT);
+        int[] weights = scores.stream().mapToInt(row -> quiz.weightForQuestion(row.getQuestionId())).toArray();
         return new AttemptStatsRecord(
             attempt.getId(),
             attempt.durationSeconds(quiz.getTimeLimit()),
@@ -121,7 +122,7 @@ public class QuizStatsService {
             incorrectAnswers,
             partiallyCorrectAnswers,
             totalQuestions,
-            AttemptQuestion.percentageScore(scores),
+            AttemptQuestion.weightedPercentageScore(scores, weights),
             attempt.status()
         );
     }

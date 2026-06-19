@@ -10,6 +10,7 @@ public record QuizResponse(
     LocalDateTime startAt,
     LocalDateTime endAt,
     QuestionResponse[] questions,
+    int[] questionWeights,
     QuizMode mode,
     Difficulty difficulty,
     int passScore,

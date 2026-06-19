@@ -90,6 +90,9 @@ export class QuizScorePage {
     answerCorrespondingResponse = (question: string, answer: string) =>
         this.answerCorrespondingResponseLocator(question, answer).textContent()
 
+    private weightedPointsLocator = () => this.page.locator('#weighted-points')
+    private totalWeightLocator = () => this.page.locator('#total-weight')
+
     // Retrying assertions
     expectResultTableVisible = () => expect(this.resultTableLocator()).toBeVisible()
     expectCorrectAnswers = (text: string) => expect(this.correctAnswerLocator()).toHaveText(text)
@@ -97,4 +100,9 @@ export class QuizScorePage {
     expectPercentageResult = (n: number) => expect(this.percentageResultLocator()).toHaveText(String(n))
     expectTextResult = (text: string) => expect(this.textResultLocator()).toHaveText(text)
     expectPassScore = (n: number) => expect(this.passScoreLocator()).toHaveText(String(n))
+    expectWeightedScore = (points: number, total: number) =>
+        Promise.all([
+            expect(this.weightedPointsLocator()).toHaveText(String(points)),
+            expect(this.totalWeightLocator()).toHaveText(String(total)),
+        ])
 }

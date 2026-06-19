@@ -142,7 +142,9 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
             <QuestionSelect
                 questions={state.filteredQuestions}
                 selectedIds={state.selectedIds}
+                weights={state.weights}
                 onSelect={state.toggleSelectedId}
+                onWeightChange={state.setWeight}
             />
             <ErrorMessage errorCode="few-questions" />
 

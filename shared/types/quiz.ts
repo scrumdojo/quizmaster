@@ -7,6 +7,7 @@ export interface QuizRequest {
     readonly startAt: string | null
     readonly endAt: string | null
     readonly questionIds: readonly number[]
+    readonly questionWeights?: readonly number[]
     readonly mode: QuizMode
     readonly difficulty: Difficulty
     readonly passScore: number
@@ -27,6 +28,7 @@ export interface Quiz {
     readonly startAt: string | null
     readonly endAt: string | null
     readonly questions: readonly Question[]
+    readonly questionWeights?: readonly number[]
     readonly mode: QuizMode
     readonly difficulty: Difficulty
     readonly passScore: number
@@ -87,6 +89,8 @@ export type QuizSubmittedAnswer =
 export interface QuizEvaluationResponse {
     readonly score: number
     readonly totalQuestions: number
+    readonly weightedScore: number
+    readonly totalWeight: number
     readonly questions?: readonly QuestionEvaluation[]
 }
 

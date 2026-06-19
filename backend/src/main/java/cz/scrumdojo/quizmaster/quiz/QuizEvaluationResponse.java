@@ -7,8 +7,14 @@ import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public record QuizEvaluationResponse(double score, int totalQuestions, QuestionEvaluationResponse[] questions) {
-    public static QuizEvaluationResponse from(List<AttemptQuestion> rows, List<Question> orderedQuestions) {
+public record QuizEvaluationResponse(
+    double score,
+    int totalQuestions,
+    double weightedScore,
+    int totalWeight,
+    QuestionEvaluationResponse[] questions
+) {
+    public static QuizEvaluationResponse from(List<AttemptQuestion> rows, List<Question> orderedQuestions, int[] weights) {
         QuestionEvaluationResponse[] perQuestion = IntStream.range(0, orderedQuestions.size())
             .mapToObj(i ->
                 QuestionEvaluationResponse.from(
@@ -17,6 +23,12 @@ public record QuizEvaluationResponse(double score, int totalQuestions, QuestionE
                 )
             )
             .toArray(QuestionEvaluationResponse[]::new);
-        return new QuizEvaluationResponse(AttemptQuestion.totalPoints(rows), rows.size(), perQuestion);
+        return new QuizEvaluationResponse(
+            AttemptQuestion.totalPoints(rows),
+            rows.size(),
+            AttemptQuestion.weightedTotalPoints(rows, weights),
+            AttemptQuestion.totalWeight(rows, weights),
+            perQuestion
+        );
     }
 }

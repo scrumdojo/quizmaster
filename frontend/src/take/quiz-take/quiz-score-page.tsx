@@ -11,7 +11,7 @@ interface QuizScorePageProps {
 }
 
 export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps) => {
-    const percentage = (result.score / result.totalQuestions) * 100
+    const percentage = result.totalWeight > 0 ? (result.weightedScore / result.totalWeight) * 100 : 0
     const passed = percentage >= quiz.passScore
     const outcome = passed ? 'passed' : 'failed'
 
@@ -33,11 +33,19 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
                 </header>
                 <dl className="metrics">
                     <div className="metric">
-                        <dt>Points</dt>
+                        <dt>Correct answers</dt>
                         <dd>
                             <span id="correct-answers">{result.score}</span>
                             <span className="separator"> / </span>
                             <span id="total-questions">{result.totalQuestions}</span>
+                        </dd>
+                    </div>
+                    <div className="metric">
+                        <dt>Points</dt>
+                        <dd>
+                            <span id="weighted-points">{result.weightedScore}</span>
+                            <span className="separator"> / </span>
+                            <span id="total-weight">{result.totalWeight}</span>
                         </dd>
                     </div>
                     <div className="metric">

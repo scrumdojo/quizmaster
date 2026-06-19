@@ -110,6 +110,11 @@ Endpoints live under `/api/`. Two flavors:
   matches question text and tags and repeated `tag` parameters filter to
   questions carrying any selected workspace tag, and
   `GET /api/workspaces/{guid}/quizzes?query=...`.
+  Quiz create/update (`POST`/`PUT /api/workspaces/{guid}/quizzes/{id}`) accept
+  an optional `questionWeights` array (parallel to `questionIds`; each weight
+  1–5, default 1) that controls per-question point contribution to the score.
+  The evaluation response (`POST /api/attempt/{id}/evaluate`) includes
+  `weightedScore` and `totalWeight` alongside `score` and `totalQuestions`.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/quiz/{id}/leaderboard`,
   `/api/question/{id}`, `/api/poll/{id}`, `/api/poll/{id}/submit`, `/api/attempt/...`.

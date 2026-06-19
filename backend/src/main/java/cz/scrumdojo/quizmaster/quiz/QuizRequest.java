@@ -9,6 +9,7 @@ public record QuizRequest(
     LocalDateTime startAt,
     LocalDateTime endAt,
     int[] questionIds,
+    int[] questionWeights,
     QuizMode mode,
     Difficulty difficulty,
     int passScore,
@@ -22,6 +23,7 @@ public record QuizRequest(
             .startAt(startAt)
             .endAt(endAt)
             .questionIds(questionIds)
+            .questionWeights(questionWeights)
             .mode(mode != null ? mode : QuizMode.EXAM)
             .difficulty(difficulty != null ? difficulty : Difficulty.KEEP_QUESTION)
             .passScore(passScore)

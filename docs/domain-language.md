@@ -64,10 +64,17 @@ Two settings shape _how_ takers experience the quiz:
   easier or harder variant; _keep_ respects whatever each question itself
   declares.
 
+Each question in a quiz can have a **weight** (1–5, default 1) that controls how
+many points it contributes to the final score. Weights are set per quiz
+inclusion — the same question can carry different weights in different quizzes.
+The **weighted score** is the sum of each question's point value multiplied by
+its weight. The **score percentage** is `weightedPoints / totalWeight × 100`.
+Pass/fail uses this percentage. The unweighted question count ("Points X / Y")
+is also shown separately for reference.
+
 Three settings shape _which_ questions appear and _when_:
 
-- **Pass score** is the percentage of questions a taker must answer correctly
-  to pass.
+- **Pass score** is the percentage a taker must reach (weighted) to pass.
 - **Time limit** is the maximum time allowed to complete the quiz. When time
   runs out the quiz is auto-submitted and scored.
 - **Random question count** limits the quiz to N randomly drawn questions from

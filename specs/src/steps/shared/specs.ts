@@ -32,6 +32,7 @@ export type Difficulty = 'easy' | 'hard' | 'keep-question'
 export interface QuizSpec {
     name: string
     questions: string[]
+    weights?: number[]
     description?: string
     mode?: string
     passScore?: string

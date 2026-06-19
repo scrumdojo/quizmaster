@@ -35,6 +35,20 @@ public class Quiz {
     @JdbcTypeCode(SqlTypes.ARRAY)
     private int[] questionIds;
 
+    @Column(name = "question_weights", columnDefinition = "int[]")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    private int[] questionWeights;
+
+    public int weightForQuestion(int questionId) {
+        if (questionIds == null || questionWeights == null) return 1;
+        for (int i = 0; i < questionIds.length; i++) {
+            if (questionIds[i] == questionId) {
+                return (i < questionWeights.length) ? questionWeights[i] : 1;
+            }
+        }
+        return 1;
+    }
+
     @Enumerated(EnumType.STRING)
     private QuizMode mode;
 

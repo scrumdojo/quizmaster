@@ -7,6 +7,13 @@ import { expectAllOptionsForQuestion, expectQuizResult } from '#steps/quiz/expec
 Then('I see the quiz result', async function (data: DataTable) {
     const [row] = data.hashes()
     const [correct, total] = row['Correct Answers'].split('/').map((s: string) => s.trim())
+    const weightedScoreRaw = row['Weighted Score']
+    const weightedScore = weightedScoreRaw
+        ? (() => {
+              const [points, weightTotal] = weightedScoreRaw.split('/').map((s: string) => s.trim())
+              return { points: Number(points), total: Number(weightTotal) }
+          })()
+        : undefined
     await this.quizScorePage.expectResultTableVisible()
     await expectQuizResult(
         this.quizScorePage,
@@ -15,6 +22,7 @@ Then('I see the quiz result', async function (data: DataTable) {
         Number(row.Score),
         row.Result,
         Number(row['Pass Score']),
+        weightedScore,
     )
 })
 

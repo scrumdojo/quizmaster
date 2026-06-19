@@ -120,6 +120,7 @@ public class WorkspaceQuizController {
         workspaceGuard.requireExists(workspaceGuid);
 
         validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
+        validateQuestionWeights(request.questionWeights());
 
         Quiz output = quizRepository.save(request.toEntity(workspaceGuid));
         return ResponseEntity.ok(new IdResponse(output.getId()));
@@ -138,12 +139,14 @@ public class WorkspaceQuizController {
             .findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
                 validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
+                validateQuestionWeights(request.questionWeights());
                 Quiz incoming = request.toEntity(workspaceGuid);
                 existing.setTitle(incoming.getTitle());
                 existing.setDescription(incoming.getDescription());
                 existing.setStartAt(incoming.getStartAt());
                 existing.setEndAt(incoming.getEndAt());
                 existing.setQuestionIds(incoming.getQuestionIds());
+                existing.setQuestionWeights(incoming.getQuestionWeights());
                 existing.setMode(incoming.getMode());
                 existing.setDifficulty(incoming.getDifficulty());
                 existing.setPassScore(incoming.getPassScore());
@@ -270,6 +273,15 @@ public class WorkspaceQuizController {
 
         int deleted = quizRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
         return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    private void validateQuestionWeights(int[] questionWeights) {
+        if (questionWeights == null) return;
+        for (int w : questionWeights) {
+            if (w < 1 || w > 5) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question weights must be between 1 and 5.");
+            }
+        }
     }
 
     private void validateQuestionsBelongToWorkspace(int[] questionIds, String workspaceGuid) {

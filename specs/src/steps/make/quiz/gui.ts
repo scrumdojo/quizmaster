@@ -246,6 +246,20 @@ Then('I see question {string} in the quiz question list', async function (questi
     await this.quizCreatePage.expectQuestionInList(question)
 })
 
+// ── Question weights ──────────────────────────────────────────────────────────
+
+Then('I see weight {int} for question {string}', async function (weight: number, question: string) {
+    await this.quizCreatePage.expectQuestionWeight(question, weight)
+})
+
+When('I set weight of question {string} to {int}', async function (question: string, weight: number) {
+    await this.quizCreatePage.setQuestionWeight(question, weight)
+})
+
+Then('I see a validation error for the weight field', async function () {
+    await this.quizCreatePage.expectWeightValidationError()
+})
+
 // ── Cohorts ──────────────────────────────────────────
 
 When('I create a new cohort {string}', async function (cohortName: string) {

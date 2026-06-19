@@ -163,6 +163,7 @@ const toQuizPayload = (world: QuizmasterWorld, spec: QuizSpec): QuizRequest => (
     startAt: spec.startAt ?? null,
     endAt: spec.endAt ?? null,
     questionIds: resolveQuestionIds(world, spec.questions),
+    questionWeights: spec.weights,
     mode: (spec.mode ?? DEFAULT_MODE) as QuizMode,
     difficulty: spec.difficulty ? toDifficultyValue(spec.difficulty) : DEFAULT_DIFFICULTY,
     passScore: spec.passScore ? Number.parseInt(spec.passScore, 10) : DEFAULT_PASS_SCORE,

@@ -79,3 +79,41 @@ Feature: Evaluate quiz score
     Then I see the quiz result
       | Correct Answers | Score | Result | Pass Score |
       | 1 / 2           | 50    | failed | 100        |
+
+
+
+  Scenario: Heavier question contributes more points to the score
+    Given workspace "Weighted" with questions
+      | question  | answers  |
+      | 1 + 1 = ? | 2 (*), 3 |
+      | 2 + 2 = ? | 4 (*), 5 |
+    And quiz "Weighted Quiz" with weighted questions
+      | question  | weight |
+      | 1 + 1 = ? | 1      |
+      | 2 + 2 = ? | 3      |
+    When I start the quiz
+    * I answer incorrectly
+    * I answer correctly
+    * I evaluate the quiz
+    Then I see the quiz result
+      | Correct Answers | Score | Weighted Score | Result | Pass Score |
+      | 1 / 2           | 75    | 3 / 4          | passed | 50         |
+
+
+
+  Scenario: All questions with weight 1 scores the same as unweighted
+    Given workspace "Equal Weights" with questions
+      | question  | answers  |
+      | 1 + 1 = ? | 2 (*), 3 |
+      | 2 + 2 = ? | 4 (*), 5 |
+    And quiz "Equal Quiz" with weighted questions
+      | question  | weight |
+      | 1 + 1 = ? | 1      |
+      | 2 + 2 = ? | 1      |
+    When I start the quiz
+    * I answer correctly
+    * I answer incorrectly
+    * I evaluate the quiz
+    Then I see the quiz result
+      | Correct Answers | Score | Weighted Score | Result | Pass Score |
+      | 1 / 2           | 50    | 1 / 2          | passed | 50         |

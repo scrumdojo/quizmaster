@@ -18,12 +18,16 @@ export const expectQuizResult = async (
     expectedPercentage: number,
     expectedTextResult: string,
     expectedPassScore: number,
+    expectedWeightedScore?: { points: number; total: number },
 ) => {
     await page.expectCorrectAnswers(expectedCorrectAnswers)
     await page.expectTotalQuestions(expectedTotalQuestions)
     await page.expectPercentageResult(expectedPercentage)
     await page.expectTextResult(expectedTextResult)
     await page.expectPassScore(expectedPassScore)
+    if (expectedWeightedScore) {
+        await page.expectWeightedScore(expectedWeightedScore.points, expectedWeightedScore.total)
+    }
 }
 
 export const expectAllOptionsForQuestion = async (

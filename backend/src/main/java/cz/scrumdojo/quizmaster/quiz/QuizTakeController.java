@@ -7,6 +7,7 @@ import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardResponse;
 import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardService;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
@@ -97,10 +98,12 @@ public class QuizTakeController {
         @PathVariable Integer attemptId
     ) {
         var attempt = requireAttemptNotFinished(quizId, attemptId);
+        var quiz = requireQuiz(quizId);
         attemptService.finish(attempt, now());
         var rows = attemptService.answeredQuestions(attempt.getId());
+        int[] weights = weightsFor(quiz, rows);
         return ResponseEntity.ok(
-            QuizEvaluationResponse.from(rows, quizService.loadQuestions(AttemptQuestion.questionIdsOf(rows)))
+            QuizEvaluationResponse.from(rows, quizService.loadQuestions(AttemptQuestion.questionIdsOf(rows)), weights)
         );
     }
 
@@ -174,6 +177,10 @@ public class QuizTakeController {
         );
 
         return attempt.get();
+    }
+
+    private int[] weightsFor(Quiz quiz, List<AttemptQuestion> rows) {
+        return rows.stream().mapToInt(row -> quiz.weightForQuestion(row.getQuestionId())).toArray();
     }
 
     private LocalDateTime now() {

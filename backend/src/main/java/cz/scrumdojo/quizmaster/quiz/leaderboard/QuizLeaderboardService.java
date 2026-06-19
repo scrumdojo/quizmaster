@@ -52,7 +52,7 @@ public class QuizLeaderboardService {
 
         return new QuizLeaderboardResponse(
             rankCohorts(quiz, finishedAttempts, scoresByAttemptId),
-            rankIndividuals(finishedAttempts, scoresByAttemptId)
+            rankIndividuals(quiz, finishedAttempts, scoresByAttemptId)
         );
     }
 
@@ -78,9 +78,11 @@ public class QuizLeaderboardService {
             .toList();
         var scoresByCohort = new HashMap<String, List<Integer>>();
         for (Attempt attempt : finishedCohortAttempts) {
+            var rows = scoresByAttemptId.getOrDefault(attempt.getId(), List.of());
+            int[] weights = weightsFor(quiz, rows);
             scoresByCohort
                 .computeIfAbsent(attempt.getCohortGuid(), ignored -> new ArrayList<>())
-                .add(AttemptQuestion.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
+                .add(AttemptQuestion.weightedPercentageScore(rows, weights));
         }
 
         var rankedCohorts = cohortRepository
@@ -105,6 +107,7 @@ public class QuizLeaderboardService {
     }
 
     private QuizLeaderboardIndividualResponse[] rankIndividuals(
+        Quiz quiz,
         List<Attempt> finishedAttempts,
         Map<Integer, List<AttemptQuestion>> scoresByAttemptId
     ) {
@@ -112,7 +115,7 @@ public class QuizLeaderboardService {
             .stream()
             .filter(attempt -> attempt.getNickname() != null)
             .map(attempt ->
-                new IndividualLeaderboardRow(attempt.getNickname(), scoreForAttempt(attempt, scoresByAttemptId))
+                new IndividualLeaderboardRow(attempt.getNickname(), scoreForAttempt(quiz, attempt, scoresByAttemptId))
             )
             .sorted(
                 Comparator.comparingInt(IndividualLeaderboardRow::score)
@@ -133,8 +136,13 @@ public class QuizLeaderboardService {
         return response;
     }
 
-    private int scoreForAttempt(Attempt attempt, Map<Integer, List<AttemptQuestion>> scoresByAttemptId) {
-        return AttemptQuestion.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of()));
+    private int scoreForAttempt(Quiz quiz, Attempt attempt, Map<Integer, List<AttemptQuestion>> scoresByAttemptId) {
+        var rows = scoresByAttemptId.getOrDefault(attempt.getId(), List.of());
+        return AttemptQuestion.weightedPercentageScore(rows, weightsFor(quiz, rows));
+    }
+
+    private int[] weightsFor(Quiz quiz, List<AttemptQuestion> rows) {
+        return rows.stream().mapToInt(row -> quiz.weightForQuestion(row.getQuestionId())).toArray();
     }
 
     private int averageScore(List<Integer> scores) {

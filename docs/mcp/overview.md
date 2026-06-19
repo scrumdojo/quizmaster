@@ -40,6 +40,13 @@ this doc only names them. See the named files for the current set:
 - **Prompts** — `mcp/src/prompts.ts`. Guided multi-step prompts for question
   authoring and workspace review.
 
+## Known gaps
+
+- **Quiz question weights**: The `questionWeights` field introduced for
+  weighted scoring is not yet surfaced in the MCP quiz schema (`mcp/src/schemas.ts`).
+  Quizzes created or updated through MCP will have all weights default to 1.
+  See `backlog/` if this needs MCP support.
+
 ## Related docs
 
 - [configuration.md](configuration.md) — how to run and configure the server.

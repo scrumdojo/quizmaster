@@ -63,4 +63,27 @@ public class AttemptQuestion {
         if (rows.isEmpty()) return 0;
         return (int) Math.round((totalPoints(rows) / rows.size()) * 100);
     }
+
+    public static double weightedTotalPoints(List<AttemptQuestion> rows, int[] weights) {
+        double total = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            int weight = (weights != null && i < weights.length) ? weights[i] : 1;
+            total += rows.get(i).getStatus().points() * weight;
+        }
+        return total;
+    }
+
+    public static int totalWeight(List<AttemptQuestion> rows, int[] weights) {
+        int total = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            total += (weights != null && i < weights.length) ? weights[i] : 1;
+        }
+        return total;
+    }
+
+    public static int weightedPercentageScore(List<AttemptQuestion> rows, int[] weights) {
+        int tw = totalWeight(rows, weights);
+        if (tw == 0) return 0;
+        return (int) Math.round((weightedTotalPoints(rows, weights) / tw) * 100);
+    }
 }

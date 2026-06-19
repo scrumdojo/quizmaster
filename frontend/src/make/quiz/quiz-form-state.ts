@@ -18,6 +18,16 @@ export type QuizEditFormData = QuizRequest
 const formatDateTimeInputValue = (value?: string | null) => value?.slice(0, 16) ?? ''
 const toApiDateTimeValue = (value: string) => value || null
 
+const buildInitialWeights = (quiz?: Quiz): Map<number, number> => {
+    const map = new Map<number, number>()
+    if (quiz?.questions && quiz.questionWeights) {
+        quiz.questions.forEach((q, i) => {
+            map.set(q.id, quiz.questionWeights![i] ?? 1)
+        })
+    }
+    return map
+}
+
 export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: Quiz) => {
     const [title, setTitle] = useState(quiz?.title || '')
     const [description, setDescription] = useState(quiz?.description || '')
@@ -31,6 +41,11 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
     const [checkRandomize, setCheckRandomize] = useState(!!quiz?.randomQuestionCount)
     const [feedbackMode, setFeedbackMode] = useState<QuizMode>(quiz?.mode || DEFAULT_MODE)
     const [difficulty, setDifficulty] = useState<Difficulty>(quiz?.difficulty || DEFAULT_DIFFICULTY)
+    const [weights, setWeights] = useState<Map<number, number>>(buildInitialWeights(quiz))
+
+    const setWeight = (questionId: number, weight: number) => {
+        setWeights(prev => new Map(prev).set(questionId, weight))
+    }
 
     const filteredQuestions = useMemo(() => {
         const normalizedFilter = filter.trim().toLowerCase()
@@ -58,6 +73,7 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
         filteredQuestions,
         feedbackMode,
         difficulty,
+        weights,
         setTitle,
         setDescription,
         setStartAt,
@@ -70,18 +86,24 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
         setCheckRandomize,
         setFeedbackMode,
         setDifficulty,
+        setWeight,
     }
 }
 
-export const stateToQuizApiData = (state: ReturnType<typeof useQuizFormState>): QuizEditFormData => ({
-    title: state.title,
-    description: state.description,
-    startAt: toApiDateTimeValue(state.startAt),
-    endAt: toApiDateTimeValue(state.endAt),
-    questionIds: Array.from(state.selectedIds),
-    mode: state.feedbackMode,
-    difficulty: state.difficulty,
-    passScore: state.passScore,
-    timeLimit: state.timeLimit,
-    randomQuestionCount: state.randomQuestionCount,
-})
+export const stateToQuizApiData = (state: ReturnType<typeof useQuizFormState>): QuizEditFormData => {
+    const questionIds = Array.from(state.selectedIds)
+    const questionWeights = questionIds.map(id => state.weights.get(id) ?? 1)
+    return {
+        title: state.title,
+        description: state.description,
+        startAt: toApiDateTimeValue(state.startAt),
+        endAt: toApiDateTimeValue(state.endAt),
+        questionIds,
+        questionWeights,
+        mode: state.feedbackMode,
+        difficulty: state.difficulty,
+        passScore: state.passScore,
+        timeLimit: state.timeLimit,
+        randomQuestionCount: state.randomQuestionCount,
+    }
+}

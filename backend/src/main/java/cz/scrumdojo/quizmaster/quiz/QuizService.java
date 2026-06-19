@@ -66,6 +66,7 @@ public class QuizService {
             quiz.getStartAt(),
             quiz.getEndAt(),
             questionResponses,
+            quiz.getQuestionWeights(),
             quiz.getMode(),
             quiz.getDifficulty(),
             quiz.getPassScore(),
