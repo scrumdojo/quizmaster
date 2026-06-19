@@ -124,12 +124,17 @@ quiz. Dry-run attempts bypass the quiz's availability window and are excluded
 from quiz statistics. Otherwise they behave identically to a regular attempt
 (same per-question submission, evaluation, and timeout pipeline).
 
-While taking a quiz, two affordances support navigation:
+While taking a quiz, several affordances are available:
 
 - **Skip** leaves the current question unanswered and moves on. Skipped
   questions can be revisited.
 - **Bookmark** marks a question to return to later, useful when the taker
   wants to come back after seeing later questions.
+- **Flag** marks a question as problematic (confusing or ambiguous). The flag
+  is recorded on the attempt's drawn question, can be toggled off, and is
+  isolated per attempt — a new attempt starts with nothing flagged. Flagging
+  never affects answering, navigation, or scoring; flag counts are aggregated
+  per question and surfaced to the author in quiz statistics.
 
 ## AI assistance: Robin AI
 

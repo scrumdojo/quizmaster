@@ -89,13 +89,15 @@ public class QuizStatsService {
         int correctAnswers = countByStatus(answeredScores, AnswerStatus.CORRECT);
         int partiallyCorrectAnswers = countByStatus(answeredScores, AnswerStatus.PARTIAL);
         int incorrectAnswers = countByStatus(answeredScores, AnswerStatus.INCORRECT);
+        int flagged = (int) scores.stream().filter(AttemptQuestion::isFlagged).count();
         return new QuestionStatsRecord(
             question.getQuestion(),
             answered,
             correctAnswers,
             partiallyCorrectAnswers,
             incorrectAnswers,
-            unanswered
+            unanswered,
+            flagged
         );
     }
 

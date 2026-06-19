@@ -6,5 +6,6 @@ public record QuestionStatsRecord(
     int correctAnswers,
     int partiallyCorrectAnswers,
     int incorrectAnswers,
-    int unanswered
+    int unanswered,
+    int flagged
 ) {}

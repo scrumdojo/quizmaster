@@ -257,6 +257,30 @@ Feature: Show stats
       | Second Quiz | Which are planets in solar system? | 1         | 0%           | 0 (0%)            | 1 (100%)   | 0           | What is 2 + 2?                | 1         | 100%         | 0 (0%)            | 0 (0%)     | 0           |                        |           |              |                   |            |             |
 
 
+  Scenario: Flagged questions are counted in question statistics
+    A taker can flag a question as problematic while taking the quiz. The
+    author sees, per question, how many attempts flagged it and what share
+    of the attempts that drew it raised a flag.
+
+    Given workspace "Flag Stats" with questions
+      | question  | answers  |
+      | 1 + 1 = ? | 2 (*), 3 |
+      | 2 + 2 = ? | 4 (*), 5 |
+    And quiz "Flag Quiz" with all questions
+
+    When I start the quiz
+    * I flag question "1 + 1 = ?" as problematic
+    * I answer correctly
+    * I answer correctly
+    * I finish the quiz in 5 seconds
+
+    When I open quiz "Flag Quiz" statistics
+    Then I see question stats table
+      | Question  | Answered | Correct | Partially Correct | Incorrect | Unanswered | Flagged  |
+      | 1 + 1 = ? | 1        | 100%    | 0 (0%)            | 0 (0%)    | 0          | 1 (100%) |
+      | 2 + 2 = ? | 1        | 100%    | 0 (0%)            | 0 (0%)    | 0          | 0 (0%)   |
+
+
   Scenario Outline: Explain statistics columns
     Given quiz "Stats Quiz" with 2 questions
     When I open quiz "Stats Quiz" statistics
@@ -264,11 +288,12 @@ Feature: Show stats
     Then I see help text "<help>"
 
     Examples:
-      | column            | help                                                                        |
-      | Points            | Correct answers earn 1 point and partially correct answers earn 0.5 points. |
-      | Score             | The final percentage score for the attempt.                                 |
-      | Partially Correct | A multiple choice answer with exactly one mistake.                          |
-      | Unanswered        | Questions not answered during the attempt.                                  |
+      | column            | help                                                                                          |
+      | Points            | Correct answers earn 1 point and partially correct answers earn 0.5 points.                   |
+      | Score             | The final percentage score for the attempt.                                                   |
+      | Partially Correct | A multiple choice answer with exactly one mistake.                                            |
+      | Unanswered        | Questions not answered during the attempt.                                                    |
+      | Flagged           | How often takers flagged this question as problematic, relative to the attempts that drew it. |
 
 
   Scenario: Per-question accuracy shows as a colour-coded pill

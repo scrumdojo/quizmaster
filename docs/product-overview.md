@@ -48,15 +48,16 @@ Desktop.
   schedule and is excluded from stats.
 - **Statistics** — attempt-by-attempt table (duration, points, score,
   status: in-progress / finished / timeout / abandoned) plus
-  per-question success rates.
+  per-question success rates and how often each question was flagged
+  as problematic.
 
 ### Taking (learner side)
 
 - **Welcome page** with quiz description, question count, time limit,
   pass score, feedback mode, and cohort leaderboard if applicable.
 - **In-quiz navigation** — countdown timer, progress bar, back/next,
-  skip (revisited later), bookmark, browser back/forward, numeric-key
-  shortcuts (1–9) for choice questions.
+  skip (revisited later), bookmark, flag-as-problematic, browser
+  back/forward, numeric-key shortcuts (1–9) for choice questions.
 - **Per-answer feedback** with color coding and explanations; partial
   credit for multi-choice; tolerance-aware grading for numerical.
 - **Final score page** with the user's selections, correct answers,

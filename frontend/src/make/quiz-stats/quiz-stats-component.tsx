@@ -63,6 +63,7 @@ const questionRow = (question: QuestionStatsRecord): ReactNode[] => [
     pct(question.partiallyCorrectAnswers, question.answered),
     pct(question.incorrectAnswers, question.answered),
     String(question.unanswered),
+    pct(question.flagged, question.answered + question.unanswered),
 ]
 const averageDuration = (attempts: readonly AttemptStatsRecord[]): string => {
     const durations = attempts.flatMap(attempt => (attempt.durationSeconds == null ? [] : [attempt.durationSeconds]))
@@ -79,6 +80,7 @@ const emptyQuestionStats = (question: string): QuestionStatsRecord => ({
     partiallyCorrectAnswers: 0,
     incorrectAnswers: 0,
     unanswered: 0,
+    flagged: 0,
 })
 const resolveQuestionStats = (quiz: Quiz, stats: QuizStatsResponse): readonly QuestionStatsRecord[] => {
     const backendQuestionStats = stats.questionStatistics ?? stats.questions ?? stats.questionStats ?? []
@@ -209,6 +211,11 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                             },
                             'Incorrect',
                             { label: 'Unanswered', tooltip: 'Questions not answered during the attempt.' },
+                            {
+                                label: 'Flagged',
+                                tooltip:
+                                    'How often takers flagged this question as problematic, relative to the attempts that drew it.',
+                            },
                         ]}
                         rows={questions.map(questionRow)}
                     />

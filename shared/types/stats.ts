@@ -15,6 +15,7 @@ export interface QuestionStatsRecord {
     readonly partiallyCorrectAnswers: number
     readonly incorrectAnswers: number
     readonly unanswered: number
+    readonly flagged: number
 }
 export interface SummaryStats {
     readonly started: number
