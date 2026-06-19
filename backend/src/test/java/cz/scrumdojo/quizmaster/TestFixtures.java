@@ -108,6 +108,7 @@ public class TestFixtures {
             null,
             null,
             questionIds,
+            null,
             QuizMode.LEARN,
             Difficulty.KEEP_QUESTION,
             85,
