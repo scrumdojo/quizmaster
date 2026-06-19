@@ -123,6 +123,19 @@ public class QuizTakeController {
         return ResponseEntity.ok(QuestionEvaluationResponse.from(status, feedback));
     }
 
+    @PutMapping("/{quizId}/attempts/{attemptId}/questions/{questionId}/flag")
+    public ResponseEntity<Void> flagAttemptQuestion(
+        @PathVariable Integer quizId,
+        @PathVariable Integer attemptId,
+        @PathVariable Integer questionId,
+        @RequestBody FlagRequest request
+    ) {
+        requireAttemptNotFinished(quizId, attemptId);
+        var attemptQuestion = requireAttemptQuestion(attemptId, questionId);
+        attemptService.setFlag(attemptQuestion, request.flagged());
+        return ResponseEntity.noContent().build();
+    }
+
     private Quiz requireQuiz(Integer quizId) {
         return quizService
             .findById(quizId)

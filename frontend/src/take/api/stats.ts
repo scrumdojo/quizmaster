@@ -1,4 +1,4 @@
-import { postJson, postNoContent } from '#fe/shared/api/helpers.ts'
+import { postJson, postNoContent, putNoContent } from '#fe/shared/api/helpers.ts'
 import type { QuizEvaluationResponse } from '#fe/shared/model/quiz.ts'
 import type { QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 
@@ -17,6 +17,14 @@ export const evaluateQuiz = async (
         `/api/quiz/${quizId}/attempts/${attemptId}/evaluate`,
         request,
     )
+export const flagQuizQuestion = async (
+    quizId: number,
+    attemptId: number,
+    questionId: number,
+    flagged: boolean,
+): Promise<void> =>
+    await putNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/questions/${questionId}/flag`, { flagged })
+
 export const submitQuizQuestionAnswer = async (
     quizId: number,
     attemptId: number,

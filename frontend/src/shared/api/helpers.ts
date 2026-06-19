@@ -47,6 +47,21 @@ export const postNoContent = async <T>(url: string, data?: T, init?: RequestInit
     }
 }
 
+export const putNoContent = async <T>(url: string, data?: T, init?: RequestInit): Promise<void> => {
+    const response = await fetch(url, {
+        ...init,
+        method: 'PUT',
+        headers: mergeHeaders(init?.headers, {
+            'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message)
+    }
+}
+
 export const callDelete = async (url: string, init?: RequestInit) =>
     fetch(url, { ...init, method: 'DELETE' }).then(async response => {
         if (!response.ok) {

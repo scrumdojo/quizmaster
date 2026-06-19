@@ -7,10 +7,11 @@ import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/take/mo
 import { QuestionForm, QuizQuestionProvider } from '#fe/take/question-take/index.ts'
 
 import { BookmarkList } from './components/bookmark-list.tsx'
-import { BackButton, BookmarkButton, EvaluateButton, NextButton } from './components/buttons.tsx'
+import { BackButton, BookmarkButton, EvaluateButton, FlagButton, NextButton } from './components/buttons.tsx'
 import { ProgressBar } from './components/progress-bar.tsx'
 import { useQuizAnswersState, type QuizAnswers } from './quiz-answers-state.ts'
 import { useQuizBookmarkState } from './quiz-bookmark-state.ts'
+import { useQuizFlagState } from './quiz-flag-state.ts'
 import { useQuizNavigationState } from './quiz-navigation-state.ts'
 import { TimeLimit } from './time-limit/with-time-limit.tsx'
 
@@ -27,6 +28,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const { quizAnswers, answerQuestion } = useQuizAnswersState()
     const nav = useQuizNavigationState(props.quiz, props.questionsBaseUrl)
     const bookmarks = useQuizBookmarkState()
+    const flags = useQuizFlagState()
     const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs | undefined>(undefined)
 
     const answer = (questionAnswer: QuestionAnswer) => {
@@ -55,6 +57,8 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     }
 
     const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
+    const toggleFlag = () =>
+        void flags.toggle(props.quiz.id, props.quizRunId, currentQuestion.id, nav.currentQuestionIdx)
     const currentAnswer = quizAnswers.finalAnswers[nav.currentQuestionIdx]
     const isAnswered = currentAnswer !== undefined
     const hasSelectedAnswer = selectedAnswerIdxs !== undefined && selectedAnswerIdxs.length > 0
@@ -129,6 +133,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
             <div className="quiz-play-actions">
                 {nav.canBack && <BackButton onClick={nav.back} />}
                 <BookmarkButton isBookmarked={bookmarks.has(nav.currentQuestionIdx)} onClick={bookmark} />
+                <FlagButton isFlagged={flags.has(nav.currentQuestionIdx)} onClick={toggleFlag} />
                 {nav.canNext && <NextButton onClick={() => void handleNextButton()} />}
                 {isAnswered && !nav.canNext && <EvaluateButton onClick={evaluate} />}
             </div>

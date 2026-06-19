@@ -85,6 +85,12 @@ public class AttemptService {
     }
 
     @Transactional
+    public void setFlag(AttemptQuestion attemptQuestion, boolean flagged) {
+        attemptQuestion.setFlagged(flagged);
+        attemptQuestionRepository.save(attemptQuestion);
+    }
+
+    @Transactional
     public void timeout(Attempt attempt, LocalDateTime now) {
         attempt.markTimedOut(now);
         attemptRepository.save(attempt);

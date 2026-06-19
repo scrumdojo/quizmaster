@@ -36,6 +36,9 @@ public class AttemptQuestion {
     @Column(name = "answered_at")
     private LocalDateTime answeredAt;
 
+    @Column(nullable = false)
+    private boolean flagged = false;
+
     public void recordOutcome(QuizMode mode, AnswerStatus newStatus, LocalDateTime when) {
         if (mode == QuizMode.LEARN && status != AnswerStatus.UNANSWERED) return;
         status = newStatus;

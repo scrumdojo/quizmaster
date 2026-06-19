@@ -14,6 +14,7 @@ export class QuestionPage {
     navigationButtonsLocator = () => this.page.locator('#back, #next, #evaluate')
     submitButtonLocator = () => this.page.locator('input.submit-btn')
 
+    private flagQuestionButtonLocator = () => this.page.locator('[data-testid="flag-toggle"]')
     private bookmarkQuestionButtonLocator = () => this.page.locator('[data-testid="bookmark-toggle"]')
     private unBookmarkQuestionButtonLocator = (title: string) =>
         this.page.locator(`[data-testid="delete-bookmark-${title}"]`)
@@ -27,6 +28,8 @@ export class QuestionPage {
     progressMax = async () => Number.parseInt((await this.progressBarAttribute('max')) ?? '')
 
     back = () => this.backButtonLocator().click()
+    flag = () => this.flagQuestionButtonLocator().click()
+    unflag = () => this.flagQuestionButtonLocator().click()
     bookmark = () => this.bookmarkQuestionButtonLocator().click()
     unBookmark = (title: string) => this.unBookmarkQuestionButtonLocator(title).click()
     next = () => this.nextButtonLocator().click()
@@ -48,5 +51,7 @@ export class QuestionPage {
         expect(this.progressBarLocator())
             .toHaveAttribute('value', String(current))
             .then(() => expect(this.progressBarLocator()).toHaveAttribute('max', String(max)))
+    expectFlagged = () => expect(this.flagQuestionButtonLocator()).toHaveAttribute('data-flagged', 'true')
+    expectNotFlagged = () => expect(this.flagQuestionButtonLocator()).toHaveAttribute('data-flagged', 'false')
     expectBookmarked = () => expect(this.bookmarkQuestionButtonLocator()).toHaveAttribute('data-bookmarked', 'true')
 }

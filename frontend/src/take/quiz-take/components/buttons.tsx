@@ -29,6 +29,24 @@ export const StartButton = ({ onClick, disabled = false }: StartButtonProps) => 
     </Button>
 )
 
+interface FlagButtonProps {
+    readonly isFlagged: boolean
+    readonly onClick: () => void
+}
+
+export const FlagButton = ({ isFlagged, onClick }: FlagButtonProps) => (
+    <Button
+        type="button"
+        className="button flag-button"
+        onClick={onClick}
+        data-testid="flag-toggle"
+        data-flagged={isFlagged}
+        title={isFlagged ? 'Remove problematic flag' : 'Flag as problematic'}
+    >
+        {isFlagged ? '⚑ Flagged as problematic' : '⚐ Flag as problematic'}
+    </Button>
+)
+
 interface BookmarkButtonProps {
     readonly isBookmarked: boolean
     readonly onClick: () => void

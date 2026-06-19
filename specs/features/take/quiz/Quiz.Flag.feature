@@ -14,7 +14,6 @@ Feature: Flag a quiz question as problematic
       | pass score | 75 |
 
 
-  @skip
   Scenario: Flag a question as problematic
     When I start quiz "Quiz"
     Then I see question "1 + 1 = ?"
