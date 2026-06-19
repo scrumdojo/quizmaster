@@ -46,7 +46,6 @@ Feature: Flag a quiz question as problematic
     Then I do not see question "1 + 1 = ?" flagged as problematic
 
 
-  @skip
   Scenario: A flag is remembered when navigating within the attempt
     When I start quiz "Quiz"
     * I flag question "1 + 1 = ?" as problematic
@@ -57,7 +56,6 @@ Feature: Flag a quiz question as problematic
     Then I see question "1 + 1 = ?" flagged as problematic
 
 
-  @skip
   Scenario: A new attempt starts with no flags from the previous attempt
     When I start quiz "Quiz"
     * I flag question "1 + 1 = ?" as problematic
@@ -72,7 +70,6 @@ Feature: Flag a quiz question as problematic
     And I do not see question "1 + 1 = ?" flagged as problematic
 
 
-  @skip
   Scenario: Flagging a question does not affect the score
     When I start quiz "Quiz"
     * I flag question "1 + 1 = ?" as problematic

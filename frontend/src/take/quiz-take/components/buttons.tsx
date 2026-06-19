@@ -41,13 +41,13 @@ interface FlagButtonProps {
 export const FlagButton = ({ isFlagged, onClick }: FlagButtonProps) => (
     <Button
         type="button"
-        className="button flag-button"
+        className="button secondary flag-button"
         onClick={onClick}
         data-testid="flag-toggle"
         data-flagged={isFlagged}
-        title={isFlagged ? 'Remove problematic flag' : 'Flag as problematic'}
+        title={isFlagged ? 'Remove flag' : 'Flag this question'}
     >
-        {isFlagged ? '⚑ Flagged as problematic' : '⚐ Flag as problematic'}
+        {isFlagged ? '⚑ Flagged' : '⚐ Flag'}
     </Button>
 )
 

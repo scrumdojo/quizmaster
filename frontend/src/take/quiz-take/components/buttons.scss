@@ -1,3 +1,11 @@
+.flag-button {
+    &[data-flagged='true'] {
+        background: var(--feedback-incorrect-bg);
+        border-color: var(--feedback-incorrect-border);
+        color: var(--feedback-incorrect-fg);
+    }
+}
+
 .bookmark-button {
     background: rgba(255, 255, 255, 0.85);
     border-color: var(--border-subtle);
