@@ -87,16 +87,13 @@ Given(
     },
 )
 
-Given(
-    'quiz {string} with weighted questions',
-    async function (quizName: string, data: DataTable) {
-        const rows = data.hashes() as Array<{ question: string; weight: string }>
-        const questions = rows.map(r => r.question)
-        const weights = rows.map(r => Number.parseInt(r.weight, 10))
-        const spec: QuizSpec = { name: quizName, questions, weights, passScore: '50' }
-        await createQuiz(this, spec)
-    },
-)
+Given('quiz {string} with weighted questions', async function (quizName: string, data: DataTable) {
+    const rows = data.hashes() as Array<{ question: string; weight: string }>
+    const questions = rows.map(r => r.question)
+    const weights = rows.map(r => Number.parseInt(r.weight, 10))
+    const spec: QuizSpec = { name: quizName, questions, weights, passScore: '50' }
+    await createQuiz(this, spec)
+})
 
 Given('quiz {string} has a cohort named {string}', async function (quizName: string, cohortName: string) {
     await addCohortViaShareScreen(this, quizName, cohortName)
