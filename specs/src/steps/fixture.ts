@@ -73,7 +73,8 @@ const skipEmbedding = (page: Page) =>
         await route.continue({ headers })
     })
 
-const screenshotsDir = path.join(__dirname, '../../../site/docs/screenshots')
+// __dirname is undefined in native ESM (Node ≥ 20.11 without CJS transforms); import.meta.dirname is the ESM equivalent
+const screenshotsDir = path.join(typeof __dirname !== 'undefined' ? __dirname : import.meta.dirname, '../../../site/docs/screenshots')
 fs.mkdir(screenshotsDir, { recursive: true })
 
 After(async function ({ $tags, $testInfo }) {
