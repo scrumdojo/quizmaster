@@ -82,6 +82,16 @@ export interface QuizLeaderboardResponse {
     readonly individuals: readonly QuizLeaderboardIndividual[]
 }
 
+export interface QuizLiveStatsCohort {
+    readonly order: number
+    readonly cohort: string
+    readonly points: number
+}
+
+export interface QuizLiveStatsResponse {
+    readonly cohorts: readonly QuizLiveStatsCohort[]
+}
+
 export type QuizSubmittedAnswer =
     | { readonly questionId: number; readonly type: 'choice'; readonly selectedIdxs: readonly number[] }
     | { readonly questionId: number; readonly type: 'numerical'; readonly value: number }

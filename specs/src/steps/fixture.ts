@@ -32,7 +32,7 @@ export const test = base.extend<{ world: QuizmasterWorld }>({
     },
 })
 
-export const { Given, When, Then, BeforeScenario, After, AfterScenario } = createBdd(test, {
+export const { Given, When, Then, Step, BeforeScenario, After, AfterScenario } = createBdd(test, {
     worldFixture: 'world',
 })
 

@@ -25,3 +25,20 @@ for _f in ./.env ../.env; do [ -f "$_f" ] && . "$_f" && break; done
 
 : ${BE_PORT:=8080}
 : ${FE_PORT:=5173}
+
+# Gradle requires Java 21. Prefer an explicit JAVA_HOME; otherwise use Homebrew openjdk@21.
+if [ -z "${JAVA_HOME:-}" ]; then
+    for _java_home in \
+        /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
+        /usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home; do
+        if [ -x "$_java_home/bin/java" ]; then
+            JAVA_HOME="$_java_home"
+            break
+        fi
+    done
+    unset _java_home
+fi
+if [ -n "${JAVA_HOME:-}" ]; then
+    export JAVA_HOME
+    export PATH="$JAVA_HOME/bin:$PATH"
+fi

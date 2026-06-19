@@ -3,6 +3,7 @@ import { expect } from '@playwright/test'
 
 import { Given, Then, When } from '#steps/fixture.ts'
 import {
+    expectCohortLiveStatsTable,
     expectCohortRowsInOrder,
     expectQuizTakeLinkFor,
     expectShareScreenError,
@@ -201,4 +202,40 @@ Then('I see a note explaining that cohort attempts contribute to the cohort lead
 
 Then('I see a note explaining that cohorts with attempts cannot be deleted', async function () {
     await this.quizSharePage.expectCohortDeleteNote('Boyz')
+})
+
+Then('the live stats button sits with the quiz take link share actions', async function () {
+    await this.quizSharePage.expectLiveStatsButtonInTakeLinkShareActions()
+})
+
+Then('I see a help tooltip for live stats after the live stats button', async function () {
+    await this.quizSharePage.expectLiveStatsHelpTooltipAfterButton()
+})
+
+Then('I see the live stats button', async function () {
+    await this.quizSharePage.expectLiveStatsButtonVisible()
+})
+
+Then('I do not see the live stats button', async function () {
+    await this.quizSharePage.expectLiveStatsButtonHidden()
+})
+
+When('I open live stats', async function () {
+    await this.quizSharePage.openLiveStats()
+})
+
+Then('I see the live stats panel', async function () {
+    await this.quizSharePage.expectLiveStatsPanelVisible()
+})
+
+Then('I see the cohort live stats table', async function (table: DataTable) {
+    await expectCohortLiveStatsTable(this.quizSharePage, table)
+})
+
+When('I close live stats', async function () {
+    await this.quizSharePage.closeLiveStats()
+})
+
+Then('I see the share screen for quiz {string}', async function (quizName: string) {
+    await this.quizSharePage.expectShareScreenForQuiz(quizName)
 })

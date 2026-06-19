@@ -1,6 +1,8 @@
+import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
 import type { QuizSharePage } from '#pages/index.ts'
+import { parseTableData } from '#steps/quiz/expects.ts'
 
 export const expectCohortRowsInOrder = async (sharePage: QuizSharePage, expectedNames: string[]) => {
     expect(await sharePage.cohortRowNames()).toEqual(expectedNames)
@@ -21,4 +23,9 @@ export const expectShareScreenError = async (sharePage: QuizSharePage, testId: s
 export const expectQuizTakeLinkFor = async (sharePage: QuizSharePage, expectedPath: string, origin: string) => {
     const href = await sharePage.takeLink()
     expect(href).toBe(`${origin}${expectedPath}`)
+}
+
+export const expectCohortLiveStatsTable = async (sharePage: QuizSharePage, data: DataTable) => {
+    const { headerCells, bodyRows } = parseTableData(data)
+    await sharePage.expectCohortLiveStatsTable('Cohort live stats', headerCells, bodyRows)
 }

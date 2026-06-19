@@ -1,5 +1,7 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 
+import { expectTextToBe } from '#steps/common.ts'
+
 export class QuizSharePage {
     private lastShareButtonCenter: { readonly x: number; readonly y: number } | null = null
 
@@ -14,6 +16,9 @@ export class QuizSharePage {
     private shareBirdLocator = () => this.page.getByTestId('share-bird')
     private shareBirdImageLocator = () => this.shareBirdLocator().locator('img')
     private shareFlockBirdLocator = () => this.page.locator('[data-testid="share-bird"][data-flock="true"]')
+    private liveStatsButtonLocator = () => this.page.getByTestId('live-stats-button')
+    private liveStatsPanelLocator = () => this.page.getByTestId('live-stats-panel')
+    private cohortLiveStatsTableLocator = () => this.page.getByTestId('cohort-live-stats-table')
 
     private cohortRowLocator = (name: string) => this.page.locator(`.cohort-row[data-name="${name}"]`)
 
@@ -263,6 +268,67 @@ export class QuizSharePage {
     expectCohortTakeLinkNote = () => expect(this.page.locator('#cohort-take-link-note')).toBeVisible()
     expectCohortDeleteNote = (name: string) =>
         expect(this.cohortRowLocator(name).getByText('Cohorts with attempts cannot be deleted.')).toBeVisible()
+
+    expectLiveStatsButtonVisible = () => expect(this.liveStatsButtonLocator()).toBeVisible()
+
+    expectLiveStatsButtonHidden = () => expect(this.liveStatsButtonLocator()).toHaveCount(0)
+
+    openLiveStats = () => this.liveStatsButtonLocator().click()
+
+    expectLiveStatsPanelVisible = () => expect(this.liveStatsPanelLocator()).toBeVisible()
+
+    closeLiveStats = () => this.liveStatsPanelLocator().getByRole('button', { name: 'Close' }).click()
+
+    expectShareScreenForQuiz = async (quizName: string) => {
+        await expect(this.page.locator('#share-page')).toBeVisible()
+        await expect(this.page.locator('#share-page h1')).toHaveText(`Share ${quizName}`)
+    }
+
+    expectCohortLiveStatsTable = async (captionText: string, headerCells: string[], bodyRows: string[][]) => {
+        const table = this.cohortLiveStatsTableLocator()
+        await expectTextToBe(table.locator('caption'), captionText)
+
+        for (let i = 0; i < headerCells.length; i++) {
+            if (headerCells[i] !== '') {
+                await expectTextToBe(table.locator('thead th').nth(i), headerCells[i])
+            }
+        }
+
+        const rows = table.locator('tbody tr')
+        await expect(rows).toHaveCount(bodyRows.length)
+
+        for (let i = 0; i < bodyRows.length; i++) {
+            for (let j = 0; j < bodyRows[i].length; j++) {
+                if (bodyRows[i][j] !== '') {
+                    await expect
+                        .poll(async () => (await rows.nth(i).locator('td').nth(j).textContent())?.trim() ?? '')
+                        .toBe(bodyRows[i][j])
+                }
+            }
+        }
+    }
+
+    private takeLinkShareActionsLocator = () =>
+        this.page
+            .locator('section')
+            .filter({ has: this.page.getByRole('heading', { name: 'Take link' }) })
+            .locator('.share-actions')
+
+    expectLiveStatsButtonInTakeLinkShareActions = async () => {
+        const shareActions = this.takeLinkShareActionsLocator()
+        await expect(shareActions.getByRole('button', { name: 'Show QR code' })).toBeVisible()
+        await expect(shareActions.getByTestId('share-link-quiz-take')).toBeVisible()
+        await expect(shareActions.getByTestId('live-stats-button')).toBeVisible()
+    }
+
+    expectLiveStatsHelpTooltipAfterButton = async () => {
+        const shareActions = this.takeLinkShareActionsLocator()
+        await expect(
+            shareActions.locator(
+                '[data-testid="live-stats-button"] + .help-tooltip button[aria-label="Help for Live stats"]',
+            ),
+        ).toBeVisible()
+    }
 
     private quizShareButton = () => this.page.getByTestId('share-link-quiz-take')
 

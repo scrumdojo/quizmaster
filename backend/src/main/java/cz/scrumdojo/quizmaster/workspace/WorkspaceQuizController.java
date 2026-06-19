@@ -13,6 +13,8 @@ import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.quiz.QuizResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizService;
+import cz.scrumdojo.quizmaster.quiz.livestats.QuizLiveStatsResponse;
+import cz.scrumdojo.quizmaster.quiz.livestats.QuizLiveStatsService;
 import cz.scrumdojo.quizmaster.quiz.stats.QuizStatsResponse;
 import cz.scrumdojo.quizmaster.quiz.stats.QuizStatsService;
 import jakarta.validation.Valid;
@@ -39,6 +41,7 @@ public class WorkspaceQuizController {
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
+    private final QuizLiveStatsService quizLiveStatsService;
     private final AttemptService attemptService;
     private final CohortRepository cohortRepository;
     private final Clock clock;
@@ -49,6 +52,7 @@ public class WorkspaceQuizController {
         QuestionRepository questionRepository,
         QuizService quizService,
         QuizStatsService quizStatsService,
+        QuizLiveStatsService quizLiveStatsService,
         AttemptService attemptService,
         CohortRepository cohortRepository,
         Clock clock
@@ -58,6 +62,7 @@ public class WorkspaceQuizController {
         this.questionRepository = questionRepository;
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
+        this.quizLiveStatsService = quizLiveStatsService;
         this.attemptService = attemptService;
         this.cohortRepository = cohortRepository;
         this.clock = clock;
@@ -109,6 +114,16 @@ public class WorkspaceQuizController {
         workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(quizStatsService.getStats(workspaceGuid, id));
+    }
+
+    @GetMapping("/{id}/live-stats")
+    public ResponseEntity<QuizLiveStatsResponse> getQuizLiveStats(
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id
+    ) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        return ResponseHelper.okOrNotFound(quizLiveStatsService.getLiveStats(workspaceGuid, id));
     }
 
     @Transactional

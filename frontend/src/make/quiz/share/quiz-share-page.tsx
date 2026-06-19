@@ -7,6 +7,7 @@ import './quiz-share-page.scss'
 import {
     createCohort,
     deleteCohort,
+    fetchQuizLiveStats,
     fetchWorkspaceQuiz,
     updateCohort,
     type CohortCreateError,
@@ -16,6 +17,8 @@ import { useApi } from '#fe/shared/api/hooks.ts'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 import type { QuizCohort } from '#shared/types/quiz.ts'
+
+const LIVE_STATS_POLL_MS = 2000
 
 const quizQrKey = 'quiz-take'
 
@@ -105,6 +108,10 @@ export const QuizSharePage = () => {
     const [copiedKey, setCopiedKey] = useState<string | null>(null)
     const [editing, setEditing] = useState<{ readonly guid: string; readonly name: string } | null>(null)
     const [shareBirds, setShareBirds] = useState<readonly ShareBird[]>([])
+    const [liveStatsOpen, setLiveStatsOpen] = useState(false)
+    const [liveStatsRows, setLiveStatsRows] = useState<
+        readonly { readonly order: number; readonly cohort: string; readonly points: number }[]
+    >([])
     const shareClickRef = useRef<{ readonly key: string; readonly count: number; readonly lastClickAt: number } | null>(
         null,
     )
@@ -136,6 +143,22 @@ export const QuizSharePage = () => {
 
         return () => window.clearTimeout(timeoutId)
     }, [error])
+
+    useEffect(() => {
+        if (!liveStatsOpen || !quizId) return
+
+        const loadLiveStats = async () => {
+            const response = await fetchQuizLiveStats(workspaceId, quizId)
+            setLiveStatsRows(response.cohorts)
+        }
+
+        void loadLiveStats()
+        const intervalId = window.setInterval(() => {
+            void loadLiveStats()
+        }, LIVE_STATS_POLL_MS)
+
+        return () => window.clearInterval(intervalId)
+    }, [liveStatsOpen, quizId, workspaceId])
 
     if (!quiz) return null
 
@@ -279,7 +302,13 @@ export const QuizSharePage = () => {
         </a>
     )
 
-    const renderShareActions = (key: string, label: string, url: string, qrTestId: string) => (
+    const renderShareActions = (
+        key: string,
+        label: string,
+        url: string,
+        qrTestId: string,
+        options?: { readonly showLiveStats?: boolean },
+    ) => (
         <div className="share-actions">
             <Button
                 className="button secondary"
@@ -296,8 +325,65 @@ export const QuizSharePage = () => {
                 {copiedKey === key ? 'Copied' : 'Share'}
             </Button>
             <HelpTooltip label={`Share ${label}`}>Copies the take link to the clipboard.</HelpTooltip>
+            {options?.showLiveStats && (
+                <>
+                    <Button
+                        className="button secondary"
+                        data-testid="live-stats-button"
+                        onClick={() => setLiveStatsOpen(true)}
+                    >
+                        Live stats
+                    </Button>
+                    <HelpTooltip label="Live stats">
+                        Opens live cohort standings by weighted points while participants answer the quiz.
+                    </HelpTooltip>
+                </>
+            )}
         </div>
     )
+
+    const renderLiveStatsPanel = () => {
+        if (!liveStatsOpen) return null
+        return createPortal(
+            <div
+                className="live-stats-panel"
+                data-testid="live-stats-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="live-stats-title"
+            >
+                <div className="live-stats-backdrop" onClick={() => setLiveStatsOpen(false)} />
+                <div className="live-stats-dialog">
+                    <div className="live-stats-header">
+                        <h2 id="live-stats-title">Live stats</h2>
+                        <Button className="button secondary" onClick={() => setLiveStatsOpen(false)}>
+                            Close
+                        </Button>
+                    </div>
+                    <table className="live-stats-table" data-testid="cohort-live-stats-table">
+                        <caption>Cohort live stats</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Order</th>
+                                <th scope="col">Cohort</th>
+                                <th scope="col">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {liveStatsRows.map(entry => (
+                                <tr key={entry.cohort}>
+                                    <td>{entry.order}</td>
+                                    <td>{entry.cohort}</td>
+                                    <td>{entry.points}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>,
+            document.body,
+        )
+    }
 
     const renderQrModal = () => {
         if (!activeQrCode) return null
@@ -384,7 +470,9 @@ export const QuizSharePage = () => {
                     The general take link lets participants join without assigning them to a cohort.
                 </FieldNote>
                 {renderHiddenLink('quiz-take-link', '', takeUrl)}
-                {renderShareActions(quizQrKey, quiz.title, takeUrl, 'quiz-take-qr')}
+                {renderShareActions(quizQrKey, quiz.title, takeUrl, 'quiz-take-qr', {
+                    showLiveStats: cohorts.length > 0,
+                })}
             </section>
             <section>
                 <h2>Cohorts</h2>
@@ -478,6 +566,7 @@ export const QuizSharePage = () => {
                     {renderCohortError('add')}
                 </div>
             </section>
+            {renderLiveStatsPanel()}
             {renderQrModal()}
         </Page>
     )

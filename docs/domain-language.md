@@ -72,6 +72,12 @@ its weight. The **score percentage** is `weightedPoints / totalWeight × 100`.
 Pass/fail uses this percentage. The unweighted question count ("Points X / Y")
 is also shown separately for reference.
 
+From the quiz **Share** screen, a maker can open **Live stats** when the quiz
+has cohorts. The panel ranks cohorts by the sum of weighted points earned so
+far across all non-dry-run attempts in each cohort, including in-progress runs.
+Each answered question contributes its outcome points (1 for correct, 0.5 for
+partial) multiplied by that question's weight in the quiz.
+
 Three settings shape _which_ questions appear and _when_:
 
 - **Pass score** is the percentage a taker must reach (weighted) to pass.

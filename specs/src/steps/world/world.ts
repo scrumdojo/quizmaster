@@ -136,6 +136,13 @@ export class QuizmasterWorld {
     rememberedCohortLink = ''
     lastClickedInQuizQuestion = ''
     delayedFlagSave?: DelayedFlagSave
+    participantAttempt?: {
+        quizId: number
+        attemptId: number
+        questions: readonly { readonly id: number }[]
+        nextQuestionIndex: number
+    }
+    nextParticipantNumber = 0
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())

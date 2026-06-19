@@ -22,11 +22,11 @@
         // Build scripts
         "build:fe:dev": "cd frontend && pnpm build:dev",
         "build:fe:prod": "cd frontend && pnpm build:prod",
-        "build:be": "cd backend && ./gradlew build",
-        "build:be:prod": "cd backend && ./gradlew bootJar",
+        "build:be": ". scripts/load-env.sh && cd backend && ./gradlew build",
+        "build:be:prod": ". scripts/load-env.sh && cd backend && ./gradlew bootJar",
 
         // Start Quizmaster in dev mode
-        "start:be": "pnpm build:fe:dev && cd backend && ./gradlew bootRun",
+        "start:be": ". scripts/load-env.sh && pnpm build:fe:dev && cd backend && ./gradlew bootRun",
         "start:fe": "cd frontend && pnpm dev",
         "mcp": "cd mcp && pnpm start",
         "start": "concurrently 'pnpm start:be' 'pnpm start:fe'",
@@ -57,9 +57,9 @@
         // Unit tests
         "test:mcp": "cd mcp && pnpm test",
         "test:specs:fmt": "cd specs && pnpm test:fmt",
-        "test:be:local": "cd backend && ./gradlew testLocal",
-        "test:be:ai": "cd backend && ./gradlew testAi",
-        "test:be": "cd backend && ./gradlew test",
+        "test:be:local": ". scripts/load-env.sh && cd backend && ./gradlew testLocal",
+        "test:be:ai": ". scripts/load-env.sh && cd backend && ./gradlew testAi",
+        "test:be": ". scripts/load-env.sh && cd backend && ./gradlew test",
         "coverage:be": "cd backend && ./gradlew test jacocoMergedReport",
 
         // Helper scripts, do not run directly
@@ -74,6 +74,7 @@
         "test:e2e": "./scripts/test-e2e.sh",
         "test:e2e:dev": "./scripts/test-e2e.sh --dev",
         "test:e2e:ui": "./scripts/test-e2e.sh --ui",
+        "test:e2e:quiz-share-live-stats": "./scripts/test-e2e-quiz-share-live-stats.sh",
         "coverage:e2e": "./scripts/test-e2e.sh --coverage",
 
         // BDD step catalog
@@ -82,7 +83,7 @@
 
         // CI scripts
         "build:ci:fe": "FEATURE_FLAG=true pnpm build:fe:prod",
-        "build:ci:be": "FEATURE_FLAG=true pnpm build:be",
+        "build:ci:be": ". scripts/load-env.sh && FEATURE_FLAG=true pnpm build:be",
         "build:ci": "pnpm build:ci:fe && pnpm build:ci:be",
 
         "code:ci:tsc": "pnpm code:fe:tsc && pnpm code:specs:tsc && pnpm code:mcp:tsc",

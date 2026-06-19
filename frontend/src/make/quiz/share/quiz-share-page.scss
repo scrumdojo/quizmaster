@@ -205,3 +205,59 @@
         animation-duration: 0.25s;
     }
 }
+
+.live-stats-panel {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+}
+
+.live-stats-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.72);
+}
+
+.live-stats-dialog {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1.5rem;
+    width: min(92vw, 680px);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    background: #ffffff;
+    box-shadow: var(--shadow-lg);
+}
+
+.live-stats-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+        margin: 0;
+    }
+}
+
+.live-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    caption {
+        margin-bottom: 0.75rem;
+        text-align: left;
+        font-weight: 700;
+    }
+
+    th,
+    td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-subtle);
+        text-align: left;
+    }
+}

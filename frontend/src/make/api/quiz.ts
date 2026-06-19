@@ -1,6 +1,6 @@
 import { fetchJson, postJson, putJson, callDelete } from '#fe/shared/api/helpers.ts'
 import type { IdResponse } from '#shared/types/id-response.ts'
-import type { Quiz, QuizCohort, QuizRequest } from '#shared/types/quiz.ts'
+import type { Quiz, QuizCohort, QuizLiveStatsResponse, QuizRequest } from '#shared/types/quiz.ts'
 
 export type { QuizRequest } from '#shared/types/quiz.ts'
 
@@ -60,3 +60,6 @@ export const updateCohort = async (
 
 export const deleteCohort = async (workspaceGuid: string, quizId: number | string, cohortGuid: string) =>
     await callDelete(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/cohorts/${cohortGuid}`)
+
+export const fetchQuizLiveStats = async (workspaceGuid: string, quizId: number | string) =>
+    await fetchJson<QuizLiveStatsResponse>(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/live-stats`)
