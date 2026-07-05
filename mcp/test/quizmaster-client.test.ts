@@ -151,42 +151,4 @@ describe('QuizmasterClient', () => {
         await expect(client.getWorkspace('slow')).rejects.toBeInstanceOf(QuizmasterClientError)
         await expect(client.getWorkspace('slow')).rejects.toMatchObject({ code: 'backend-timeout' })
     })
-
-    it('normalizes AI assistant responses into drafts without transport fields', async () => {
-        const fetcher: typeof fetch = async () =>
-            jsonResponse({
-                id: null,
-                workspaceGuid: null,
-                question: 'What is Scrum?',
-                answers: ['A framework', 'A database'],
-                explanations: ['Correct', 'Incorrect'],
-                questionExplanation: 'Scrum is a framework.',
-                correctAnswers: [0],
-                isEasy: false,
-                imageUrl: null,
-                tolerance: null,
-                questionType: 'single',
-                tags: [],
-            })
-        const client = new QuizmasterClient(testConfig(), fetcher)
-
-        await expect(
-            client.generateQuestionDraft({
-                workspaceGuid: 'workspace-guid',
-                question: 'Create one.',
-                questionType: 'single',
-            }),
-        ).resolves.toEqual({
-            question: 'What is Scrum?',
-            answers: ['A framework', 'A database'],
-            explanations: ['Correct', 'Incorrect'],
-            questionExplanation: 'Scrum is a framework.',
-            correctAnswers: [0],
-            isEasy: false,
-            imageUrl: undefined,
-            tolerance: undefined,
-            questionType: 'single',
-            tags: [],
-        })
-    })
 })

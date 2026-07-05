@@ -1,6 +1,6 @@
 import type { IdResponse } from '../../shared/types/id-response.ts'
 import type { QuestionListItem } from '../../shared/types/question-list-item.ts'
-import type { Question, QuestionDraft, QuestionRequest } from '../../shared/types/question.ts'
+import type { Question, QuestionRequest } from '../../shared/types/question.ts'
 import type { QuizListItem } from '../../shared/types/quiz-list-item.ts'
 import type { Quiz, QuizRequest } from '../../shared/types/quiz.ts'
 import type { QuizStatsResponse } from '../../shared/types/stats.ts'
@@ -34,12 +34,6 @@ export class QuizmasterClientError extends Error {
         super(message)
         this.name = 'QuizmasterClientError'
     }
-}
-
-export interface AiAssistantRequest {
-    readonly workspaceGuid: string
-    readonly question: string
-    readonly questionType: QuestionRequest['questionType']
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
@@ -88,19 +82,6 @@ const pathSegment = (value: string | number): string => encodeURIComponent(value
 
 const workspacePath = (workspaceGuid: string, suffix = ''): string =>
     `/api/workspaces/${pathSegment(workspaceGuid)}${suffix}`
-
-const stripDraftTransportFields = (question: Question & { readonly id?: number | null }): QuestionDraft => ({
-    question: question.question,
-    answers: question.answers,
-    explanations: question.explanations,
-    questionExplanation: question.questionExplanation,
-    correctAnswers: question.correctAnswers,
-    isEasy: question.isEasy,
-    imageUrl: question.imageUrl ?? undefined,
-    tolerance: question.tolerance ?? undefined,
-    questionType: question.questionType,
-    tags: question.tags ?? [],
-})
 
 export class QuizmasterClient {
     private readonly fetcher: typeof fetch
@@ -187,16 +168,6 @@ export class QuizmasterClient {
 
     async getQuizStats(workspaceGuid: string, quizId: number): Promise<QuizStatsResponse> {
         return await this.request('GET', workspacePath(workspaceGuid, `/quizzes/${pathSegment(quizId)}/stats`))
-    }
-
-    async generateQuestionDraft(request: AiAssistantRequest): Promise<QuestionDraft> {
-        const { workspaceGuid, ...body } = request
-        const response = await this.request<Question & { readonly id?: number | null }>(
-            'POST',
-            workspacePath(workspaceGuid, '/ai-assistant'),
-            body,
-        )
-        return stripDraftTransportFields(response)
     }
 
     private authHeaders(path: string, authRequirement: AuthRequirement): Record<string, string> {

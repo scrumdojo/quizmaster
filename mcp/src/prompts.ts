@@ -46,7 +46,7 @@ Tags: ${args.tags ?? 'none provided'}
 
 Before saving:
 - Ask for any missing topic or question type details.
-- Use quizmaster_generate_question_draft only when the user wants AI help.
+- Draft the question yourself; Quizmaster exposes no AI drafting tool.
 - Validate the draft against Quizmaster question rules.
 - Ask the user to approve the final wording.
 - Call quizmaster_create_question only after approval.`),

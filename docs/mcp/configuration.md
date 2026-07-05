@@ -11,7 +11,7 @@ pnpm install:all
 ```
 
 - Ensure `https://quizmaster.scrumdojo.cz` is reachable for production use. Local test runs can target another REST API by setting `QUIZMASTER_MCP_BASE_URL`.
-- Have a Quizmaster bearer token available for protected workspace, question, quiz, stats, and AI-assistant calls.
+- Have a Quizmaster bearer token available for protected workspace, question, quiz, and stats calls.
 
 ## Runtime Configuration
 
@@ -107,7 +107,7 @@ Call `quizmaster_health` after connecting to confirm the MCP server is using the
 
 After the MCP host connects, the Quizmaster server exposes:
 
-- tools for health checks and workspace, question, quiz, statistics, and AI draft operations,
+- tools for health checks and workspace, question, quiz, and statistics operations,
 - resources under the `quizmaster://` URI scheme,
 - prompts for creating questions, reviewing workspaces, and creating quizzes from tags.
 

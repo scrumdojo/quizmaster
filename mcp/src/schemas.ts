@@ -113,12 +113,6 @@ export const updateQuizInputSchema = z
     })
     .superRefine(addQuizIssues)
 
-export const generateQuestionDraftInputSchema = z.object({
-    ...workspaceGuidShape,
-    question: nonEmptyString('question'),
-    questionType: questionTypeSchema,
-})
-
 export type CreateQuestionInput = z.output<typeof createQuestionInputSchema>
 export type UpdateQuestionInput = z.output<typeof updateQuestionInputSchema>
 export type CreateQuizInput = z.output<typeof createQuizInputSchema>

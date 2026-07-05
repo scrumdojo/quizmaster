@@ -24,7 +24,9 @@ The MCP server owns protocol concerns: MCP initialization and capability
 declaration, tool/resource/prompt registration, JSON schema validation for
 tool inputs, mapping REST failures into MCP errors, and formatting returned
 data for assistants. The Spring Boot backend owns persistence, domain
-validation, AI assistant integration, and HTTP status semantics.
+validation, and HTTP status semantics. Quizmaster's own AI assistant
+(Robin) is deliberately not exposed through MCP — an MCP client is itself
+an AI and drafts questions directly.
 
 ## What's exposed
 
@@ -32,8 +34,7 @@ The authoritative list of tools, resources, and prompts lives in the source —
 this doc only names them. See the named files for the current set:
 
 - **Tools** — `mcp/src/tools.ts`. Names use the `quizmaster_` prefix.
-  Operations cover health, workspace/question/quiz CRUD, stats, and AI
-  drafting.
+  Operations cover health, workspace/question/quiz CRUD, and stats.
 - **Resources** — `mcp/src/resources.ts`. URIs use the `quizmaster://`
   scheme, including `quizmaster://domain-language` (served from
   [../domain-language.md](../domain-language.md)).

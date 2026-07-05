@@ -8,7 +8,6 @@ import {
     createQuizInputSchema,
     createWorkspaceInputSchema,
     emptyInputSchema,
-    generateQuestionDraftInputSchema,
     questionIdInputSchema,
     toolErrorResult,
     toolResult,
@@ -36,7 +35,6 @@ export const QUIZMASTER_TOOL_NAMES = [
     'quizmaster_update_quiz',
     'quizmaster_delete_quiz',
     'quizmaster_get_quiz_stats',
-    'quizmaster_generate_question_draft',
 ] as const
 
 type ToolInputSchema = z.ZodObject<Record<string, z.ZodType>>
@@ -276,17 +274,5 @@ export const registerQuizmasterTools = (server: McpServer, client: QuizmasterCli
             annotations: readOnlyAnnotations,
         },
         async input => await client.getQuizStats(input.workspaceGuid, input.quizId),
-    )
-
-    registerTool(
-        server,
-        'quizmaster_generate_question_draft',
-        generateQuestionDraftInputSchema,
-        {
-            title: 'Generate Question Draft',
-            description: 'Uses the existing Quizmaster AI assistant to draft a question without saving it.',
-            annotations: readOnlyAnnotations,
-        },
-        async input => await client.generateQuestionDraft(input),
     )
 }
