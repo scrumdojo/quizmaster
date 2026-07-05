@@ -100,7 +100,8 @@ Each domain has its own package under `cz.scrumdojo.quizmaster`: `question/`,
 Endpoints live under `/api/`. Two flavors:
 
 - **Authoring** is workspace-scoped: `/api/workspaces/{guid}/...` for
-  questions, quizzes, polls, and AI drafting. Shared by FE and MCP. Includes
+  questions, quizzes, polls, and AI drafting. Shared by FE and MCP (except
+  AI drafting — `POST .../ai-assistant/chat` is used by the FE only). Includes
   `GET /api/workspaces/{guid}/polls` for poll list,
   `GET /api/workspaces/{guid}/polls/{id}` for poll detail,
   `GET /api/workspaces/{guid}/polls/{id}/results` for poll results, and
@@ -160,13 +161,13 @@ BDD specs in `specs/features/`, organized into `make/` (creating) and `take/` (a
 
 ## AI Assistant
 
-Quizmaster generates question drafts via **Robin AI** (frontend FAB + sheet) calling an `AiAssistantController` that proxies to OpenRouter. Drafts are deduplicated against existing questions in the workspace via cosine similarity on cached embeddings; a match above `ai.embedding.similarity-threshold` triggers one retry with feedback, then fails with `502`.
+Quizmaster generates question drafts via **Robin AI** (frontend FAB + chat sheet), a multi-turn conversation over `POST /api/workspaces/{guid}/ai-assistant/chat`. The frontend owns the transcript and sends it whole on every call; the backend (`AiAssistantController` → `AiAssistantService.chat`) replays it to OpenRouter under one unified system prompt (`prompts/robin-chat.md`) that infers each question's type from natural language. Generated questions that duplicate existing workspace questions (exact text match, or cosine similarity on cached embeddings above `ai.embedding.similarity-threshold`) are filtered out of the drafts and reported via a `notice` field — HTTP 200, no retry; the maker's next chat message is the retry.
 
 Architecture, contracts (`RobinFormBinding`), file layout, and OpenRouter configuration: see `docs/ai-assistant.md`. Setup: see `docs/devenv/how-to-develop.md`.
 
 ## MCP Server
 
-The `mcp/` package exposes Quizmaster as a Model Context Protocol server (stdio transport) so AI clients can read and manage workspaces, questions, quizzes, stats, and AI drafts through the existing REST API.
+The `mcp/` package exposes Quizmaster as a Model Context Protocol server (stdio transport) so AI clients can read and manage workspaces, questions, quizzes, and stats through the existing REST API. It deliberately exposes no AI drafting tool — an MCP client is itself an AI and drafts questions directly.
 
 - **Boundary:** the MCP server is a thin REST shim. It never reads the database directly and never duplicates backend validation. The backend currently has no authentication layer; MCP is wired to send a bearer token but the backend does not validate it yet. See `docs/mcp/rest-auth.md` for the current state.
 - **Docs:** `docs/mcp/overview.md` (what it is), `docs/mcp/configuration.md` (how to run it), `docs/mcp/rest-auth.md` (current REST auth state).

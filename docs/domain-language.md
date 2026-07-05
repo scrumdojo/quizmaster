@@ -144,10 +144,16 @@ While taking a quiz, several affordances are available:
 
 ## AI assistance: Robin AI
 
-[Quiz makers](#roles) can ask **Robin AI** to draft a [question](#question)
-from a short prompt. Robin only drafts; the maker reviews and saves. Robin will
-refuse a draft that is too similar to an existing question in the same
-workspace, prompting the maker to refine the prompt instead.
+[Quiz makers](#roles) converse with **Robin AI** to draft
+[questions](#question). In a single chat the maker can ask for any number of
+questions of any type, mixed — Robin infers each question's type from the
+request; there is no type selector. Asking for a change appends a **new draft
+version** while every earlier version stays visible and usable. Robin only
+drafts; the maker reviews and then uses a draft to fill the question form, or
+saves drafts (one or all) straight into the workspace. A draft that is too
+similar to an existing question in the same workspace is not shown — Robin
+says so in the chat, and the maker refines the request in the next message.
+The conversation is ephemeral: closing the assistant discards it.
 
 ---
 
