@@ -59,3 +59,15 @@ Feature: Generate numerical question using AI
       | prompt            | answer | answer-magnitude |
       | "What is 5 / 2?"  | "2.5"  | "2.5"            |
       | "What is -5 / 2?" | "-2.5" | "2.5"            |
+
+
+  @skip @ai
+  Scenario: Robin drafts a numerical question with answer and tolerance
+    Given I start creating a new question
+    When I open Robin AI
+    And I ask Robin:
+      | Ask one numerical question: what is 5 divided by 2? |
+      | Allow a small tolerance in the answer.              |
+    Then generated question 1 in Robin chat has numerical answer "2.5"
+    And generated question 1 in Robin chat has tolerance greater than "0"
+    And generated question 1 in Robin chat has tolerance less than "2.5"

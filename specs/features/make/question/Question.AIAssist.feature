@@ -182,3 +182,91 @@ Feature: Generate question using AI
     * I ask stubbed AI to "add one more incorrect answer"
     Then AI received current question context with question "What is the capital of Slovakia?"
     * AI received current question context with answer "Bratislava"
+
+
+  @skip @ai
+  Scenario: Robin drafts a single-choice question from a topic
+    Given I start creating a new question
+    When I open Robin AI
+    And I ask Robin:
+      | Ask one single-choice question about capital cities   |
+      | with exactly 1 correct answer and 2 incorrect answers |
+    Then I see 1 draft version in Robin chat
+    And generated question 1 in Robin chat has at least 3 answers
+    And generated question 1 in Robin chat has 1 highlighted correct answers
+
+
+  @skip @ai
+  Scenario: Robin drafts a multiple-choice question
+    Given I start creating a new question
+    When I open Robin AI
+    And I ask Robin:
+      | Ask one multiple-choice question about European capitals |
+      | with at least 2 correct answers and 2 incorrect answers  |
+    Then I see generated question 1 in Robin chat
+    And generated question 1 in Robin chat has at least 4 answers
+    And generated question 1 in Robin chat has at least 2 highlighted correct answers
+
+
+  @skip @ai
+  Scenario: Refining appends a new draft version and keeps prior versions usable
+    Given I start creating a new question
+    When I open Robin AI
+    And I ask Robin:
+      | Ask one single-choice question about capital cities |
+      | with exactly 3 answers                              |
+    Then I see 1 draft version in Robin chat
+    When I ask Robin:
+      | Add one more incorrect answer to the question |
+    Then I see 2 draft versions in Robin chat
+    And question 1 in draft version 2 has one more answer than in draft version 1
+    And question 1 in draft version 1 can be used
+    And question 1 in draft version 2 can be used
+
+
+  @skip @ai
+  Scenario: Using a chosen version fills the form and closes the assistant
+    Given I start creating a new question
+    When I open Robin AI
+    And I ask Robin:
+      | Ask one single-choice question about capital cities |
+    And I use question 1 from draft version 1
+    Then Question field is not empty
+    And exactly 1 answer is marked correct
+    And I do not see AI section
+
+
+  @skip @ai
+  Scenario: Editing preloads the existing question as the first draft and refines it in chat
+    Given question "What is the capital of Czech Republic?"
+    * with answers:
+      | Brno   |   | No Brno |
+      | Prague | * | Yes     |
+      | Berlin |   | Germany |
+    * saved and bookmarked as "Czechia"
+    When I start editing question "Czechia"
+    And I open Robin AI
+    Then I see 1 draft version in Robin chat
+    And generated question 1 in Robin chat is "What is the capital of Czech Republic?"
+    When I ask Robin:
+      | Add one more incorrect answer to the question |
+    Then I see 2 draft versions in Robin chat
+    And question 1 in draft version 2 has one more answer than in draft version 1
+
+
+  @skip @ai
+  Scenario: Editing preserves untouched fields when refining
+    Given question "What is the capital of Czech Republic?"
+    * with answers:
+      | Brno   |   | No Brno |
+      | Prague | * | Yes     |
+      | Berlin |   | Germany |
+    * saved and bookmarked as "Czechia"
+    When I start editing question "Czechia"
+    And I open Robin AI
+    And I ask Robin:
+      | Reword the question text to be harder to guess |
+      | and change nothing else                        |
+    Then I see 2 draft versions in Robin chat
+    And question 1 in draft version 2 has 3 answers
+    And question 1 in draft version 2 has 1 highlighted correct answer

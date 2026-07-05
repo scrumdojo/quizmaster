@@ -101,9 +101,13 @@ export async function attemptSubmitQuestion(this: QuizmasterWorld) {
 
 // ── createQuestion pipeline ─────────────────────────────
 
-export const createQuestion = async (world: QuizmasterWorld, spec: QuestionSpec) => {
+export const createQuestion = async (
+    world: QuizmasterWorld,
+    spec: QuestionSpec,
+    options?: { skipEmbedding?: boolean },
+) => {
     await ensureWorkspaceGuid(world)
-    const id = await createQuestionViaRest(world, world.workspaceGuid, spec)
+    const id = await createQuestionViaRest(world, world.workspaceGuid, spec, options)
     const key = spec.bookmark ?? spec.text
     world.bookmarkQuestion(key, spec)
     world.questionIds[key] = id

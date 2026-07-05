@@ -29,6 +29,24 @@ export class RobinSheetPage {
         this.generatedQuestionLocator(index).getByTestId('robin-generated-tolerance')
     private generatedQuestionExplanationLocator = (index: number) =>
         this.generatedQuestionLocator(index).getByTestId('robin-generated-question-explanation')
+    private generatedQuestionAnswerExplanationsLocator = (index: number) =>
+        this.generatedQuestionLocator(index).getByTestId('robin-generated-answer-explanation')
+    private draftVersionsLocator = () => this.page.getByTestId('robin-draft-version')
+    private draftVersionLocator = (version: number) => this.draftVersionsLocator().nth(version - 1)
+    private versionQuestionLocator = (version: number, index: number) =>
+        this.draftVersionLocator(version)
+            .getByTestId('robin-generated-question')
+            .nth(index - 1)
+    private versionQuestionAnswersLocator = (version: number, index: number) =>
+        this.versionQuestionLocator(version, index).getByTestId('robin-generated-answer')
+    private versionQuestionCorrectBadgesLocator = (version: number, index: number) =>
+        this.versionQuestionLocator(version, index).getByTestId('robin-generated-answer-correct')
+    private versionQuestionUseButtonLocator = (version: number, index: number) =>
+        this.versionQuestionLocator(version, index).locator('#robin-use-button')
+    private saveQuestionButtonLocator = (index: number) =>
+        this.generatedQuestionLocator(index).locator('#robin-save-question-button')
+    private saveAllButtonLocator = () => this.page.locator('#robin-save-all-button')
+    private noticeLocator = () => this.page.getByTestId('robin-chat-notice')
 
     open = async () => {
         await expect(this.fabLocator()).toBeVisible({ timeout: 3_000 })
@@ -46,6 +64,10 @@ export class RobinSheetPage {
 
     saveGeneratedQuestions = () => this.saveButtonLocator().click()
     useGeneratedQuestion = () => this.page.locator('#robin-use-button').first().click()
+    useQuestionFromVersion = (version: number, index: number) =>
+        this.versionQuestionUseButtonLocator(version, index).click()
+    saveGeneratedQuestion = (index: number) => this.saveQuestionButtonLocator(index).click()
+    saveAllGeneratedQuestions = () => this.saveAllButtonLocator().click()
 
     expectPromptVisible = () => expect(this.promptLocator().first()).toBeVisible()
     expectPromptNotVisible = () => expect(this.promptLocator().first()).not.toBeVisible()
@@ -107,4 +129,34 @@ export class RobinSheetPage {
     }
     expectGeneratedQuestionExplanationVisible = (index: number) =>
         expect(this.generatedQuestionExplanationLocator(index)).toBeVisible()
+    expectEveryAnswerExplained = async (index: number) => {
+        const answerCount = await this.generatedQuestionAnswersLocator(index).count()
+        expect(answerCount).toBeGreaterThan(0)
+        await expect(this.generatedQuestionAnswerExplanationsLocator(index)).toHaveCount(answerCount)
+    }
+
+    expectDraftVersionCount = (count: number) => expect(this.draftVersionsLocator()).toHaveCount(count)
+    versionQuestionAnswerCount = (version: number, index: number) =>
+        this.versionQuestionAnswersLocator(version, index).count()
+    expectVersionQuestionAnswerCount = (version: number, index: number, count: number) =>
+        expect(this.versionQuestionAnswersLocator(version, index)).toHaveCount(count)
+    expectVersionQuestionCorrectAnswerCount = (version: number, index: number, count: number) =>
+        expect(this.versionQuestionCorrectBadgesLocator(version, index)).toHaveCount(count)
+    expectVersionQuestionUsable = (version: number, index: number) =>
+        expect(this.versionQuestionUseButtonLocator(version, index)).toBeVisible()
+
+    generatedQuestionCorrectBadgeCounts = async (): Promise<number[]> => {
+        const cards = await this.generatedQuestionsLocator().all()
+        return Promise.all(cards.map(card => card.getByTestId('robin-generated-answer-correct').count()))
+    }
+    numericalGeneratedQuestionCount = () =>
+        this.generatedQuestionsLocator()
+            .filter({ has: this.page.getByTestId('robin-generated-numerical-answer') })
+            .count()
+
+    expectNoticeVisible = () => expect(this.noticeLocator().first()).toBeVisible()
+    expectComposerUsable = async () => {
+        await expect(this.promptLocator()).toBeVisible()
+        await expect(this.promptLocator()).toBeEnabled()
+    }
 }

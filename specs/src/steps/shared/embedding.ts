@@ -13,3 +13,7 @@ const isAiScenario = (testInfo: TestInfo): boolean => testInfo.tags.includes(AI_
 // Headers for a REST question write: skip embedding unless the scenario actually exercises Robin.
 export const skipEmbeddingHeaders = (testInfo: TestInfo): Record<string, string> | undefined =>
     isAiScenario(testInfo) ? undefined : { [SKIP_EMBEDDING_HEADER]: 'true' }
+
+// Headers that skip the embedding even in an @ai scenario. Used to seed a question that is
+// invisible to embedding dedup, so only the deterministic exact-text match can catch it.
+export const forceSkipEmbeddingHeaders = (): Record<string, string> => ({ [SKIP_EMBEDDING_HEADER]: 'true' })
