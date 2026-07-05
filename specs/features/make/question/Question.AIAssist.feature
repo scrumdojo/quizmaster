@@ -49,22 +49,6 @@ Feature: Generate question using AI
     Then I see question in list "What is the capital of France?"
 
 
-  @ai
-  Scenario: Regenerate replaces the previous AI draft
-    Given I start creating a new question
-    When I open Robin AI
-    And I ask AI:
-      | Generate a question about capital cities |
-      | and 2 incorrect answers                  |
-    Then generated question 1 in Robin chat has 1 highlighted correct answers
-    When I ask AI for multiple choice question:
-      | Generate a question about European capitals |
-      | with 2 correct answers                      |
-      | and 2 incorrect answers                     |
-    Then I see 1 generated questions in Robin chat
-    And generated question 1 in Robin chat has at least 2 highlighted correct answers
-
-
   Scenario: AI section is available when editing
     Given question "What is the capital of Czech Republic?"
     * with answers:
@@ -156,7 +140,7 @@ Feature: Generate question using AI
     And generated question 1 in Robin chat has at least 2 highlighted correct answers
 
 
-  @skip @ai
+  @ai
   Scenario: Refining appends a new draft version and keeps prior versions usable
     Given I start creating a new question
     When I open Robin AI

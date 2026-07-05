@@ -26,13 +26,23 @@ export const RobinSheet = ({
     onQuestionTypeChange,
     onClose,
 }: RobinSheetProps) => {
-    const { promptText, setPromptText, loading, saving, error, generate, save, generatedDrafts, chatMessages } =
-        useRobinPromptForm({
-            generateRequest,
-            saveDrafts,
-            workspaceId,
-            questionType,
-        })
+    const {
+        promptText,
+        setPromptText,
+        loading,
+        saving,
+        error,
+        generate,
+        save,
+        generatedDrafts,
+        draftVersions,
+        chatMessages,
+    } = useRobinPromptForm({
+        generateRequest,
+        saveDrafts,
+        workspaceId,
+        questionType,
+    })
 
     const submitPrompt = () => {
         if (loading || promptText.trim().length === 0) return
@@ -72,9 +82,13 @@ export const RobinSheet = ({
                         ))}
                     </div>
                 )}
-                {generatedDrafts.length > 0 && (
-                    <div className="generated-questions robin-draft-version" data-testid="robin-draft-version">
-                        {generatedDrafts.map((draft, index) => {
+                {draftVersions.map((versionDrafts, versionIndex) => (
+                    <div
+                        className="generated-questions robin-draft-version"
+                        data-testid="robin-draft-version"
+                        key={versionIndex}
+                    >
+                        {versionDrafts.map((draft, index) => {
                             const questionNumber = index + 1
                             const numericalAnswer = draft.questionType === 'numerical' ? draft.answers[0] : undefined
                             return (
@@ -157,7 +171,7 @@ export const RobinSheet = ({
                             )
                         })}
                     </div>
-                )}
+                ))}
                 {saveDrafts && generatedDrafts.length > 0 && (
                     <Button
                         id="robin-save-button"
