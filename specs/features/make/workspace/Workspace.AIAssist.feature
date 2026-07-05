@@ -34,7 +34,7 @@ Feature: Generate question preview from workspace using AI
     Then workspace question count increased by 2
 
 
-  @skip @ai
+  @ai
   Scenario: One turn produces mixed question types
     Given workspace "Workspace"
     When I open Robin AI
