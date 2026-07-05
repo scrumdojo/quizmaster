@@ -5,8 +5,6 @@ import { defineBddConfig } from 'playwright-bdd'
 config({ path: '../.env' })
 
 const port = process.env.E2E_BASE_PORT || process.env.BE_PORT || '8080'
-const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-const videoMode = process.env.PLAYWRIGHT_VIDEO || 'retain-on-failure'
 
 export default defineConfig({
     fullyParallel: true,
@@ -19,7 +17,7 @@ export default defineConfig({
     use: {
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
-        video: videoMode as 'off' | 'on' | 'retain-on-failure' | 'on-first-retry',
+        video: 'retain-on-failure',
     },
     reporter: [
         ['html', { open: 'never', outputFolder: 'playwright-report' }],
@@ -32,10 +30,7 @@ export default defineConfig({
                 browserName: 'chromium',
                 baseURL: `http://localhost:${port}`,
                 permissions: ['clipboard-read', 'clipboard-write'],
-                ...(chromiumExecutablePath
-                    ? { launchOptions: { executablePath: chromiumExecutablePath } }
-                    : {}),
-            },
+            }
         },
     ],
     testDir: defineBddConfig({

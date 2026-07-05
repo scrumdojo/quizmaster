@@ -16,8 +16,6 @@
         "install:psql": "./scripts/install-psql.sh",
 
         "install:all": "pnpm env:init && pnpm install && pnpm install:fe && pnpm install:specs && pnpm install:mcp && pnpm install:psql",
-        "dev:setup": "./scripts/dev-setup.sh",
-        "dev:reset-db": "./scripts/dev-reset-db.sh",
 
         // Build scripts
         "build:fe:dev": "cd frontend && pnpm build:dev",
@@ -30,8 +28,6 @@
         "start:fe": "cd frontend && pnpm dev",
         "mcp": "cd mcp && pnpm start",
         "start": "concurrently 'pnpm start:be' 'pnpm start:fe'",
-        "dev:run": "./scripts/dev-run.sh",
-        "dev:gate": "./scripts/dev-gate.sh",
 
         // Code quality
         "code:fe:tsc": "cd frontend && pnpm tsc -b && rm -f *.tsbuildinfo",
