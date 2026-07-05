@@ -1,31 +1,25 @@
 import type { KeyboardEvent } from 'react'
 
-import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#fe/shared'
-import type { QuestionType } from '#fe/shared/model/question.ts'
+import { Alert, Button, TextArea } from '#fe/shared'
 import type { QuestionDraft } from '#fe/shared/model/question.ts'
 
 import { useRobinPromptForm } from './use-robin-prompt-form.ts'
-import type { RobinGenerateRequest, RobinGenerationResult } from './use-robin-prompt-form.ts'
 
 interface RobinSheetProps {
-    readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
+    readonly saveDraft?: (draft: QuestionDraft) => Promise<string>
     readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
     readonly onUseDraft?: (draft: QuestionDraft) => void
     readonly workspaceId: string
-    readonly questionType: QuestionType
-    readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
     readonly excludedQuestionId?: number
     readonly initialDraft?: QuestionDraft
 }
 
 export const RobinSheet = ({
-    generateRequest,
+    saveDraft,
     saveDrafts,
     onUseDraft,
     workspaceId,
-    questionType,
-    onQuestionTypeChange,
     onClose,
     excludedQuestionId,
     initialDraft,
@@ -38,14 +32,14 @@ export const RobinSheet = ({
         error,
         generate,
         save,
+        saveOne,
         generatedDrafts,
         draftVersions,
         chatMessages,
     } = useRobinPromptForm({
-        generateRequest,
+        saveDraft,
         saveDrafts,
         workspaceId,
-        questionType,
         excludedQuestionId,
         initialDraft,
     })
@@ -173,6 +167,17 @@ export const RobinSheet = ({
                                             Use this question
                                         </Button>
                                     )}
+
+                                    {saveDraft && (
+                                        <Button
+                                            id="robin-save-question-button"
+                                            className="secondary button"
+                                            onClick={() => void saveOne(draft)}
+                                            disabled={saving || loading}
+                                        >
+                                            Save
+                                        </Button>
+                                    )}
                                 </article>
                             )
                         })}
@@ -180,27 +185,16 @@ export const RobinSheet = ({
                 ))}
                 {saveDrafts && generatedDrafts.length > 0 && (
                     <Button
-                        id="robin-save-button"
+                        id="robin-save-all-button"
                         className="secondary button"
                         onClick={() => void save()}
                         disabled={saving || loading}
                     >
-                        {saving ? 'Saving...' : 'Save'}
+                        {saving ? 'Saving...' : 'Save all'}
                     </Button>
                 )}
             </div>
             <div className="robin-sheet__composer" data-testid="robin-composer">
-                <Field
-                    label="Question type"
-                    required
-                    note="Single choice requires one correct answer. Multiple choice requires at least two correct answers. Numerical questions require a numeric answer."
-                >
-                    <QuestionTypeRadioSet
-                        name="robin-question-type"
-                        value={questionType}
-                        onChange={onQuestionTypeChange}
-                    />
-                </Field>
                 <TextArea
                     id="robin-prompt-text"
                     placeholder="What do you want to ask?"

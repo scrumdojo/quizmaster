@@ -6,8 +6,8 @@ Feature: Generate question using AI
   Scenario: AI-generated question shows explanations
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI:
-      | Generate a question about nuclear physics |
+    And I ask Robin:
+      | Ask one question about nuclear physics |
     And I use the generated question
     Then Question field is not empty
     And I see explanations are enabled
@@ -26,10 +26,10 @@ Feature: Generate question using AI
   Scenario: Save an AI-generated question
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI:
-      | Generate a question about capital cities |
-      | with 1 correct answer                    |
-      | and 2 incorrect answers                  |
+    And I ask Robin:
+      | Ask one question about capital cities |
+      | with 1 correct answer                 |
+      | and 2 incorrect answers               |
     And I use the generated question
     And I submit the question
     Then the question is saved in the workspace
@@ -39,10 +39,10 @@ Feature: Generate question using AI
   Scenario: Edit an AI-generated question before saving
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI:
-      | Generate a question about capital cities |
-      | with 1 correct answer                    |
-      | and 2 incorrect answers                  |
+    And I ask Robin:
+      | Ask one question about capital cities |
+      | with 1 correct answer                 |
+      | and 2 incorrect answers               |
     And I use the generated question
     And I enter question "What is the capital of France?"
     And I submit the question

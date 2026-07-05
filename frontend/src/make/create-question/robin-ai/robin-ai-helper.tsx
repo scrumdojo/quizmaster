@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { QuestionRequest } from '#fe/make/api/question.ts'
-import type { QuestionDraft, QuestionType } from '#fe/shared/model/question.ts'
+import type { QuestionDraft } from '#fe/shared/model/question.ts'
 import './robin-ai.scss'
 import { questionRequestToDraft, questionToPatch } from './question-draft-mappers.ts'
 import { RobinFab } from './robin-fab.tsx'
@@ -18,7 +18,6 @@ interface RobinAiHelperProps {
 
 export const RobinAiHelper = ({ form, workspaceId, currentQuestion, currentQuestionId }: RobinAiHelperProps) => {
     const [sheetOpen, setSheetOpen] = useState(false)
-    const [questionType, setQuestionType] = useState<QuestionType>(() => form.snapshot().questionType ?? 'single')
     const handleUseDraft = (draft: QuestionDraft) => {
         form.applyPatch(questionToPatch(draft))
         setSheetOpen(false)
@@ -33,8 +32,6 @@ export const RobinAiHelper = ({ form, workspaceId, currentQuestion, currentQuest
                     initialDraft={currentQuestion ? questionRequestToDraft(currentQuestion()) : undefined}
                     excludedQuestionId={currentQuestionId}
                     workspaceId={workspaceId}
-                    questionType={questionType}
-                    onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
                 />
             )}

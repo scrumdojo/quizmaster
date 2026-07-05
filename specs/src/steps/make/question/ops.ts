@@ -21,14 +21,6 @@ export const enterAIPrompt = async (world: QuizmasterWorld, prompt: string) => {
     await world.robinSheetPage.enterPrompt(prompt)
 }
 
-export type AIQuestionTypeChoice = 'single choice' | 'multiple choice' | 'numerical'
-
-export const selectAIQuestionType = async (world: QuizmasterWorld, choice: AIQuestionTypeChoice) => {
-    if (choice === 'single choice') await world.robinSheetPage.askForSingleChoice()
-    else if (choice === 'multiple choice') await world.robinSheetPage.askForMultipleChoice()
-    else await world.robinSheetPage.askForNumericalChoice()
-}
-
 export const enterAnswerText = async (world: QuizmasterWorld, index: number, answer: string) => {
     await world.questionEditPage.enterAnswerText(index, answer)
     world.updateAnswerWip(index, { text: answer })

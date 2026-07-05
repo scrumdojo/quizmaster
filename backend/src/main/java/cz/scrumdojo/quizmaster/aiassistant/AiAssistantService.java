@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.scrumdojo.quizmaster.aiassistant.RobinChatRequest.RobinChatMessage;
-import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.question.QuestionType;
 import java.io.IOException;
 import java.net.URI;
@@ -40,12 +39,6 @@ public class AiAssistantService {
     private final String model;
     private final int maxTokens;
     private final double similarityThreshold;
-    private final String singleChoicePrompt;
-    private final String multipleChoicePrompt;
-    private final String numericalPrompt;
-    private final String singleChoiceBatchPrompt;
-    private final String multipleChoiceBatchPrompt;
-    private final String numericalBatchPrompt;
     private final String robinChatPrompt;
 
     public AiAssistantService(
@@ -63,57 +56,11 @@ public class AiAssistantService {
         this.maxTokens = maxTokens;
         this.similarityThreshold = similarityThreshold;
         this.httpClient = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
-        this.singleChoicePrompt = loadPrompt("prompts/single-choice.md");
-        this.multipleChoicePrompt = loadPrompt("prompts/multiple-choice.md");
-        this.numericalPrompt = loadPrompt("prompts/numerical.md");
-        this.singleChoiceBatchPrompt = loadPrompt("prompts/single-choice-batch.md");
-        this.multipleChoiceBatchPrompt = loadPrompt("prompts/multiple-choice-batch.md");
-        this.numericalBatchPrompt = loadPrompt("prompts/numerical-batch.md");
         this.robinChatPrompt = loadPrompt("prompts/robin-chat.md");
     }
 
     private static String loadPrompt(String path) throws IOException {
         return new ClassPathResource(path).getContentAsString(StandardCharsets.UTF_8);
-    }
-
-    public QuestionResponse generateQuestion(String prompt, String questionType) {
-        return generateQuestion(prompt, questionType, null);
-    }
-
-    public QuestionResponse generateQuestion(String prompt, String questionType, String workspaceGuid) {
-        return generateQuestion(prompt, questionType, workspaceGuid, null);
-    }
-
-    public QuestionResponse generateQuestion(
-        String prompt,
-        String questionType,
-        String workspaceGuid,
-        Integer excludedQuestionId
-    ) {
-        validatePromptAndToken(prompt);
-        QuestionType resolvedType = resolveType(questionType);
-        List<String> allQuestionTexts = questionEmbeddingService.workspaceQuestionTexts(
-            workspaceGuid,
-            excludedQuestionId
-        );
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
-            questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, excludedQuestionId);
-
-        AssistantResponse assistantResponse = generateCandidate(prompt, resolvedType, existingEmbeddings, null);
-        validateForType(assistantResponse, resolvedType);
-        DuplicateMatch duplicate = findDuplicate(assistantResponse.question(), allQuestionTexts, existingEmbeddings);
-        if (duplicate == null) {
-            return toDraftResponse(assistantResponse, normalizeExplanations(assistantResponse), resolvedType);
-        }
-
-        AssistantResponse retryResponse = generateCandidate(prompt, resolvedType, existingEmbeddings, duplicate);
-        validateForType(retryResponse, resolvedType);
-        DuplicateMatch retryDuplicate = findDuplicate(retryResponse.question(), allQuestionTexts, existingEmbeddings);
-        if (retryDuplicate == null) {
-            return toDraftResponse(retryResponse, normalizeExplanations(retryResponse), resolvedType);
-        }
-
-        throw duplicateGenerationFailure();
     }
 
     public RobinChatResponse chat(List<RobinChatMessage> messages, String workspaceGuid, Integer excludedQuestionId) {
@@ -146,50 +93,6 @@ public class AiAssistantService {
         throw duplicateGenerationFailure();
     }
 
-    public QuestionResponse[] generateQuestions(String prompt, String questionType) {
-        return generateQuestions(prompt, questionType, null);
-    }
-
-    public QuestionResponse[] generateQuestions(String prompt, String questionType, String workspaceGuid) {
-        validatePromptAndToken(prompt);
-        QuestionType resolvedType = resolveType(questionType);
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
-            questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, null);
-
-        AssistantBatchResponse assistantResponse = generateBatchCandidate(
-            prompt,
-            resolvedType,
-            existingEmbeddings,
-            null
-        );
-        validateBatchResponses(assistantResponse.questions(), resolvedType);
-        DuplicateMatch duplicate = findBatchDuplicate(assistantResponse.questions(), existingEmbeddings);
-        if (duplicate == null) {
-            return toDraftResponses(assistantResponse.questions(), resolvedType);
-        }
-
-        AssistantBatchResponse retryResponse = generateBatchCandidate(
-            prompt,
-            resolvedType,
-            existingEmbeddings,
-            duplicate
-        );
-        validateBatchResponses(retryResponse.questions(), resolvedType);
-        DuplicateMatch retryDuplicate = findBatchDuplicate(retryResponse.questions(), existingEmbeddings);
-        if (retryDuplicate == null) {
-            return toDraftResponses(retryResponse.questions(), resolvedType);
-        }
-
-        throw duplicateGenerationFailure();
-    }
-
-    private void validatePromptAndToken(String prompt) {
-        if (prompt == null || prompt.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question must not be empty.");
-        }
-        validateToken();
-    }
-
     private void validateToken() {
         if (apiToken == null || apiToken.isBlank()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI token is not configured.");
@@ -208,13 +111,6 @@ public class AiAssistantService {
             );
         }
         validateToken();
-    }
-
-    private <T> T requestAssistant(String prompt, String systemPrompt, Class<T> responseType) {
-        return requestAssistant(
-            new Message[] { new Message("system", systemPrompt), new Message("user", prompt) },
-            responseType
-        );
     }
 
     private <T> T requestAssistant(Message[] messages, Class<T> responseType) {
@@ -249,28 +145,6 @@ public class AiAssistantService {
         }
     }
 
-    private AssistantResponse generateCandidate(
-        String prompt,
-        QuestionType resolvedType,
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
-        DuplicateMatch retryFeedback
-    ) {
-        String systemPrompt =
-            chooseSystemPrompt(resolvedType) + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
-        return requestAssistant(prompt, systemPrompt, AssistantResponse.class);
-    }
-
-    private AssistantBatchResponse generateBatchCandidate(
-        String prompt,
-        QuestionType resolvedType,
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
-        DuplicateMatch retryFeedback
-    ) {
-        String systemPrompt =
-            chooseBatchSystemPrompt(resolvedType) + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
-        return requestAssistant(prompt, systemPrompt, AssistantBatchResponse.class);
-    }
-
     private AssistantBatchResponse generateChatCandidate(
         List<RobinChatMessage> messages,
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
@@ -294,31 +168,6 @@ public class AiAssistantService {
             return objectMapper.writeValueAsString(new CanonicalDrafts(message.drafts()));
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid drafts in transcript.");
-        }
-    }
-
-    private DuplicateMatch findDuplicate(
-        String generatedQuestion,
-        List<String> allQuestionTexts,
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
-    ) {
-        // Exact-text check — works even when embeddings haven't been stored yet
-        String normalizedGenerated = normalizeForExactMatch(generatedQuestion);
-        for (String existingText : allQuestionTexts) {
-            if (normalizeForExactMatch(existingText).equals(normalizedGenerated)) {
-                return new DuplicateMatch(generatedQuestion, existingText, 1.0);
-            }
-        }
-
-        if (existingEmbeddings.isEmpty()) {
-            return null;
-        }
-
-        try {
-            double[] generatedEmbedding = questionEmbeddingService.embedQuestionText(generatedQuestion);
-            return highestDuplicate(generatedQuestion, generatedEmbedding, existingEmbeddings);
-        } catch (RuntimeException e) {
-            return null;
         }
     }
 
@@ -438,12 +287,6 @@ public class AiAssistantService {
         return rule.toString();
     }
 
-    private static QuestionResponse[] toDraftResponses(AssistantResponse[] responses, QuestionType resolvedType) {
-        return Arrays.stream(responses)
-            .map(response -> toDraftResponse(response, normalizeExplanations(response), resolvedType))
-            .toArray(QuestionResponse[]::new);
-    }
-
     private static String normalizeForExactMatch(String text) {
         return text.trim().toLowerCase().replaceAll("[^\\p{L}\\p{N}]+", " ").replaceAll("\\s+", " ").trim();
     }
@@ -461,50 +304,11 @@ public class AiAssistantService {
         }
     }
 
-    private static QuestionType resolveType(String questionType) {
-        if (questionType == null || questionType.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "questionType is required.");
-        }
-        try {
-            return QuestionType.fromWire(questionType);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown questionType: " + questionType);
-        }
-    }
-
-    private String chooseSystemPrompt(QuestionType resolvedType) {
-        return switch (resolvedType) {
-            case SINGLE -> singleChoicePrompt;
-            case MULTIPLE -> multipleChoicePrompt;
-            case NUMERICAL -> numericalPrompt;
-        };
-    }
-
-    private String chooseBatchSystemPrompt(QuestionType resolvedType) {
-        return switch (resolvedType) {
-            case SINGLE -> singleChoiceBatchPrompt;
-            case MULTIPLE -> multipleChoiceBatchPrompt;
-            case NUMERICAL -> numericalBatchPrompt;
-        };
-    }
-
     private static void validateForType(AssistantResponse response, QuestionType resolvedType) {
         switch (resolvedType) {
             case SINGLE -> validateSingleChoiceResponse(response);
             case MULTIPLE -> validateMultipleChoiceResponse(response);
             case NUMERICAL -> validateNumericalResponse(response);
-        }
-    }
-
-    static void validateBatchResponses(AssistantResponse[] responses, QuestionType resolvedType) {
-        if (responses == null || responses.length < 1) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_GATEWAY,
-                "AI assistant returned invalid batch response: need at least 1 question."
-            );
-        }
-        for (AssistantResponse response : responses) {
-            validateForType(response, resolvedType);
         }
     }
 
@@ -680,22 +484,6 @@ public class AiAssistantService {
         return Arrays.stream(response.explanations())
             .map(e -> e == null ? "" : e)
             .toArray(String[]::new);
-    }
-
-    private static QuestionResponse toDraftResponse(
-        AssistantResponse assistantResponse,
-        String[] explanations,
-        QuestionType resolvedType
-    ) {
-        return QuestionResponse.draft(
-            assistantResponse.question(),
-            assistantResponse.answers(),
-            assistantResponse.correctAnswers(),
-            explanations,
-            assistantResponse.questionExplanation(),
-            assistantResponse.tolerance() != null ? assistantResponse.tolerance() : 0.0,
-            resolvedType
-        );
     }
 
     private record ChatRequest(

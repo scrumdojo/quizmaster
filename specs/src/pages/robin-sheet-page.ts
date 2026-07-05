@@ -4,13 +4,7 @@ export class RobinSheetPage {
     constructor(private page: Page) {}
 
     private fabLocator = () => this.page.locator('.robin-fab .trigger')
-    private sheetLocator = () => this.page.getByTestId('robin-sheet')
-    private composerLocator = () => this.page.getByTestId('robin-composer')
     private promptLocator = () => this.page.locator('#robin-prompt-text')
-    private chatMessageLocator = () => this.page.getByTestId('robin-chat-message')
-    private generateButtonLocator = () => this.page.locator('#robin-generate-button')
-    private saveButtonLocator = () => this.page.locator('#robin-save-button')
-    private questionTypeRadio = (value: string) => this.page.locator(`#robin-question-type-${value}`)
     private generatedQuestionsLocator = () => this.page.getByTestId('robin-generated-question')
     private generatedQuestionLocator = (index: number) => this.generatedQuestionsLocator().nth(index - 1)
     private generatedQuestionNumberLocator = (index: number) =>
@@ -58,11 +52,6 @@ export class RobinSheetPage {
     sendPromptByEnter = () => this.promptLocator().press('Enter')
     generate = () => this.sendPromptByEnter()
 
-    askForSingleChoice = () => this.questionTypeRadio('single').check()
-    askForMultipleChoice = () => this.questionTypeRadio('multiple').check()
-    askForNumericalChoice = () => this.questionTypeRadio('numerical').check()
-
-    saveGeneratedQuestions = () => this.saveButtonLocator().click()
     useGeneratedQuestion = () => this.page.locator('#robin-use-button').first().click()
     useQuestionFromVersion = (version: number, index: number) =>
         this.versionQuestionUseButtonLocator(version, index).click()
@@ -71,19 +60,6 @@ export class RobinSheetPage {
 
     expectPromptVisible = () => expect(this.promptLocator().first()).toBeVisible()
     expectPromptNotVisible = () => expect(this.promptLocator().first()).not.toBeVisible()
-    expectPromptValue = (value: string) => expect(this.promptLocator()).toHaveValue(value)
-    expectGenerateButtonNotVisible = () => expect(this.generateButtonLocator()).not.toBeVisible()
-    expectChatMessageVisible = (message: string) =>
-        expect(this.chatMessageLocator().filter({ hasText: message })).toBeVisible()
-    expectComposerDockedToBottom = async () => {
-        await expect(this.sheetLocator()).toHaveClass(/robin-sheet--chat/)
-        await expect(this.composerLocator()).toBeVisible()
-        await expect(this.sheetLocator().locator('> .header')).toBeVisible()
-        await expect(this.sheetLocator().locator('> .robin-sheet__content')).toBeVisible()
-        await expect(this.sheetLocator().locator('> [data-testid="robin-composer"]:last-child')).toBeVisible()
-        await expect(this.sheetLocator().locator('> *')).toHaveCount(3)
-    }
-    expectNoGeneratedQuestions = () => expect(this.generatedQuestionsLocator()).toHaveCount(0)
 
     expectGeneratedQuestionCount = (count: number) => expect(this.generatedQuestionsLocator()).toHaveCount(count)
     expectGeneratedQuestionVisible = (index: number) => expect(this.generatedQuestionLocator(index)).toBeVisible()

@@ -127,11 +127,6 @@ export class QuizmasterWorld {
     clockInstalled = false
     scenarioClockNow?: Date
     lastAnsweredTitle?: string
-    lastAiAssistantRequest?: {
-        question: string
-        questionType: string
-        excludedQuestionId?: number
-    }
     rememberedWorkspaceQuestionCount?: number
     rememberedCohortLink = ''
     lastClickedInQuizQuestion = ''

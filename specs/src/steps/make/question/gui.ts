@@ -1,8 +1,6 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import type { QuestionDraft } from '#shared/types/question.ts'
-import { toText } from '#steps/common.ts'
 import { Given, Then, When } from '#steps/fixture.ts'
 import {
     enterAnswers,
@@ -15,12 +13,10 @@ import {
     enterQuestion,
     enterQuestionExplanation,
     markAnswerCorrectness,
-    selectAIQuestionType,
     submitQuestion,
     attemptSubmitQuestion,
     enterTag,
     createQuestion,
-    type AIQuestionTypeChoice,
 } from '#steps/make/question/ops.ts'
 import { ensureWorkspace } from '#steps/make/workspace/ops.ts'
 import {
@@ -30,39 +26,9 @@ import {
     expectErrorCount,
     expectErrorMessages,
 } from '#steps/question/expects.ts'
-import { parseAnswerTable, parseQuestionRow } from '#steps/shared/parsers.ts'
+import { parseAnswerTable } from '#steps/shared/parsers.ts'
 
 const AI_RESPONSE_TIMEOUT = 120_000
-
-const questionSpecToDraft = (row: Record<string, string | undefined>): QuestionDraft => {
-    const spec = parseQuestionRow(row)
-
-    if (spec.numericalAnswer !== undefined) {
-        return {
-            question: spec.text,
-            answers: [spec.numericalAnswer],
-            correctAnswers: [0],
-            explanations: [''],
-            questionExplanation: spec.explanation ?? '',
-            questionType: 'numerical',
-            isEasy: false,
-            tolerance: spec.tolerance ? Number.parseFloat(spec.tolerance) : undefined,
-            tags: [],
-        }
-    }
-
-    const correctAnswers = spec.answers.flatMap((answer, index) => (answer.correct ? [index] : []))
-    return {
-        question: spec.text,
-        answers: spec.answers.map(answer => answer.text),
-        correctAnswers,
-        explanations: spec.answers.map(answer => answer.explanation ?? ''),
-        questionExplanation: spec.explanation ?? '',
-        questionType: correctAnswers.length > 1 ? 'multiple' : 'single',
-        isEasy: false,
-        tags: [],
-    }
-}
 
 Given('I start creating a new question', async function () {
     await ensureWorkspace(this)
@@ -84,37 +50,6 @@ Given('the workspace already contains the question {string}', async function (qu
             { text: 'Correct answer', correct: true },
             { text: 'Incorrect answer', correct: false },
         ],
-    })
-})
-
-Given('Robin AI will return these generated questions:', async function (dataTable: DataTable) {
-    const drafts = dataTable.hashes().map(questionSpecToDraft)
-    if (drafts.length === 0) throw new Error('Robin AI stub requires at least one generated question.')
-
-    await this.page.route('**/ai-assistant', async route => {
-        this.lastAiAssistantRequest = route.request().postDataJSON() as {
-            question: string
-            questionType: string
-            excludedQuestionId?: number
-        }
-        await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(drafts[0]),
-        })
-    })
-
-    await this.page.route('**/ai-assistant/batch', async route => {
-        this.lastAiAssistantRequest = route.request().postDataJSON() as {
-            question: string
-            questionType: string
-            excludedQuestionId?: number
-        }
-        await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(drafts),
-        })
     })
 })
 
@@ -265,26 +200,6 @@ Then('I do not see AI section', async function () {
 
 Then('I see AI section', async function () {
     await this.robinSheetPage.expectPromptVisible()
-})
-
-Then('Robin AI message composer is docked to the bottom of the chat', async function () {
-    await this.robinSheetPage.expectComposerDockedToBottom()
-})
-
-Then('I do not see Robin AI send button', async function () {
-    await this.robinSheetPage.expectGenerateButtonNotVisible()
-})
-
-Then('Robin AI message composer is empty', async function () {
-    await this.robinSheetPage.expectPromptValue('')
-})
-
-Then('I see Robin AI chat message {string}', async function (message: string) {
-    await this.robinSheetPage.expectChatMessageVisible(message)
-})
-
-Then('I do not see generated questions in Robin chat', async function () {
-    await this.robinSheetPage.expectNoGeneratedQuestions()
 })
 
 Then('I see explanation fields', async function () {
@@ -475,79 +390,16 @@ When('I ask the application to create a exact question {string}', async function
     await this.robinSheetPage.open()
     await enterAIPrompt(this, `Generate a exact question: ${topic}`)
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant/chat') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
-})
-
-When('I ask AI:', async function (dataTable: DataTable) {
-    await enterAIPrompt(this, toText(dataTable))
-    // Wait on the actual API response, not the textarea content. The latter
-    // is unreliable on regenerate (the previous response makes "not empty"
-    // resolve immediately, before the new response arrives).
-    await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
-            timeout: AI_RESPONSE_TIMEOUT,
-        }),
-        this.robinSheetPage.generate(),
-    ])
-})
-
-When('I ask AI to generate multiple questions:', async function (dataTable: DataTable) {
-    await enterAIPrompt(this, toText(dataTable))
-    await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/ai-assistant/batch') && response.ok(), {
-            timeout: AI_RESPONSE_TIMEOUT,
-        }),
-        this.robinSheetPage.generate(),
-    ])
-})
-
-When('I save the generated questions', async function () {
-    await this.robinSheetPage.saveGeneratedQuestions()
 })
 
 When('I use the generated question', async function () {
     await this.robinSheetPage.useGeneratedQuestion()
 })
-
-When('I enter Robin AI message {string}', async function (message: string) {
-    await this.robinSheetPage.enterPrompt(message)
-})
-
-When('I press Enter to send the Robin AI message', async function () {
-    await this.robinSheetPage.sendPromptByEnter()
-})
-
-When(
-    /I ask AI for (single choice|multiple choice|numerical) question:/,
-    async function (choice: string, dataTable: DataTable) {
-        await selectAIQuestionType(this, choice as AIQuestionTypeChoice)
-        await enterAIPrompt(this, toText(dataTable))
-        await Promise.all([
-            this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
-                timeout: AI_RESPONSE_TIMEOUT,
-            }),
-            this.robinSheetPage.generate(),
-        ])
-    },
-)
-
-When(
-    /I ask AI for (single choice|multiple choice|numerical) questions:/,
-    async function (choice: string, dataTable: DataTable) {
-        await selectAIQuestionType(this, choice as AIQuestionTypeChoice)
-        await enterAIPrompt(this, toText(dataTable))
-        await Promise.all([
-            this.page.waitForResponse(response => response.url().includes('/ai-assistant/batch') && response.ok(), {
-                timeout: AI_RESPONSE_TIMEOUT,
-            }),
-            this.robinSheetPage.generate(),
-        ])
-    },
-)
 
 When(/I mark the question as (single choice|multiple choice|numerical)/, async function (choice: string) {
     if (choice === 'single choice') {

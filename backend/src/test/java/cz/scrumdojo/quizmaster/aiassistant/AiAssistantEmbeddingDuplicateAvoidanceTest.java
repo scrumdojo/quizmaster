@@ -6,10 +6,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
-import cz.scrumdojo.quizmaster.question.QuestionResponse;
-import cz.scrumdojo.quizmaster.question.QuestionType;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
-import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,56 +36,60 @@ class AiAssistantEmbeddingDuplicateAvoidanceTest {
     private String apiToken;
 
     @Test
-    void singleGenerationAvoidsExistingEmbeddedWorkspaceQuestion() {
+    void chatAvoidsExistingEmbeddedWorkspaceQuestion() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
         Workspace workspace = workspaceWithEmbeddedQuestion(EXISTING_QUESTION);
 
-        QuestionResponse response = aiAssistantService.generateQuestion(
-            "Generate an exact question: " + EXISTING_QUESTION,
-            "single",
-            workspace.getGuid()
-        );
+        RobinChatResponse response = chat("Generate an exact question: " + EXISTING_QUESTION, workspace, null);
 
-        assertGeneralChoiceResponse(response);
-        assertThat(normalize(response.question())).isNotEqualTo(normalize(EXISTING_QUESTION));
+        assertThat(response.drafts()).isNotEmpty();
+        assertThat(response.drafts().stream().map(QuestionDraft::question).map(this::normalizeText)).doesNotContain(
+            normalizeText(EXISTING_QUESTION)
+        );
     }
 
     @Test
-    void singleGenerationExcludesQuestionBeingEditedFromDuplicateComparisons() {
+    void chatExcludesQuestionBeingEditedFromDuplicateComparisons() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
         Workspace workspace = workspaceWithEmbeddedQuestion(EXISTING_QUESTION);
         Question editedQuestion = questionRepository.findByWorkspaceGuidOrderByIdDesc(workspace.getGuid()).getFirst();
 
-        QuestionResponse response = aiAssistantService.generateQuestion(
+        RobinChatResponse response = chat(
             "Improve this exact question without changing its meaning: " + EXISTING_QUESTION,
-            "single",
-            workspace.getGuid(),
+            workspace,
             editedQuestion.getId()
         );
 
-        assertGeneralChoiceResponse(response);
+        assertThat(response.drafts()).isNotEmpty();
+        assertThat(response.drafts().getFirst().question()).isNotBlank();
     }
 
     @Test
-    void batchGenerationAvoidsExistingEmbeddedWorkspaceQuestion() {
+    void chatMultiQuestionTurnAvoidsExistingEmbeddedWorkspaceQuestion() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
         Workspace workspace = workspaceWithEmbeddedQuestion(EXISTING_QUESTION);
 
-        QuestionResponse[] responses = aiAssistantService.generateQuestions(
+        RobinChatResponse response = chat(
             "Generate 2 single-choice questions about coffee. Include the exact question: " + EXISTING_QUESTION,
-            "single",
-            workspace.getGuid()
+            workspace,
+            null
         );
 
-        assertThat(responses).hasSizeGreaterThanOrEqualTo(1);
-        assertThat(
-            Arrays.stream(responses)
-                .map(QuestionResponse::question)
-                .map(AiAssistantEmbeddingDuplicateAvoidanceTest::normalize)
-        ).doesNotContain(normalize(EXISTING_QUESTION));
+        assertThat(response.drafts()).isNotEmpty();
+        assertThat(response.drafts().stream().map(QuestionDraft::question).map(this::normalizeText)).doesNotContain(
+            normalizeText(EXISTING_QUESTION)
+        );
+    }
+
+    private RobinChatResponse chat(String prompt, Workspace workspace, Integer excludedQuestionId) {
+        return aiAssistantService.chat(
+            List.of(new RobinChatRequest.RobinChatMessage("user", prompt, null)),
+            workspace.getGuid(),
+            excludedQuestionId
+        );
     }
 
     private Workspace workspaceWithEmbeddedQuestion(String questionText) {
@@ -98,15 +100,12 @@ class AiAssistantEmbeddingDuplicateAvoidanceTest {
         return workspace;
     }
 
-    private static void assertGeneralChoiceResponse(QuestionResponse response) {
-        assertThat(response.question()).isNotBlank();
-        assertThat(response.answers()).hasSizeGreaterThanOrEqualTo(2);
-        assertThat(response.correctAnswers()).hasSize(1);
-        assertThat(response.explanations()).hasSize(response.answers().length);
-        assertThat(response.questionType()).isEqualTo(QuestionType.SINGLE);
-    }
-
-    private static String normalize(String value) {
-        return value.trim().toLowerCase().replaceAll("[^\\p{L}\\p{N}]+", " ").replaceAll("\\s+", " ").trim();
+    private String normalizeText(String value) {
+        return value
+            .trim()
+            .toLowerCase(java.util.Locale.ROOT)
+            .replaceAll("[^\\p{L}\\p{N}]+", " ")
+            .replaceAll("\\s+", " ")
+            .trim();
     }
 }

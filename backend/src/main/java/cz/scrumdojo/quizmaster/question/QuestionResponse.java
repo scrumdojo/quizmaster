@@ -54,29 +54,4 @@ public record QuestionResponse(
     public static QuestionResponse feedbackFrom(Question q) {
         return from(q).withWorkspaceGuid(null);
     }
-
-    public static QuestionResponse draft(
-        String question,
-        String[] answers,
-        int[] correctAnswers,
-        String[] explanations,
-        String questionExplanation,
-        double tolerance,
-        QuestionType questionType
-    ) {
-        return new QuestionResponse(
-            null,
-            question,
-            answers,
-            explanations,
-            questionExplanation,
-            correctAnswers,
-            null,
-            false,
-            null,
-            tolerance,
-            questionType,
-            new String[0]
-        );
-    }
 }

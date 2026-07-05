@@ -1,25 +1,21 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { postAiAssistantBatch } from '#fe/make/api/ai-assistant.ts'
 import { saveQuestion } from '#fe/make/api/question.ts'
 import { questionDraftToRequest } from '#fe/make/create-question/robin-ai/question-draft-mappers.ts'
 import { RobinFab } from '#fe/make/create-question/robin-ai/robin-fab.tsx'
 import { RobinSheet } from '#fe/make/create-question/robin-ai/robin-sheet.tsx'
-import type {
-    RobinGenerateRequest,
-    RobinGenerationResult,
-} from '#fe/make/create-question/robin-ai/use-robin-prompt-form.ts'
-import type { QuestionDraft, QuestionType } from '#fe/shared/model/question.ts'
+import type { QuestionDraft } from '#fe/shared/model/question.ts'
 
-const generateWorkspaceRobinDrafts = async (request: RobinGenerateRequest): Promise<RobinGenerationResult> => ({
-    drafts: await postAiAssistantBatch(request.workspaceGuid, {
-        question: request.question,
-        questionType: request.questionType,
-    }),
-})
+const saveWorkspaceRobinDraft =
+    (workspaceGuid: string, onQuestionsSaved: () => Promise<void>) =>
+    async (draft: QuestionDraft): Promise<string> => {
+        await saveQuestion(workspaceGuid, questionDraftToRequest(draft))
+        await onQuestionsSaved()
+        return 'Saved question to workspace.'
+    }
 
-const saveWorkspaceRobinDrafts =
+const saveAllWorkspaceRobinDrafts =
     (workspaceGuid: string, onQuestionsSaved: () => Promise<void>) =>
     async (drafts: readonly QuestionDraft[]): Promise<string> => {
         await Promise.all(drafts.map(draft => saveQuestion(workspaceGuid, questionDraftToRequest(draft))))
@@ -34,18 +30,15 @@ interface WorkspaceRobinAiHelperProps {
 
 export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionsSaved }: WorkspaceRobinAiHelperProps) => {
     const [sheetOpen, setSheetOpen] = useState(false)
-    const [questionType, setQuestionType] = useState<QuestionType>('single')
 
     return createPortal(
         <>
             <RobinFab onOpen={() => setSheetOpen(true)} />
             {sheetOpen && (
                 <RobinSheet
-                    generateRequest={generateWorkspaceRobinDrafts}
-                    saveDrafts={saveWorkspaceRobinDrafts(workspaceId, onQuestionsSaved)}
+                    saveDraft={saveWorkspaceRobinDraft(workspaceId, onQuestionsSaved)}
+                    saveDrafts={saveAllWorkspaceRobinDrafts(workspaceId, onQuestionsSaved)}
                     workspaceId={workspaceId}
-                    questionType={questionType}
-                    onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
                 />
             )}

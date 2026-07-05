@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
-import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.question.QuestionType;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import java.util.Arrays;
@@ -36,30 +35,22 @@ public class AiAssistantServiceTest {
     private String embeddingModel;
 
     @Test
-    void generateQuestionFailsOnEmptyPrompt() {
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("   ", "single"));
+    void chatFailsOnEmptyMessages() {
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.chat(List.of(), null, null));
     }
 
     @Test
-    void generateQuestionFailsOnMissingQuestionType() {
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("Topic", null));
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("Topic", "  "));
-    }
-
-    @Test
-    void generateQuestionFailsOnUnknownQuestionType() {
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("Topic", "wat"));
-    }
-
-    @Test
-    void generateQuestionsFailsOnEmptyPrompt() {
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("   ", "single"));
-    }
-
-    @Test
-    void generateQuestionsFailsOnMissingQuestionType() {
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", null));
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", "  "));
+    void chatFailsWhenLastTurnIsNotAUserMessage() {
+        assertThrows(ResponseStatusException.class, () ->
+            aiAssistantService.chat(
+                List.of(new RobinChatRequest.RobinChatMessage("assistant", null, List.of())),
+                null,
+                null
+            )
+        );
+        assertThrows(ResponseStatusException.class, () ->
+            aiAssistantService.chat(List.of(new RobinChatRequest.RobinChatMessage("user", "   ", null)), null, null)
+        );
     }
 
     @Test
@@ -89,80 +80,96 @@ public class AiAssistantServiceTest {
 
     @Tag("ai")
     @Test
-    void generateSingleChoiceWithType() {
+    void chatInfersSingleChoiceFromNaturalLanguage() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        var response = aiAssistantService.generateQuestion(
-            "Generate a question about capital cities and 2 incorrect answers",
-            "single"
-        );
+        var draft = singleChatDraft("Ask one question about capital cities with 1 correct and 2 incorrect answers");
 
-        assertGeneralChoiceResponse(response);
-        assertEquals(1, response.correctAnswers().length);
-        assertEquals(QuestionType.SINGLE, response.questionType());
+        assertGeneralChoiceDraft(draft);
+        assertEquals(1, draft.correctAnswers().length);
+        assertEquals(QuestionType.SINGLE, draft.questionType());
     }
 
     @Tag("ai")
     @Test
-    void generateMultipleChoiceWithType() {
+    void chatInfersMultipleChoiceFromNaturalLanguage() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        var response = aiAssistantService.generateQuestion(
-            "Generate a question about European capitals with 2 correct answers and 2 incorrect answers",
-            "multiple"
+        var draft = singleChatDraft(
+            "Ask one question about European capitals with 2 correct answers and 2 incorrect answers"
         );
 
-        assertGeneralChoiceResponse(response);
-        assertTrue(response.correctAnswers().length >= 2, "Expected at least 2 correct answers");
-        assertEquals(QuestionType.MULTIPLE, response.questionType());
+        assertGeneralChoiceDraft(draft);
+        assertTrue(draft.correctAnswers().length >= 2, "Expected at least 2 correct answers");
+        assertEquals(QuestionType.MULTIPLE, draft.questionType());
     }
 
     @Tag("ai")
     @Test
-    void generateNumericalWithType() {
+    void chatInfersNumericalFromNaturalLanguage() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        var response = aiAssistantService.generateQuestion(
-            "Generate a numerical question about basic arithmetic",
-            "numerical"
-        );
+        var draft = singleChatDraft("Ask one numerical question about basic arithmetic");
 
-        assertNotNull(response.question());
-        assertFalse(response.question().isBlank());
-        assertEquals(1, response.answers().length, "Numerical must have exactly 1 answer");
-        assertDoesNotThrow(() -> Double.parseDouble(response.answers()[0].trim()));
-        assertArrayEquals(new int[] { 0 }, response.correctAnswers());
-        assertEquals(QuestionType.NUMERICAL, response.questionType());
+        assertNotNull(draft.question());
+        assertFalse(draft.question().isBlank());
+        assertEquals(1, draft.answers().length, "Numerical must have exactly 1 answer");
+        assertDoesNotThrow(() -> Double.parseDouble(draft.answers()[0].trim()));
+        assertArrayEquals(new int[] { 0 }, draft.correctAnswers());
+        assertEquals(QuestionType.NUMERICAL, draft.questionType());
     }
 
     @Tag("ai")
     @Test
-    void generateMultipleCorrectAnswersWithSpecificCount() {
+    void chatHonorsExactAnswerCounts() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        var response = aiAssistantService.generateQuestion(
-            "Create a question on exoplanets with exactly 2 correct answers and exactly 2 incorrect answers.",
-            "multiple"
+        var draft = singleChatDraft(
+            "Ask one question on exoplanets with exactly 2 correct answers and exactly 2 incorrect answers."
         );
 
-        assertFalse(response.question().isBlank());
-        assertEquals(4, response.answers().length, "Expected exactly 4 answers");
-        assertEquals(2, response.correctAnswers().length, "Expected exactly 2 correct answers");
+        assertFalse(draft.question().isBlank());
+        assertEquals(4, draft.answers().length, "Expected exactly 4 answers");
+        assertEquals(2, draft.correctAnswers().length, "Expected exactly 2 correct answers");
     }
 
     @Tag("ai")
     @Test
-    void generateSingleCorrectAnswerWithExactCount() {
+    void chatRefinesItsPriorDraftFromTheTranscript() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        var response = aiAssistantService.generateQuestion(
-            "Create a question about European capitals with exactly 2 incorrect answers (3 answers total).",
-            "single"
+        var firstTurn = singleChatDraft(
+            "Ask one single-choice question about European capitals with exactly 3 answers."
         );
 
-        assertFalse(response.question().isBlank());
-        assertEquals(3, response.answers().length, "Expected exactly 3 answers");
-        assertEquals(1, response.correctAnswers().length, "Expected exactly 1 correct answer");
+        RobinChatResponse refined = aiAssistantService.chat(
+            List.of(
+                new RobinChatRequest.RobinChatMessage(
+                    "user",
+                    "Ask one single-choice question about European capitals with exactly 3 answers.",
+                    null
+                ),
+                new RobinChatRequest.RobinChatMessage("assistant", null, List.of(firstTurn)),
+                new RobinChatRequest.RobinChatMessage("user", "Add one more incorrect answer to the question.", null)
+            ),
+            null,
+            null
+        );
+
+        assertEquals(1, refined.drafts().size());
+        QuestionDraft refinedDraft = refined.drafts().get(0);
+        assertEquals(firstTurn.answers().length + 1, refinedDraft.answers().length, "Expected one added answer");
+        assertEquals(1, refinedDraft.correctAnswers().length, "Expected the single correct answer preserved");
+    }
+
+    private QuestionDraft singleChatDraft(String prompt) {
+        RobinChatResponse response = aiAssistantService.chat(
+            List.of(new RobinChatRequest.RobinChatMessage("user", prompt, null)),
+            null,
+            null
+        );
+        assertEquals(1, response.drafts().size(), "Expected exactly 1 draft");
+        return response.drafts().get(0);
     }
 
     @Test
@@ -383,43 +390,6 @@ public class AiAssistantServiceTest {
     }
 
     @Test
-    void validateBatchResponses_valid() {
-        assertDoesNotThrow(() ->
-            AiAssistantService.validateBatchResponses(
-                new AiAssistantService.AssistantResponse[] {
-                    new AiAssistantService.AssistantResponse(
-                        "Q1?",
-                        new String[] { "a", "b" },
-                        new int[] { 0 },
-                        new String[] { "", "" },
-                        null,
-                        null
-                    ),
-                    new AiAssistantService.AssistantResponse(
-                        "Q2?",
-                        new String[] { "c", "d" },
-                        new int[] { 1 },
-                        new String[] { "", "" },
-                        null,
-                        null
-                    ),
-                },
-                QuestionType.SINGLE
-            )
-        );
-    }
-
-    @Test
-    void validateBatchResponses_requiresAtLeastTwoQuestions() {
-        assertThrows(ResponseStatusException.class, () ->
-            AiAssistantService.validateBatchResponses(
-                new AiAssistantService.AssistantResponse[] {},
-                QuestionType.SINGLE
-            )
-        );
-    }
-
-    @Test
     void validateChatResponses_acceptsMixedDeclaredTypes() {
         assertDoesNotThrow(() ->
             AiAssistantService.validateChatResponses(
@@ -494,24 +464,20 @@ public class AiAssistantServiceTest {
         );
     }
 
-    private static void assertGeneralChoiceResponse(QuestionResponse response) {
-        assertNotNull(response.question());
-        assertFalse(response.question().isBlank(), "Expected a non-empty question");
-        assertNotNull(response.answers());
-        assertTrue(response.answers().length >= 2, "Expected at least 2 answers");
-        assertNotNull(response.correctAnswers());
-        assertTrue(response.correctAnswers().length >= 1, "Expected at least 1 correct answer");
-        assertNotNull(response.explanations());
-        assertEquals(
-            response.answers().length,
-            response.explanations().length,
-            "Expected one explanation slot per answer"
-        );
+    private static void assertGeneralChoiceDraft(QuestionDraft draft) {
+        assertNotNull(draft.question());
+        assertFalse(draft.question().isBlank(), "Expected a non-empty question");
+        assertNotNull(draft.answers());
+        assertTrue(draft.answers().length >= 2, "Expected at least 2 answers");
+        assertNotNull(draft.correctAnswers());
+        assertTrue(draft.correctAnswers().length >= 1, "Expected at least 1 correct answer");
+        assertNotNull(draft.explanations());
+        assertEquals(draft.answers().length, draft.explanations().length, "Expected one explanation slot per answer");
 
-        for (int index : response.correctAnswers()) {
+        for (int index : draft.correctAnswers()) {
             assertTrue(index >= 0, "Expected non-negative correct answer indexes");
             assertTrue(
-                index < response.answers().length,
+                index < draft.answers().length,
                 "Expected correct answer indexes to stay within answers array bounds"
             );
         }

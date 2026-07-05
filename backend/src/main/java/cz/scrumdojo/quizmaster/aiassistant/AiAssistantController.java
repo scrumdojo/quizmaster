@@ -1,6 +1,5 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
-import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,22 +22,6 @@ public class AiAssistantController {
         this.workspaceRepository = workspaceRepository;
     }
 
-    @PostMapping
-    public ResponseEntity<QuestionResponse> generate(
-        @PathVariable String workspaceGuid,
-        @RequestBody AiAssistantRequest request
-    ) {
-        requireWorkspaceExists(workspaceGuid);
-        return ResponseEntity.ok(
-            aiAssistantService.generateQuestion(
-                request.question(),
-                request.questionType(),
-                workspaceGuid,
-                request.excludedQuestionId()
-            )
-        );
-    }
-
     @PostMapping("/chat")
     public ResponseEntity<RobinChatResponse> chat(
         @PathVariable String workspaceGuid,
@@ -47,17 +30,6 @@ public class AiAssistantController {
         requireWorkspaceExists(workspaceGuid);
         return ResponseEntity.ok(
             aiAssistantService.chat(request.messages(), workspaceGuid, request.excludedQuestionId())
-        );
-    }
-
-    @PostMapping("/batch")
-    public ResponseEntity<QuestionResponse[]> generateBatch(
-        @PathVariable String workspaceGuid,
-        @RequestBody AiAssistantRequest request
-    ) {
-        requireWorkspaceExists(workspaceGuid);
-        return ResponseEntity.ok(
-            aiAssistantService.generateQuestions(request.question(), request.questionType(), workspaceGuid)
         );
     }
 
