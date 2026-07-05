@@ -3,6 +3,19 @@ import type { QuestionDraft } from '#fe/shared/model/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'
 
+// Seeds the edit chat: the current form content becomes Robin's first draft version.
+export const questionRequestToDraft = (q: QuestionRequest): QuestionDraft => ({
+    question: q.question,
+    answers: Array.from(q.answers),
+    explanations: Array.from(q.explanations),
+    correctAnswers: Array.from(q.correctAnswers),
+    questionExplanation: q.questionExplanation,
+    questionType: q.questionType,
+    isEasy: q.isEasy,
+    tolerance: q.tolerance,
+    tags: Array.from(q.tags),
+})
+
 export const questionToPatch = (q: QuestionDraft): QuestionFormStatePatch => ({
     questionText: q.question,
     questionType: q.questionType,

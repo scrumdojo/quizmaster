@@ -15,6 +15,8 @@ interface RobinSheetProps {
     readonly questionType: QuestionType
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
+    readonly excludedQuestionId?: number
+    readonly initialDraft?: QuestionDraft
 }
 
 export const RobinSheet = ({
@@ -25,6 +27,8 @@ export const RobinSheet = ({
     questionType,
     onQuestionTypeChange,
     onClose,
+    excludedQuestionId,
+    initialDraft,
 }: RobinSheetProps) => {
     const {
         promptText,
@@ -42,6 +46,8 @@ export const RobinSheet = ({
         saveDrafts,
         workspaceId,
         questionType,
+        excludedQuestionId,
+        initialDraft,
     })
 
     const submitPrompt = () => {

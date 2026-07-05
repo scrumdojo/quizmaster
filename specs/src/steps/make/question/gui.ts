@@ -32,23 +32,7 @@ import {
 } from '#steps/question/expects.ts'
 import { parseAnswerTable, parseQuestionRow } from '#steps/shared/parsers.ts'
 
-const stubbedAiResponse = {
-    question: 'What is the capital of Czech Republic?',
-    answers: ['Brno', 'Prague', 'Berlin', 'Ostrava', 'Bratislava'],
-    correctAnswers: [1],
-    explanations: ['No Brno', 'Yes', 'Germany', 'No', 'No'],
-    questionExplanation: '',
-    questionType: 'single',
-    isEasy: false,
-}
-
 const AI_RESPONSE_TIMEOUT = 120_000
-
-const aiPrompt = (world: { lastAiAssistantRequest?: { question: string } }) => {
-    const prompt = world.lastAiAssistantRequest?.question
-    expect(prompt, 'Expected AI assistant request to be captured').toBeDefined()
-    return prompt ?? ''
-}
 
 const questionSpecToDraft = (row: Record<string, string | undefined>): QuestionDraft => {
     const spec = parseQuestionRow(row)
@@ -303,28 +287,6 @@ Then('I do not see generated questions in Robin chat', async function () {
     await this.robinSheetPage.expectNoGeneratedQuestions()
 })
 
-Then('AI received current question context', async function () {
-    const prompt = aiPrompt(this)
-    expect(prompt).toContain('add two more incorrect answers')
-    expect(prompt).toContain('What is the capital of Czech Republic?')
-    expect(prompt).toContain('Brno')
-    expect(prompt).toContain('Prague')
-    expect(prompt).toContain('Berlin')
-    expect(prompt).toContain('No Brno')
-    expect(prompt).toContain('Yes')
-    expect(prompt).toContain('Germany')
-    expect(prompt).toContain('1')
-    expect(this.lastAiAssistantRequest?.excludedQuestionId).toBe(this.questionIds[this.activeQuestionBookmark])
-})
-
-Then('AI received current question context with question {string}', async function (question: string) {
-    expect(aiPrompt(this)).toContain(question)
-})
-
-Then('AI received current question context with answer {string}', async function (answer: string) {
-    expect(aiPrompt(this)).toContain(answer)
-})
-
 Then('I see explanation fields', async function () {
     await this.questionEditPage.expectExplanationFieldsExist()
 })
@@ -557,29 +519,6 @@ When('I enter Robin AI message {string}', async function (message: string) {
 
 When('I press Enter to send the Robin AI message', async function () {
     await this.robinSheetPage.sendPromptByEnter()
-})
-
-When('I ask stubbed AI to {string}', async function (instruction: string) {
-    await this.page.route('**/ai-assistant', async route => {
-        this.lastAiAssistantRequest = route.request().postDataJSON() as {
-            question: string
-            questionType: string
-            excludedQuestionId?: number
-        }
-        await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(stubbedAiResponse),
-        })
-    })
-    await enterAIPrompt(this, instruction)
-    await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
-            timeout: AI_RESPONSE_TIMEOUT,
-        }),
-        this.robinSheetPage.generate(),
-    ])
-    await this.page.unroute('**/ai-assistant')
 })
 
 When(

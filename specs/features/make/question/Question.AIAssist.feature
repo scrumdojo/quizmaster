@@ -61,61 +61,6 @@ Feature: Generate question using AI
     Then I see AI section
 
 
-  Scenario: AI updates an edited question from current form context
-    Given question "What is the capital of Czech Republic?"
-    * with answers:
-      | Brno   |   | No Brno |
-      | Prague | * | Yes     |
-      | Berlin |   | Germany |
-    * saved and bookmarked as "Czechia"
-    When I start editing question "Czechia"
-    * I open Robin AI
-    * I ask stubbed AI to "add two more incorrect answers"
-    Then AI received current question context
-    * I use the generated question
-    * I see the answers fields
-      | Brno       |   | No Brno |
-      | Prague     | * | Yes     |
-      | Berlin     |   | Germany |
-      | Ostrava    |   | No      |
-      | Bratislava |   | No      |
-
-
-  Scenario: AI edit is discarded when not submitted
-    Given question "What is the capital of Czech Republic?"
-    * with answers:
-      | Brno   |   | No Brno |
-      | Prague | * | Yes     |
-      | Berlin |   | Germany |
-    * saved and bookmarked as "Czechia"
-    When I start editing question "Czechia"
-    * I open Robin AI
-    * I ask stubbed AI to "add two more incorrect answers"
-    * I use the generated question
-    * I refresh the page
-    * I start editing question "Czechia"
-    Then I see the answers fields
-      | Brno   |   | No Brno |
-      | Prague | * | Yes     |
-      | Berlin |   | Germany |
-
-
-  Scenario: AI context includes unsaved manual edits
-    Given question "What is the capital of Czech Republic?"
-    * with answers:
-      | Brno   |   | No Brno |
-      | Prague | * | Yes     |
-      | Berlin |   | Germany |
-    * saved and bookmarked as "Czechia"
-    When I start editing question "Czechia"
-    * I enter question "What is the capital of Slovakia?"
-    * I enter answer 2 text "Bratislava"
-    * I open Robin AI
-    * I ask stubbed AI to "add one more incorrect answer"
-    Then AI received current question context with question "What is the capital of Slovakia?"
-    * AI received current question context with answer "Bratislava"
-
-
   @ai
   Scenario: Robin drafts a single-choice question from a topic
     Given I start creating a new question
@@ -168,7 +113,7 @@ Feature: Generate question using AI
     And I do not see AI section
 
 
-  @skip @ai
+  @ai
   Scenario: Editing preloads the existing question as the first draft and refines it in chat
     Given question "What is the capital of Czech Republic?"
     * with answers:
@@ -186,7 +131,7 @@ Feature: Generate question using AI
     And question 1 in draft version 2 has one more answer than in draft version 1
 
 
-  @skip @ai
+  @ai
   Scenario: Editing preserves untouched fields when refining
     Given question "What is the capital of Czech Republic?"
     * with answers:

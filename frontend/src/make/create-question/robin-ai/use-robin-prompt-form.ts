@@ -26,6 +26,7 @@ export interface RobinGenerateRequest {
     readonly questionType: QuestionType
     readonly currentDrafts: readonly QuestionDraft[]
     readonly messages: readonly AiChatMessage[]
+    readonly excludedQuestionId?: number
 }
 
 interface UseRobinPromptFormArgs {
@@ -33,28 +34,45 @@ interface UseRobinPromptFormArgs {
     readonly saveDrafts?: (drafts: readonly QuestionDraft[]) => Promise<string>
     readonly workspaceId: string
     readonly questionType: QuestionType
+    readonly excludedQuestionId?: number
+    readonly initialDraft?: QuestionDraft
 }
 
 const generateChatDrafts = async ({
     workspaceGuid,
     messages,
+    excludedQuestionId,
 }: RobinGenerateRequest): Promise<RobinGenerationResult> => {
-    const response = await postAiAssistantChat(workspaceGuid, { messages })
+    const response = await postAiAssistantChat(workspaceGuid, { messages, excludedQuestionId })
     return { drafts: response.drafts }
 }
+
+// Editing seeds the conversation as if Robin had already drafted the existing question,
+// so refining it needs no special wire format — it is just the next chat turn.
+const seedTranscript = (initialDraft: QuestionDraft | undefined): readonly AiChatMessage[] =>
+    initialDraft
+        ? [
+              { role: 'user', content: 'Here is the existing question to refine.' },
+              { role: 'assistant', drafts: [initialDraft] },
+          ]
+        : []
 
 export const useRobinPromptForm = ({
     generateRequest = generateChatDrafts,
     saveDrafts,
     workspaceId,
     questionType,
+    excludedQuestionId,
+    initialDraft,
 }: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
-    const [draftVersions, setDraftVersions] = useState<readonly (readonly QuestionDraft[])[]>([])
-    const [transcript, setTranscript] = useState<readonly AiChatMessage[]>([])
+    const [draftVersions, setDraftVersions] = useState<readonly (readonly QuestionDraft[])[]>(() =>
+        initialDraft ? [[initialDraft]] : [],
+    )
+    const [transcript, setTranscript] = useState<readonly AiChatMessage[]>(() => seedTranscript(initialDraft))
     const [chatMessages, setChatMessages] = useState<readonly RobinChatMessage[]>([])
 
     const generatedDrafts = draftVersions.flat()
@@ -73,6 +91,7 @@ export const useRobinPromptForm = ({
                 questionType,
                 currentDrafts: generatedDrafts,
                 messages,
+                excludedQuestionId,
             })
             setTranscript([...messages, { role: 'assistant', drafts: response.drafts }])
             setDraftVersions(versions => [...versions, response.drafts])
