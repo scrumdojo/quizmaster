@@ -8,6 +8,7 @@ import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.question.QuestionType;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -415,6 +416,81 @@ public class AiAssistantServiceTest {
                 new AiAssistantService.AssistantResponse[] {},
                 QuestionType.SINGLE
             )
+        );
+    }
+
+    @Test
+    void validateChatResponses_acceptsMixedDeclaredTypes() {
+        assertDoesNotThrow(() ->
+            AiAssistantService.validateChatResponses(
+                new AiAssistantService.AssistantResponse[] {
+                    chatResponse("Single?", new String[] { "a", "b" }, new int[] { 0 }, "single"),
+                    chatResponse("Multiple?", new String[] { "a", "b", "c" }, new int[] { 0, 1 }, "multiple"),
+                    chatResponse("What is 5 / 2?", new String[] { "2.5" }, new int[] { 0 }, "numerical"),
+                }
+            )
+        );
+    }
+
+    @Test
+    void validateChatResponses_rejectsMissingQuestionType() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateChatResponses(
+                new AiAssistantService.AssistantResponse[] {
+                    chatResponse("Single?", new String[] { "a", "b" }, new int[] { 0 }, null),
+                }
+            )
+        );
+    }
+
+    @Test
+    void validateChatResponses_rejectsUnknownQuestionType() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateChatResponses(
+                new AiAssistantService.AssistantResponse[] {
+                    chatResponse("Single?", new String[] { "a", "b" }, new int[] { 0 }, "essay"),
+                }
+            )
+        );
+    }
+
+    @Test
+    void validateChatResponses_rejectsTypeMismatch() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateChatResponses(
+                new AiAssistantService.AssistantResponse[] {
+                    // Declared multiple but carries only one correct answer.
+                    chatResponse("Multiple?", new String[] { "a", "b", "c" }, new int[] { 0 }, "multiple"),
+                }
+            )
+        );
+    }
+
+    @Test
+    void validateChatResponses_requiresAtLeastOneQuestion() {
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateChatResponses(new AiAssistantService.AssistantResponse[] {})
+        );
+    }
+
+    private static AiAssistantService.AssistantResponse chatResponse(
+        String question,
+        String[] answers,
+        int[] correctAnswers,
+        String questionType
+    ) {
+        String[] explanations = new String[answers.length];
+        Arrays.fill(explanations, "");
+        return new AiAssistantService.AssistantResponse(
+            question,
+            answers,
+            correctAnswers,
+            explanations,
+            null,
+            null,
+            questionType,
+            null,
+            null
         );
     }
 

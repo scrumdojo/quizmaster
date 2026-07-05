@@ -2,8 +2,10 @@ package cz.scrumdojo.quizmaster.aiassistant;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.scrumdojo.quizmaster.aiassistant.RobinChatRequest.RobinChatMessage;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.question.QuestionType;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +46,7 @@ public class AiAssistantService {
     private final String singleChoiceBatchPrompt;
     private final String multipleChoiceBatchPrompt;
     private final String numericalBatchPrompt;
+    private final String robinChatPrompt;
 
     public AiAssistantService(
         ObjectMapper objectMapper,
@@ -65,6 +69,7 @@ public class AiAssistantService {
         this.singleChoiceBatchPrompt = loadPrompt("prompts/single-choice-batch.md");
         this.multipleChoiceBatchPrompt = loadPrompt("prompts/multiple-choice-batch.md");
         this.numericalBatchPrompt = loadPrompt("prompts/numerical-batch.md");
+        this.robinChatPrompt = loadPrompt("prompts/robin-chat.md");
     }
 
     private static String loadPrompt(String path) throws IOException {
@@ -111,6 +116,36 @@ public class AiAssistantService {
         throw duplicateGenerationFailure();
     }
 
+    public RobinChatResponse chat(List<RobinChatMessage> messages, String workspaceGuid, Integer excludedQuestionId) {
+        validateChatRequest(messages);
+        List<String> allQuestionTexts = questionEmbeddingService.workspaceQuestionTexts(
+            workspaceGuid,
+            excludedQuestionId
+        );
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
+            questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, excludedQuestionId);
+
+        AssistantBatchResponse response = generateChatCandidate(messages, existingEmbeddings, null);
+        validateChatResponses(response.questions());
+        DuplicateMatch duplicate = findChatDuplicate(response.questions(), allQuestionTexts, existingEmbeddings);
+        if (duplicate == null) {
+            return toChatResponse(response.questions());
+        }
+
+        AssistantBatchResponse retryResponse = generateChatCandidate(messages, existingEmbeddings, duplicate);
+        validateChatResponses(retryResponse.questions());
+        DuplicateMatch retryDuplicate = findChatDuplicate(
+            retryResponse.questions(),
+            allQuestionTexts,
+            existingEmbeddings
+        );
+        if (retryDuplicate == null) {
+            return toChatResponse(retryResponse.questions());
+        }
+
+        throw duplicateGenerationFailure();
+    }
+
     public QuestionResponse[] generateQuestions(String prompt, String questionType) {
         return generateQuestions(prompt, questionType, null);
     }
@@ -152,20 +187,40 @@ public class AiAssistantService {
         if (prompt == null || prompt.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question must not be empty.");
         }
+        validateToken();
+    }
+
+    private void validateToken() {
         if (apiToken == null || apiToken.isBlank()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI token is not configured.");
         }
     }
 
+    private void validateChatRequest(List<RobinChatMessage> messages) {
+        if (messages == null || messages.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Messages must not be empty.");
+        }
+        RobinChatMessage last = messages.get(messages.size() - 1);
+        if (!"user".equals(last.role()) || last.content() == null || last.content().isBlank()) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Last message must be a user message with non-empty content."
+            );
+        }
+        validateToken();
+    }
+
     private <T> T requestAssistant(String prompt, String systemPrompt, Class<T> responseType) {
+        return requestAssistant(
+            new Message[] { new Message("system", systemPrompt), new Message("user", prompt) },
+            responseType
+        );
+    }
+
+    private <T> T requestAssistant(Message[] messages, Class<T> responseType) {
         try {
             String body = objectMapper.writeValueAsString(
-                new ChatRequest(
-                    model,
-                    new Message[] { new Message("system", systemPrompt), new Message("user", prompt) },
-                    new ResponseFormat("json_object"),
-                    maxTokens
-                )
+                new ChatRequest(model, messages, new ResponseFormat("json_object"), maxTokens)
             );
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -216,6 +271,32 @@ public class AiAssistantService {
         return requestAssistant(prompt, systemPrompt, AssistantBatchResponse.class);
     }
 
+    private AssistantBatchResponse generateChatCandidate(
+        List<RobinChatMessage> messages,
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
+        DuplicateMatch retryFeedback
+    ) {
+        List<Message> replay = new ArrayList<>();
+        replay.add(new Message("system", robinChatPrompt + embeddingUniquenessRule(existingEmbeddings, retryFeedback)));
+        for (RobinChatMessage message : messages) {
+            replay.add(new Message(message.role(), transcriptContent(message)));
+        }
+        return requestAssistant(replay.toArray(Message[]::new), AssistantBatchResponse.class);
+    }
+
+    // Assistant turns are replayed as the canonical {questions:[...]} JSON so the model
+    // always sees its prior output in schema-perfect form, whatever it originally emitted.
+    private String transcriptContent(RobinChatMessage message) {
+        if (message.drafts() == null) {
+            return message.content() == null ? "" : message.content();
+        }
+        try {
+            return objectMapper.writeValueAsString(new CanonicalDrafts(message.drafts()));
+        } catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid drafts in transcript.");
+        }
+    }
+
     private DuplicateMatch findDuplicate(
         String generatedQuestion,
         List<String> allQuestionTexts,
@@ -239,6 +320,22 @@ public class AiAssistantService {
         } catch (RuntimeException e) {
             return null;
         }
+    }
+
+    private DuplicateMatch findChatDuplicate(
+        AssistantResponse[] responses,
+        List<String> allQuestionTexts,
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
+    ) {
+        for (AssistantResponse response : responses) {
+            String normalizedGenerated = normalizeForExactMatch(response.question());
+            for (String existingText : allQuestionTexts) {
+                if (normalizeForExactMatch(existingText).equals(normalizedGenerated)) {
+                    return new DuplicateMatch(response.question(), existingText, 1.0);
+                }
+            }
+        }
+        return findBatchDuplicate(responses, existingEmbeddings);
     }
 
     private DuplicateMatch findBatchDuplicate(
@@ -411,6 +508,58 @@ public class AiAssistantService {
         }
     }
 
+    static void validateChatResponses(AssistantResponse[] responses) {
+        if (responses == null || responses.length < 1) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid chat response: need at least 1 question."
+            );
+        }
+        for (AssistantResponse response : responses) {
+            validateForType(response, resolveChatType(response.questionType()));
+        }
+    }
+
+    private static QuestionType resolveChatType(String questionType) {
+        if (questionType == null || questionType.isBlank()) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid chat response: missing questionType."
+            );
+        }
+        try {
+            return QuestionType.fromWire(questionType);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid chat response: unknown questionType " + questionType + "."
+            );
+        }
+    }
+
+    private static RobinChatResponse toChatResponse(AssistantResponse[] responses) {
+        return new RobinChatResponse(Arrays.stream(responses).map(AiAssistantService::toChatDraft).toList(), null);
+    }
+
+    private static QuestionDraft toChatDraft(AssistantResponse response) {
+        QuestionType type = resolveChatType(response.questionType());
+        Double tolerance = response.tolerance();
+        if (tolerance == null && type == QuestionType.NUMERICAL) {
+            tolerance = 0.0;
+        }
+        return new QuestionDraft(
+            response.question(),
+            type,
+            response.answers(),
+            response.correctAnswers(),
+            normalizeExplanations(response),
+            response.questionExplanation() == null ? "" : response.questionExplanation(),
+            tolerance,
+            response.isEasy(),
+            response.tags()
+        );
+    }
+
     static void validateResponse(AssistantResponse response) {
         if (response.question() == null || response.question().isBlank()) {
             throw new ResponseStatusException(
@@ -567,10 +716,27 @@ public class AiAssistantService {
         int[] correctAnswers,
         String[] explanations,
         @JsonProperty("tolerance") Double tolerance,
-        @JsonProperty("questionExplanation") String questionExplanation
-    ) {}
+        @JsonProperty("questionExplanation") String questionExplanation,
+        // Chat-path fields; the legacy per-type prompts never emit them.
+        @JsonProperty("questionType") String questionType,
+        @JsonProperty("isEasy") Boolean isEasy,
+        @JsonProperty("tags") String[] tags
+    ) {
+        AssistantResponse(
+            String question,
+            String[] answers,
+            int[] correctAnswers,
+            String[] explanations,
+            Double tolerance,
+            String questionExplanation
+        ) {
+            this(question, answers, correctAnswers, explanations, tolerance, questionExplanation, null, null, null);
+        }
+    }
 
     record AssistantBatchResponse(AssistantResponse[] questions) {}
+
+    private record CanonicalDrafts(List<QuestionDraft> questions) {}
 
     private record DuplicateMatch(String generatedQuestion, String matchedQuestion, double similarity) {}
 }

@@ -73,7 +73,7 @@ export const RobinSheet = ({
                     </div>
                 )}
                 {generatedDrafts.length > 0 && (
-                    <div className="generated-questions" data-testid="robin-generated-questions">
+                    <div className="generated-questions robin-draft-version" data-testid="robin-draft-version">
                         {generatedDrafts.map((draft, index) => {
                             const questionNumber = index + 1
                             const numericalAnswer = draft.questionType === 'numerical' ? draft.answers[0] : undefined
@@ -120,6 +120,14 @@ export const RobinSheet = ({
                                                             <strong data-testid="robin-generated-answer-correct">
                                                                 Correct
                                                             </strong>
+                                                        )}
+                                                        {draft.explanations[answerIndex] && (
+                                                            <span
+                                                                className="generated-question__answer-explanation"
+                                                                data-testid="robin-generated-answer-explanation"
+                                                            >
+                                                                {draft.explanations[answerIndex]}
+                                                            </span>
                                                         )}
                                                     </li>
                                                 )

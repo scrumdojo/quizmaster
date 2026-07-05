@@ -120,6 +120,94 @@ public class AiAssistantControllerTest {
             .andExpect(status().isBadRequest());
     }
 
+    @Tag("ai")
+    @Test
+    public void chatReturnsDraftsForSingleUserTurn() throws Exception {
+        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/ai-assistant/chat", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                            {
+                                "messages": [
+                                    {
+                                        "role": "user",
+                                        "content": "Ask one single-choice question about capital cities with 1 correct answer and 2 incorrect answers"
+                                    }
+                                ]
+                            }
+                        """
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.drafts").isArray())
+            .andExpect(jsonPath("$.drafts.length()").value(1))
+            .andExpect(jsonPath("$.drafts[0].question").isNotEmpty())
+            .andExpect(jsonPath("$.drafts[0].questionType").value("single"))
+            .andExpect(jsonPath("$.drafts[0].answers.length()").value(3))
+            .andExpect(jsonPath("$.drafts[0].correctAnswers.length()").value(1))
+            .andExpect(jsonPath("$.drafts[0].explanations.length()").value(3))
+            .andExpect(jsonPath("$.notice").doesNotExist());
+    }
+
+    @Test
+    public void chatWithoutMessagesReturnsBadRequest() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/ai-assistant/chat", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                            {"messages": []}
+                        """
+                    )
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void chatEndingWithAssistantTurnReturnsBadRequest() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/ai-assistant/chat", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                            {
+                                "messages": [
+                                    {"role": "user", "content": "Ask a question"},
+                                    {"role": "assistant", "drafts": []}
+                                ]
+                            }
+                        """
+                    )
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void chatOnUnknownWorkspaceReturnsNotFound() throws Exception {
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/ai-assistant/chat", "non-existent-guid")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                            {"messages": [{"role": "user", "content": "Ask a question"}]}
+                        """
+                    )
+            )
+            .andExpect(status().isNotFound());
+    }
+
     @Test
     public void unknownWorkspaceReturnsNotFound() throws Exception {
         mockMvc

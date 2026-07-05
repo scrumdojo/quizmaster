@@ -61,7 +61,7 @@ Feature: Generate numerical question using AI
       | "What is -5 / 2?" | "-2.5" | "2.5"            |
 
 
-  @skip @ai
+  @ai
   Scenario: Robin drafts a numerical question with answer and tolerance
     Given I start creating a new question
     When I open Robin AI

@@ -10,7 +10,7 @@ export const questionToPatch = (q: QuestionDraft): QuestionFormStatePatch => ({
     explanations: q.explanations,
     correctAnswers: Array.from(q.correctAnswers),
     questionExplanation: q.questionExplanation,
-    isEasy: q.isEasy,
+    isEasy: q.isEasy ?? false,
     showExplanations: q.explanations.some(explanation => !!explanation),
     numericalAnswer: q.questionType === 'numerical' ? (q.answers[0] ?? '') : '',
     tolerance: q.tolerance ?? 0,
@@ -36,6 +36,6 @@ export const questionDraftToRequest = (q: QuestionDraft): QuestionRequest =>
               explanations: Array.from(q.explanations),
               questionExplanation: q.questionExplanation,
               questionType: q.questionType,
-              isEasy: q.isEasy,
-              tags: [],
+              isEasy: q.isEasy ?? false,
+              tags: q.tags ? Array.from(q.tags) : [],
           }

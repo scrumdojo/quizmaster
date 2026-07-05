@@ -48,4 +48,8 @@ export interface QuestionEvaluation {
     readonly question?: Question
 }
 
-export type QuestionDraft = Omit<Question, 'id' | 'workspaceGuid'>
+// Robin chat drafts carry isEasy/tags only when the model actually produced them.
+export type QuestionDraft = Omit<Question, 'id' | 'workspaceGuid' | 'isEasy' | 'tags'> & {
+    readonly isEasy?: boolean
+    readonly tags?: readonly string[]
+}

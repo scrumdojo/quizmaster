@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { postAiAssistant } from '#fe/make/api/ai-assistant.ts'
+import { postAiAssistantChat } from '#fe/make/api/ai-assistant.ts'
 import type { QuestionDraft, QuestionType } from '#fe/shared/model/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'
@@ -33,16 +33,18 @@ interface UseRobinPromptFormArgs {
     readonly questionType: QuestionType
 }
 
-const generateSingleDraft = async ({
+const generateChatDrafts = async ({
     workspaceGuid,
     question,
-    questionType,
-}: RobinGenerateRequest): Promise<RobinGenerationResult> => ({
-    drafts: [await postAiAssistant(workspaceGuid, { question, questionType })],
-})
+}: RobinGenerateRequest): Promise<RobinGenerationResult> => {
+    const response = await postAiAssistantChat(workspaceGuid, {
+        messages: [{ role: 'user', content: question }],
+    })
+    return { drafts: response.drafts }
+}
 
 export const useRobinPromptForm = ({
-    generateRequest = generateSingleDraft,
+    generateRequest = generateChatDrafts,
     saveDrafts,
     workspaceId,
     questionType,

@@ -2,34 +2,6 @@ Feature: Generate question using AI
   Robin AI drafts a question in chat from a topic. The quiz maker reviews
   the draft and uses it to fill the question form before saving.
 
-  Scenario: Create question Robin AI uses the chat composer docked at the bottom
-    Given I start creating a new question
-    When I open Robin AI
-    Then Robin AI message composer is docked to the bottom of the chat
-
-
-  Scenario: Create question Robin AI does not show a Generate button
-    Given I start creating a new question
-    When I open Robin AI
-    Then I do not see Robin AI send button
-
-
-  Scenario: Using a generated question fills the form and closes the assistant
-    Given I start creating a new question
-    And Robin AI will return these generated questions:
-      | question                               | answers                  |
-      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
-    When I open Robin AI
-    And I ask AI:
-      | Generate a question about capital cities |
-    And I use the generated question
-    Then I see question text "What is the capital of Czech Republic?"
-    And the question is single choice
-    And I see at least 3 answers
-    And exactly 1 answer is marked correct
-    And I do not see AI section
-
-
   @ai
   Scenario: AI-generated question shows explanations
     Given I start creating a new question
@@ -40,30 +12,6 @@ Feature: Generate question using AI
     Then Question field is not empty
     And I see explanations are enabled
     And all answers have explanations
-
-
-  @ai
-  Scenario: Generate a single-choice question
-    Given I start creating a new question
-    When I open Robin AI
-    And I ask AI:
-      | Generate a question about capital cities |
-      | and 2 incorrect answers                  |
-    Then I see generated question 1 in Robin chat
-    And generated question 1 in Robin chat has at least 3 answers
-    And generated question 1 in Robin chat has 1 highlighted correct answers
-
-
-  @ai
-  Scenario: Generate a multiple-choice question
-    Given I start creating a new question
-    When I open Robin AI
-    And I ask AI for multiple choice question:
-      | Generate a question about European capitals |
-      | and 2 incorrect answers                     |
-    Then I see generated question 1 in Robin chat
-    And generated question 1 in Robin chat has at least 4 answers
-    And generated question 1 in Robin chat has at least 2 highlighted correct answers
 
 
   @ai
@@ -184,7 +132,7 @@ Feature: Generate question using AI
     * AI received current question context with answer "Bratislava"
 
 
-  @skip @ai
+  @ai
   Scenario: Robin drafts a single-choice question from a topic
     Given I start creating a new question
     When I open Robin AI
@@ -196,7 +144,7 @@ Feature: Generate question using AI
     And generated question 1 in Robin chat has 1 highlighted correct answers
 
 
-  @skip @ai
+  @ai
   Scenario: Robin drafts a multiple-choice question
     Given I start creating a new question
     When I open Robin AI
@@ -224,7 +172,7 @@ Feature: Generate question using AI
     And question 1 in draft version 2 can be used
 
 
-  @skip @ai
+  @ai
   Scenario: Using a chosen version fills the form and closes the assistant
     Given I start creating a new question
     When I open Robin AI

@@ -39,6 +39,17 @@ public class AiAssistantController {
         );
     }
 
+    @PostMapping("/chat")
+    public ResponseEntity<RobinChatResponse> chat(
+        @PathVariable String workspaceGuid,
+        @RequestBody RobinChatRequest request
+    ) {
+        requireWorkspaceExists(workspaceGuid);
+        return ResponseEntity.ok(
+            aiAssistantService.chat(request.messages(), workspaceGuid, request.excludedQuestionId())
+        );
+    }
+
     @PostMapping("/batch")
     public ResponseEntity<QuestionResponse[]> generateBatch(
         @PathVariable String workspaceGuid,
