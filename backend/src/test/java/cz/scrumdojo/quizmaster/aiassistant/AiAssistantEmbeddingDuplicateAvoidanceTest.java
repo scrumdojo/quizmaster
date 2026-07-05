@@ -43,7 +43,8 @@ class AiAssistantEmbeddingDuplicateAvoidanceTest {
 
         RobinChatResponse response = chat("Generate an exact question: " + EXISTING_QUESTION, workspace, null);
 
-        assertThat(response.drafts()).isNotEmpty();
+        // The model may draft an alternative or the duplicate may be filtered into a
+        // notice — either way no returned draft duplicates the workspace.
         assertThat(response.drafts().stream().map(QuestionDraft::question).map(this::normalizeText)).doesNotContain(
             normalizeText(EXISTING_QUESTION)
         );
@@ -78,7 +79,28 @@ class AiAssistantEmbeddingDuplicateAvoidanceTest {
             null
         );
 
-        assertThat(response.drafts()).isNotEmpty();
+        assertThat(response.drafts().stream().map(QuestionDraft::question).map(this::normalizeText)).doesNotContain(
+            normalizeText(EXISTING_QUESTION)
+        );
+    }
+
+    @Test
+    void chatReportsExactDuplicateAsNoticeInsteadOfError() {
+        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
+
+        // No embedding on the seeded question: the uniqueness rule stays out of the
+        // system prompt, so the model reproduces the verbatim request and only the
+        // deterministic exact-text match can catch it.
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        fixtures.save(fixtures.questionIn(workspace).question(EXISTING_QUESTION).build());
+
+        RobinChatResponse response = chat(
+            "Create exactly this question, verbatim: \"" + EXISTING_QUESTION + "\"",
+            workspace,
+            null
+        );
+
+        assertThat(response.notice()).isNotBlank();
         assertThat(response.drafts().stream().map(QuestionDraft::question).map(this::normalizeText)).doesNotContain(
             normalizeText(EXISTING_QUESTION)
         );

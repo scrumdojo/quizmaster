@@ -75,7 +75,7 @@ export const RobinSheet = ({
                             <div
                                 key={`${message.role}-${index}-${message.text}`}
                                 className={`robin-chat-message robin-chat-message--${message.role}`}
-                                data-testid="robin-chat-message"
+                                data-testid={message.notice ? 'robin-chat-notice' : 'robin-chat-message'}
                             >
                                 {message.text}
                             </div>

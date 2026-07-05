@@ -370,10 +370,12 @@ const normalizeQuestionText = (question: string) =>
         .replace(/\s+/g, ' ')
         .trim()
 
-Then('the generated question in Robin chat should not ask {string}', async function (question: string) {
-    await this.robinSheetPage.expectGeneratedQuestionVisible(1)
-    const title = await this.robinSheetPage.generatedQuestionTitleText(1)
-    expect(normalizeQuestionText(title)).not.toBe(normalizeQuestionText(question))
+// The backend filters duplicates out of the drafts deterministically; the model may
+// respond with an alternative question or with a refusal notice — both are fine, a
+// duplicate draft is not.
+Then('no generated question in Robin chat asks {string}', async function (question: string) {
+    const titles = await this.robinSheetPage.allGeneratedQuestionTitles()
+    expect(titles.map(normalizeQuestionText)).not.toContain(normalizeQuestionText(question))
 })
 
 // Field edits

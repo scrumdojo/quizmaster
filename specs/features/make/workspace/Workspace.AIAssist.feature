@@ -60,7 +60,7 @@ Feature: Generate question preview from workspace using AI
     And every answer of generated question 1 in Robin chat shows an explanation
 
 
-  @skip @ai
+  @ai
   Scenario: Robin refuses a duplicate with a chat message and lets the maker continue
     Given workspace "Workspace"
     And the workspace already contains the question "Which country is the largest producer of coffee?" without a dedup embedding

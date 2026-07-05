@@ -14,6 +14,9 @@ export interface RobinFormBinding {
 export interface RobinChatMessage {
     readonly role: 'user' | 'assistant'
     readonly text: string
+    // A notice is an assistant bubble carrying a refusal (e.g. duplicate rejection),
+    // rendered distinctly so specs can assert it without depending on its wording.
+    readonly notice?: boolean
 }
 
 interface UseRobinPromptFormArgs {
@@ -63,8 +66,14 @@ export const useRobinPromptForm = ({
             const messages = [...transcript, { role: 'user' as const, content: submittedPrompt }]
             const response = await postAiAssistantChat(workspaceId, { messages, excludedQuestionId })
             setTranscript([...messages, { role: 'assistant', drafts: response.drafts }])
-            setDraftVersions(versions => [...versions, response.drafts])
-            setChatMessages(previous => [...previous, { role: 'user', text: submittedPrompt }])
+            if (response.drafts.length > 0) {
+                setDraftVersions(versions => [...versions, response.drafts])
+            }
+            setChatMessages(previous => [
+                ...previous,
+                { role: 'user', text: submittedPrompt },
+                ...(response.notice ? [{ role: 'assistant' as const, text: response.notice, notice: true }] : []),
+            ])
         } catch (e) {
             const message = e instanceof Error ? e.message : 'AI assistant request failed.'
             setError(message || 'AI assistant request failed.')

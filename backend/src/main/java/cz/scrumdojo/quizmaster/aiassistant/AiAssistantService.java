@@ -17,7 +17,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -63,6 +62,8 @@ public class AiAssistantService {
         return new ClassPathResource(path).getContentAsString(StandardCharsets.UTF_8);
     }
 
+    // A duplicate is not an error in a conversation: the duplicate drafts are filtered
+    // out and reported back as a notice, and the maker's next message is the retry.
     public RobinChatResponse chat(List<RobinChatMessage> messages, String workspaceGuid, Integer excludedQuestionId) {
         validateChatRequest(messages);
         List<String> allQuestionTexts = questionEmbeddingService.workspaceQuestionTexts(
@@ -72,25 +73,34 @@ public class AiAssistantService {
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
             questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, excludedQuestionId);
 
-        AssistantBatchResponse response = generateChatCandidate(messages, existingEmbeddings, null);
+        AssistantBatchResponse response = generateChatCandidate(messages, existingEmbeddings);
         validateChatResponses(response.questions());
-        DuplicateMatch duplicate = findChatDuplicate(response.questions(), allQuestionTexts, existingEmbeddings);
-        if (duplicate == null) {
-            return toChatResponse(response.questions());
+
+        List<QuestionDraft> drafts = new ArrayList<>();
+        List<String> duplicatedQuestions = new ArrayList<>();
+        for (AssistantResponse question : response.questions()) {
+            DuplicateMatch duplicate = findChatDuplicate(question, allQuestionTexts, existingEmbeddings);
+            if (duplicate == null) {
+                drafts.add(toChatDraft(question));
+            } else {
+                duplicatedQuestions.add(duplicate.matchedQuestion());
+            }
         }
 
-        AssistantBatchResponse retryResponse = generateChatCandidate(messages, existingEmbeddings, duplicate);
-        validateChatResponses(retryResponse.questions());
-        DuplicateMatch retryDuplicate = findChatDuplicate(
-            retryResponse.questions(),
-            allQuestionTexts,
-            existingEmbeddings
+        return new RobinChatResponse(drafts, duplicateNotice(duplicatedQuestions));
+    }
+
+    private static String duplicateNotice(List<String> duplicatedQuestions) {
+        if (duplicatedQuestions.isEmpty()) {
+            return null;
+        }
+        return (
+            "I did not draft " +
+            (duplicatedQuestions.size() == 1 ? "one question" : duplicatedQuestions.size() + " questions") +
+            " because the workspace already covers: " +
+            String.join("; ", duplicatedQuestions) +
+            " — ask me for a different angle on the topic."
         );
-        if (retryDuplicate == null) {
-            return toChatResponse(retryResponse.questions());
-        }
-
-        throw duplicateGenerationFailure();
     }
 
     private void validateToken() {
@@ -147,11 +157,10 @@ public class AiAssistantService {
 
     private AssistantBatchResponse generateChatCandidate(
         List<RobinChatMessage> messages,
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
-        DuplicateMatch retryFeedback
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
     ) {
         List<Message> replay = new ArrayList<>();
-        replay.add(new Message("system", robinChatPrompt + embeddingUniquenessRule(existingEmbeddings, retryFeedback)));
+        replay.add(new Message("system", robinChatPrompt + embeddingUniquenessRule(existingEmbeddings)));
         for (RobinChatMessage message : messages) {
             replay.add(new Message(message.role(), transcriptContent(message)));
         }
@@ -172,58 +181,25 @@ public class AiAssistantService {
     }
 
     private DuplicateMatch findChatDuplicate(
-        AssistantResponse[] responses,
+        AssistantResponse response,
         List<String> allQuestionTexts,
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
     ) {
-        for (AssistantResponse response : responses) {
-            String normalizedGenerated = normalizeForExactMatch(response.question());
-            for (String existingText : allQuestionTexts) {
-                if (normalizeForExactMatch(existingText).equals(normalizedGenerated)) {
-                    return new DuplicateMatch(response.question(), existingText, 1.0);
-                }
+        // Exact-text check — works even when embeddings haven't been stored yet
+        String normalizedGenerated = normalizeForExactMatch(response.question());
+        for (String existingText : allQuestionTexts) {
+            if (normalizeForExactMatch(existingText).equals(normalizedGenerated)) {
+                return new DuplicateMatch(response.question(), existingText, 1.0);
             }
         }
-        return findBatchDuplicate(responses, existingEmbeddings);
-    }
 
-    private DuplicateMatch findBatchDuplicate(
-        AssistantResponse[] responses,
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
-    ) {
-        if (responses == null || (responses.length < 2 && existingEmbeddings.isEmpty())) {
+        if (existingEmbeddings.isEmpty()) {
             return null;
         }
-
-        List<String> questions = Arrays.stream(responses).map(AssistantResponse::question).toList();
 
         try {
-            List<double[]> generatedEmbeddings = questionEmbeddingService.embedQuestionTexts(questions);
-            for (int generatedIndex = 0; generatedIndex < generatedEmbeddings.size(); generatedIndex++) {
-                DuplicateMatch existingDuplicate = highestDuplicate(
-                    questions.get(generatedIndex),
-                    generatedEmbeddings.get(generatedIndex),
-                    existingEmbeddings
-                );
-                if (existingDuplicate != null) {
-                    return existingDuplicate;
-                }
-
-                for (int previousIndex = 0; previousIndex < generatedIndex; previousIndex++) {
-                    double similarity = EmbeddingSimilarity.cosine(
-                        generatedEmbeddings.get(generatedIndex),
-                        generatedEmbeddings.get(previousIndex)
-                    );
-                    if (similarity >= similarityThreshold) {
-                        return new DuplicateMatch(
-                            questions.get(generatedIndex),
-                            questions.get(previousIndex),
-                            similarity
-                        );
-                    }
-                }
-            }
-            return null;
+            double[] generatedEmbedding = questionEmbeddingService.embedQuestionText(response.question());
+            return highestDuplicate(response.question(), generatedEmbedding, existingEmbeddings);
         } catch (RuntimeException e) {
             return null;
         }
@@ -245,10 +221,9 @@ public class AiAssistantService {
     }
 
     private static String embeddingUniquenessRule(
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
-        DuplicateMatch retryFeedback
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
     ) {
-        if (existingEmbeddings.isEmpty() && retryFeedback == null) {
+        if (existingEmbeddings.isEmpty()) {
             return "";
         }
 
@@ -264,38 +239,16 @@ public class AiAssistantService {
             If the user asks for an exact duplicate, keep only the broad topic and create a question about a different fact, concept, or calculation.
             """
         );
-        if (!existingEmbeddings.isEmpty()) {
-            rule.append("Existing workspace questions:\n");
-            appendQuestionList(
-                rule,
-                existingEmbeddings.stream().map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText).toList()
-            );
-        }
-        if (retryFeedback != null) {
-            rule.append("\nThe previous draft was too similar to another question.\n");
-            rule.append("Previous draft: ").append(retryFeedback.generatedQuestion()).append("\n");
-            rule.append("Matched question: ").append(retryFeedback.matchedQuestion()).append("\n");
-            rule
-                .append("Similarity score: ")
-                .append(String.format(Locale.ROOT, "%.4f", retryFeedback.similarity()))
-                .append("\n");
-            rule.append("The next draft must not preserve the same wording, answer, fact, or calculation.\n");
-            rule.append(
-                "Generate a clearly different question on the same broad topic while still following the answer-count request.\n"
-            );
-        }
+        rule.append("Existing workspace questions:\n");
+        appendQuestionList(
+            rule,
+            existingEmbeddings.stream().map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText).toList()
+        );
         return rule.toString();
     }
 
     private static String normalizeForExactMatch(String text) {
         return text.trim().toLowerCase().replaceAll("[^\\p{L}\\p{N}]+", " ").replaceAll("\\s+", " ").trim();
-    }
-
-    private static ResponseStatusException duplicateGenerationFailure() {
-        return new ResponseStatusException(
-            HttpStatus.BAD_GATEWAY,
-            "AI assistant could not generate a question that is different from existing workspace questions."
-        );
     }
 
     private static void appendQuestionList(StringBuilder target, List<String> questions) {
@@ -339,10 +292,6 @@ public class AiAssistantService {
                 "AI assistant returned invalid chat response: unknown questionType " + questionType + "."
             );
         }
-    }
-
-    private static RobinChatResponse toChatResponse(AssistantResponse[] responses) {
-        return new RobinChatResponse(Arrays.stream(responses).map(AiAssistantService::toChatDraft).toList(), null);
     }
 
     private static QuestionDraft toChatDraft(AssistantResponse response) {

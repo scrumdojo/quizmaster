@@ -67,8 +67,10 @@ export class RobinSheetPage {
         expect(this.generatedQuestionNumberLocator(index)).toHaveText(`${index}.`)
     expectGeneratedQuestionTitle = (index: number, title: string) =>
         expect(this.generatedQuestionTitleLocator(index)).toHaveText(title)
-    generatedQuestionTitleText = async (index: number): Promise<string> =>
-        (await this.generatedQuestionTitleLocator(index).textContent())?.trim() ?? ''
+    allGeneratedQuestionTitles = async (): Promise<string[]> => {
+        const titles = await this.page.getByTestId('robin-generated-question-title').allTextContents()
+        return titles.map(title => title.trim())
+    }
     expectGeneratedQuestionAnswerCount = (index: number, count: number) =>
         expect(this.generatedQuestionAnswersLocator(index)).toHaveCount(count)
     expectGeneratedQuestionAnswerCountAtLeast = async (index: number, count: number) =>
