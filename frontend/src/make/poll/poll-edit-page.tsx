@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router'
 import { fetchWorkspacePoll, postPoll, putPoll } from '#fe/make/api/poll.ts'
 import { Button, Field, Form, SubmitButton, TextInput, TrashButton } from '#fe/shared'
 import { useApi } from '#fe/shared/api/hooks.ts'
+import { createValidator, ErrorMessage } from '#fe/shared/forms/validations.tsx'
 import { Page } from '#fe/shared/page.tsx'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 import type { PollTake } from '#shared/types/poll.ts'
@@ -19,6 +20,13 @@ const emptyAnswers: readonly AnswerDraft[] = [
     { key: 1, id: null, text: '' },
     { key: 2, id: null, text: '' },
 ]
+
+const errorMessage = {
+    'empty-question': 'Question must not be empty.',
+    'empty-answer': 'Answers must not be empty.',
+}
+
+type ErrorCode = keyof typeof errorMessage
 
 export const PollEditPage = () => {
     const workspaceId = useWorkspaceId()
@@ -47,11 +55,19 @@ export const PollEditPage = () => {
 
     const removeAnswer = (key: number) => setAnswers(answers.filter(answer => answer.key !== key))
 
+    const validate = () => {
+        const errors = new Set<ErrorCode>()
+        if (question.trim() === '') errors.add('empty-question')
+        if (answers.some(answer => answer.text.trim() === '')) errors.add('empty-answer')
+        return errors
+    }
+
+    const validator = createValidator(validate, errorMessage)
+
     const submit = () => {
-        const filled = answers.filter(answer => answer.text.trim() !== '')
         const save = isEdit
-            ? putPoll(workspaceId, pollId, { question, answers: filled.map(({ id, text }) => ({ id, text })) })
-            : postPoll(workspaceId, { question, answers: filled.map(answer => answer.text) })
+            ? putPoll(workspaceId, pollId, { question, answers: answers.map(({ id, text }) => ({ id, text })) })
+            : postPoll(workspaceId, { question, answers: answers.map(answer => answer.text) })
         void save.then(() => navigate(workspaceUrl))
     }
 
@@ -63,9 +79,10 @@ export const PollEditPage = () => {
             back={{ to: workspaceUrl, label: 'Back to workspace' }}
         >
             {(!isEdit || pollLoaded) && (
-                <Form onSubmit={submit}>
+                <Form validator={validator} onSubmit={submit}>
                     <Field label="Poll question" required>
                         <TextInput id="poll-question" placeholder="question" value={question} onChange={setQuestion} />
+                        <ErrorMessage errorCode="empty-question" />
                     </Field>
                     <Field label="Answers" required>
                         {answers.map(answer => (
@@ -79,6 +96,7 @@ export const PollEditPage = () => {
                                 <TrashButton onClick={() => removeAnswer(answer.key)} disabled={answers.length < 3} />
                             </div>
                         ))}
+                        <ErrorMessage errorCode="empty-answer" />
                         <Button id="add-poll-answer" onClick={addAnswer}>
                             + Add answer
                         </Button>

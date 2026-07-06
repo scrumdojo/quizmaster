@@ -49,4 +49,14 @@ export class PollFormPage {
         await this.page.locator('button[type="submit"]').click()
         await pendingResponse
     }
+
+    // Validation errors short-circuit submit without a network request.
+    attemptSubmit = () => this.page.locator('button[type="submit"]').click()
+
+    expectErrorMessages = async (errorCodes: readonly string[]) => {
+        await expect(this.page.locator('.alert.error')).toHaveCount(errorCodes.length)
+        for (const errorCode of errorCodes) {
+            await expect(this.page.getByTestId(errorCode)).toBeVisible()
+        }
+    }
 }

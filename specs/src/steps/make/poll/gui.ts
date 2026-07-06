@@ -42,6 +42,14 @@ When('I submit the poll', async function () {
     await this.pollFormPage.submit()
 })
 
+When('I attempt to submit the poll', async function () {
+    await this.pollFormPage.attemptSubmit()
+})
+
+Then('I see poll error messages', async function (errorTable: DataTable) {
+    await this.pollFormPage.expectErrorMessages(errorTable.raw().map(row => `${row[0]}`))
+})
+
 When('I delete poll {string} from the workspace', async function (pollBookmark: string) {
     const spec = this.pollBookmarks[pollBookmark]
     if (!spec) {
