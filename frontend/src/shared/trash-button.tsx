@@ -8,10 +8,8 @@ type TrashButtonProps = {
     disabled?: boolean
 }
 
-const TrashButton = ({ onClick, disabled }: TrashButtonProps) => (
+export const TrashButton = ({ onClick, disabled }: TrashButtonProps) => (
     <Button className="trash-button" onClick={onClick} disabled={disabled}>
         <img src={trashIcon} alt="Delete" width="20" height="20" />
     </Button>
 )
-
-export default TrashButton

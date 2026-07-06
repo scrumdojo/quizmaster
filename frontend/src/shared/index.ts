@@ -4,6 +4,7 @@ export * from './item-list.tsx'
 export * from './link-button.tsx'
 export * from './page.tsx'
 export * from './row.tsx'
+export * from './trash-button.tsx'
 
 export * from './forms/checkbox.tsx'
 export * from './forms/question-type-radio-set.tsx'
