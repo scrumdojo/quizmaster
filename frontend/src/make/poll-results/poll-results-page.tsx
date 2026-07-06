@@ -1,6 +1,6 @@
 import './poll-results-page.scss'
 import { QRCodeSVG } from 'qrcode.react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 
 import { fetchWorkspacePoll, fetchWorkspacePollResults } from '#fe/make/api/poll.ts'
@@ -8,6 +8,8 @@ import { useApi } from '#fe/shared/api/hooks.ts'
 import { Page } from '#fe/shared/page.tsx'
 import { urls } from '#fe/urls.ts'
 import type { PollResultsResponse, PollTake } from '#shared/types/poll.ts'
+
+const RESULTS_REFRESH_MS = 2000
 
 export const PollResultsPage = () => {
     const params = useParams()
@@ -19,6 +21,17 @@ export const PollResultsPage = () => {
 
     useApi(params.id, id => fetchWorkspacePoll(workspaceId, id), setPoll)
     useApi(params.id, fetchPollResults, setResults)
+
+    const pollId = params.id
+    useEffect(() => {
+        if (!pollId) return
+
+        const intervalId = window.setInterval(() => {
+            void fetchPollResults(pollId).then(setResults)
+        }, RESULTS_REFRESH_MS)
+
+        return () => window.clearInterval(intervalId)
+    }, [pollId, fetchPollResults])
 
     const takeUrl = poll ? `${window.location.origin}${urls.pollTake(poll.id)}` : ''
 

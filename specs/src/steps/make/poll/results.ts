@@ -35,6 +35,10 @@ Given('poll {string} has votes', async function (pollBookmark: string, data: Dat
     await seedPollVotes(this, pollBookmark, parseVoteSeed(data))
 })
 
+When('poll {string} receives votes', async function (pollBookmark: string, data: DataTable) {
+    await seedPollVotes(this, pollBookmark, parseVoteSeed(data))
+})
+
 When('I open poll {string} results', async function (pollBookmark: string) {
     await openPollResults(this, pollBookmark)
 })
