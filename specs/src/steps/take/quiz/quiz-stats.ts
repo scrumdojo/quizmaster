@@ -43,3 +43,10 @@ Then(
         await this.quizStatsPage.expectQuestionAccuracyBand(question, percent, band)
     },
 )
+
+Then(
+    'tag {string} shows accuracy {string} in the {string} band',
+    async function (tag: string, percent: string, band: string) {
+        await this.quizStatsPage.expectTagAccuracyBand(tag, percent, band)
+    },
+)

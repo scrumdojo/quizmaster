@@ -37,7 +37,15 @@ export class QuizStatsPage {
         )
 
     expectQuestionAccuracyBand = async (question: string, percent: string, band: string) => {
-        const row = this.tableBodyRowsLocator(this.questionStatsTableLocator()).filter({ hasText: question })
+        await this.expectRowAccuracyBand(this.questionStatsTableLocator(), question, percent, band)
+    }
+
+    expectTagAccuracyBand = async (tag: string, percent: string, band: string) => {
+        await this.expectRowAccuracyBand(this.tagStatsTableLocator(), tag, percent, band)
+    }
+
+    private expectRowAccuracyBand = async (table: Locator, rowText: string, percent: string, band: string) => {
+        const row = this.tableBodyRowsLocator(table).filter({ hasText: rowText })
         const pill = row.locator('.accuracy-pill')
         await expectTextToBe(pill, percent)
         await expect(pill).toHaveAttribute('data-band', band)

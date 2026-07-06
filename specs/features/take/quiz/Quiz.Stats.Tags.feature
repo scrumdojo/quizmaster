@@ -92,6 +92,33 @@ Feature: Show stats per tag
       | astronomy | 2         | 1        | 0%      | 1 (100%)          | 0 (0%)    | 1          |
 
 
+  Scenario: Tag accuracy shows as a colour-coded pill
+    Given workspace "Bands" with questions
+      | bookmark | question                      | tag  | answers                    |
+      | Strong   | What is 2 + 2?                | math | 4 (*), 3, 5                |
+      | Mixed    | What is the capital of Italy? | geo  | Rome (*), Naples, Florence |
+      | Weak     | What color is the sky?        | sky  | Blue (*), Green, Red       |
+    And quiz "Banded Quiz" with all questions
+
+    # Two attempts: "math" always right, "geo" half right, "sky" always wrong
+    When I start the quiz
+    * I answer "4"
+    * I answer "Rome"
+    * I answer "Green"
+    * I finish the quiz in 5 seconds
+
+    When I start the quiz
+    * I answer "4"
+    * I answer "Naples"
+    * I answer "Red"
+    * I finish the quiz in 5 seconds
+
+    When I open quiz "Banded Quiz" statistics
+    Then tag "math" shows accuracy "100%" in the "high" band
+    And tag "geo" shows accuracy "50%" in the "mid" band
+    And tag "sky" shows accuracy "0%" in the "low" band
+
+
   Scenario: Tag breakdown is hidden when no question has a tag
     Given quiz "Plain Quiz" with 2 questions
     When I start the quiz
