@@ -104,8 +104,9 @@ A poll contains:
 The backend supports creating polls and listing existing poll definitions
 through workspace-scoped authoring API. The public take API lets a voter fetch
 the poll question and answer ids by poll id and then submit an anonymous vote
-using the selected answer's id. Poll definitions and submitted votes are stored
-in memory for the duration of the running application process. The author can
+using the selected answer's id. Poll definitions are stored in PostgreSQL
+(`poll` and `poll_answer` tables); votes are stored as an aggregate counter per
+answer, incremented atomically on each submission. The author can
 fetch aggregated results for a poll through a workspace-scoped results
 endpoint; the response contains every answer with its id, text, and current
 vote count, including answers that still have zero votes.
