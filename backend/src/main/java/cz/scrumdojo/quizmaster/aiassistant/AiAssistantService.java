@@ -169,7 +169,7 @@ public class AiAssistantService {
 
     // Assistant turns are replayed as the canonical {questions:[...]} JSON so the model
     // always sees its prior output in schema-perfect form, whatever it originally emitted.
-    private String transcriptContent(RobinChatMessage message) {
+    String transcriptContent(RobinChatMessage message) {
         if (message.drafts() == null) {
             return message.content() == null ? "" : message.content();
         }

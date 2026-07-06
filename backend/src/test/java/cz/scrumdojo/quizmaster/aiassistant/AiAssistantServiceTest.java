@@ -3,6 +3,7 @@ package cz.scrumdojo.quizmaster.aiassistant;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionType;
@@ -27,6 +28,9 @@ public class AiAssistantServiceTest {
 
     @Autowired
     private TestFixtures fixtures;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Value("${ai.token:}")
     private String apiToken;
@@ -464,6 +468,61 @@ public class AiAssistantServiceTest {
         assertThrows(ResponseStatusException.class, () ->
             AiAssistantService.validateChatResponses(new AiAssistantService.AssistantResponse[] {})
         );
+    }
+
+    @Test
+    void transcriptContentSerializesDraftsAsCanonicalQuestionsJson() throws Exception {
+        RobinChatRequest.RobinChatMessage message = new RobinChatRequest.RobinChatMessage(
+            "assistant",
+            null,
+            List.of(
+                new QuestionDraft(
+                    "What is the capital of France?",
+                    QuestionType.SINGLE,
+                    new String[] { "Paris", "Berlin" },
+                    new int[] { 0 },
+                    new String[] { "Correct.", "Wrong." },
+                    "",
+                    null,
+                    null,
+                    null
+                )
+            )
+        );
+
+        String json = aiAssistantService.transcriptContent(message);
+
+        String expected = """
+            {
+                "questions": [
+                    {
+                        "question": "What is the capital of France?",
+                        "questionType": "single",
+                        "answers": ["Paris", "Berlin"],
+                        "correctAnswers": [0],
+                        "explanations": ["Correct.", "Wrong."],
+                        "questionExplanation": ""
+                    }
+                ]
+            }
+            """;
+        assertEquals(objectMapper.readTree(expected), objectMapper.readTree(json));
+    }
+
+    @Test
+    void transcriptContentReturnsPlainContentWhenNoDrafts() {
+        RobinChatRequest.RobinChatMessage message = new RobinChatRequest.RobinChatMessage(
+            "user",
+            "Add one answer",
+            null
+        );
+        assertEquals("Add one answer", aiAssistantService.transcriptContent(message));
+    }
+
+    @Test
+    void transcriptContentReturnsEmptyStringForNullContentAndNoDrafts() {
+        RobinChatRequest.RobinChatMessage message = new RobinChatRequest.RobinChatMessage("assistant", null, null);
+        assertEquals("", aiAssistantService.transcriptContent(message));
     }
 
     @Test
