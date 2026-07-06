@@ -25,6 +25,8 @@ export class QuizStatsPage {
     expectAttemptStatsRowCount = (count: number) =>
         expect(this.tableBodyRowsLocator(this.attemptStatsTableLocator())).toHaveCount(count)
 
+    expectNoTagStatsTable = () => expect(this.tagStatsTableLocator()).toHaveCount(0)
+
     expectSummaryStatsRowCount = (count: number) =>
         expect(this.tableBodyRowsLocator(this.summaryStatsTableLocator())).toHaveCount(count)
 

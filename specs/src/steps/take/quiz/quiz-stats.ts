@@ -33,6 +33,10 @@ Then('I see tag stats table', async function (data: DataTable) {
     await expectTagStatsTable(this.quizStatsPage, data)
 })
 
+Then('I do not see the tag stats table', async function () {
+    await this.quizStatsPage.expectNoTagStatsTable()
+})
+
 Then(
     'question {string} shows accuracy {string} in the {string} band',
     async function (question: string, percent: string, band: string) {

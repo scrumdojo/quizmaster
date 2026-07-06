@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class QuizStatsService {
 
+    private static final String UNTAGGED = "Untagged";
+
     private final QuizRepository quizRepository;
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
@@ -99,16 +101,32 @@ public class QuizStatsService {
         Map<Integer, List<AttemptQuestion>> scoresByQuestionId
     ) {
         Map<String, List<Question>> questionsByTag = new HashMap<>();
+        List<Question> untaggedQuestions = new ArrayList<>();
         for (Question question : questions) {
-            for (String tag : question.getTags() == null ? new String[0] : question.getTags()) {
+            String[] tags = question.getTags() == null ? new String[0] : question.getTags();
+            if (tags.length == 0) {
+                untaggedQuestions.add(question);
+                continue;
+            }
+            for (String tag : tags) {
                 questionsByTag.computeIfAbsent(tag, t -> new ArrayList<>()).add(question);
             }
+        }
+        if (questionsByTag.isEmpty()) {
+            return List.of();
+        }
+        if (!untaggedQuestions.isEmpty()) {
+            questionsByTag.put(UNTAGGED, untaggedQuestions);
         }
         return questionsByTag
             .entrySet()
             .stream()
             .map(entry -> toTagRecord(entry.getKey(), entry.getValue(), scoresByQuestionId))
-            .sorted(Comparator.comparingDouble(QuizStatsService::accuracy).thenComparing(TagStatsRecord::tag))
+            .sorted(
+                Comparator.comparing((TagStatsRecord record) -> UNTAGGED.equals(record.tag()))
+                    .thenComparingDouble(QuizStatsService::accuracy)
+                    .thenComparing(TagStatsRecord::tag)
+            )
             .toList();
     }
 

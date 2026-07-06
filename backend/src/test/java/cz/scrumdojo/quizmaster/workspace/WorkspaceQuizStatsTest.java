@@ -360,6 +360,43 @@ public class WorkspaceQuizStatsTest {
     }
 
     @Test
+    public void untaggedQuestionsGatherInUntaggedRowSortedLast() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question tagged = fixtures.save(
+            fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum" })
+        );
+        Question untagged = fixtures.save(fixtures.questionIn(workspace).question("What is a Backlog?"));
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(tagged, untagged).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build()
+        );
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz), tagged, untagged);
+        fixtures.score(attempt, tagged, AnswerStatus.CORRECT, LocalDateTime.now());
+        fixtures.score(attempt, untagged, AnswerStatus.INCORRECT, LocalDateTime.now());
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tagStatistics[0].tag").value("scrum"))
+            .andExpect(jsonPath("$.tagStatistics[1].tag").value("Untagged"))
+            .andExpect(jsonPath("$.tagStatistics[1].questions").value(1))
+            .andExpect(jsonPath("$.tagStatistics[1].incorrectAnswers").value(1));
+    }
+
+    @Test
+    public void noTagStatisticsWhenNoQuestionHasTags() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build()
+        );
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz), q1);
+        fixtures.score(attempt, q1, AnswerStatus.CORRECT, LocalDateTime.now());
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tagStatistics.length()").value(0));
+    }
+
+    @Test
     public void nonExistentQuizReturns404() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         mockMvc
