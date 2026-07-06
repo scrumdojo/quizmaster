@@ -247,6 +247,10 @@ export class WorkspacePage {
         await this.showQuestions()
         await this.page.locator('#create-question').click()
     }
+    createNewPoll = async () => {
+        await this.showPolls()
+        await this.page.locator('#create-poll').click()
+    }
     createNewQuiz = async () => {
         await this.showQuizzes()
         await this.page.locator('#create-quiz').click()

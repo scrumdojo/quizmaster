@@ -14,6 +14,7 @@ import {
     QuizSharePage,
     QuizWelcomePage,
     QuizStatsPage,
+    PollCreatePage,
     PollResultsPage,
     TakeQuestionPage,
     TakePollPage,
@@ -43,6 +44,7 @@ export class QuizmasterWorld {
         this.quizSharePage = new QuizSharePage(this.page)
         this.quizStatsPage = new QuizStatsPage(this.page)
         this.pollResultsPage = new PollResultsPage(this.page)
+        this.pollCreatePage = new PollCreatePage(this.page)
         this.quizScorePage = new QuizScorePage(this.page)
         this.workspacePage = new WorkspacePage(this.page)
         this.quizCreatePage = new QuizCreatePage(this.page)
@@ -62,6 +64,7 @@ export class QuizmasterWorld {
     readonly quizSharePage: QuizSharePage
     readonly quizStatsPage: QuizStatsPage
     readonly pollResultsPage: PollResultsPage
+    readonly pollCreatePage: PollCreatePage
     readonly quizScorePage: QuizScorePage
     readonly workspacePage: WorkspacePage
     readonly quizCreatePage: QuizCreatePage

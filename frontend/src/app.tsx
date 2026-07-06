@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router'
 
+import { CreatePollPage } from '#fe/make/create-poll/create-poll-page.tsx'
 import { CreateQuestionPage } from '#fe/make/create-question/create-question-page.tsx'
 import { EditQuestionPage } from '#fe/make/create-question/edit-question-page.tsx'
 import { WorkspaceCreatePage } from '#fe/make/create-workspace/workspace-create-page.tsx'
@@ -220,6 +221,7 @@ export const App = () => {
                     <Route path={ROUTES.workspace} element={<WorkspacePage />} />
                     <Route path={ROUTES.workspaceQuestionNew} element={<CreateQuestionPage />} />
                     <Route path={ROUTES.workspaceQuestionEdit} element={<EditQuestionPage />} />
+                    <Route path={ROUTES.workspacePollNew} element={<CreatePollPage />} />
                     <Route path={ROUTES.workspacePollResults} element={<PollResultsPage />} />
 
                     {/* Quiz management (workspace-scoped) */}

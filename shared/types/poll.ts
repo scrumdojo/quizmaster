@@ -1,3 +1,8 @@
+export interface PollRequest {
+    readonly question: string
+    readonly answers: readonly string[]
+}
+
 export interface PollAnswer {
     readonly id: number
     readonly text: string

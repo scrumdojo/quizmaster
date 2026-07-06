@@ -222,13 +222,23 @@ export function WorkspacePage() {
 
             {activeTab === 'polls' && (
                 <section className="workspace-section workspace-section--polls">
-                    <ItemList title="My Polls">
+                    <ItemList
+                        title="My Polls"
+                        action={
+                            <LinkButton
+                                label="Create"
+                                icon="+"
+                                id="create-poll"
+                                to={urls.workspacePollNew(workspace.guid)}
+                            />
+                        }
+                    >
                         {hasPolls ? (
                             polls.map(poll => <PollItem key={poll.id} poll={poll} />)
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--polls">
                                 <h3>No polls yet</h3>
-                                <p>Create a poll first, then come back here to inspect its results.</p>
+                                <p>Create your first poll and start collecting votes.</p>
                             </div>
                         )}
                     </ItemList>
