@@ -420,9 +420,11 @@ public class AiAssistantService {
         }
     }
 
-    private static String[] normalizeExplanations(AssistantResponse response) {
+    static String[] normalizeExplanations(AssistantResponse response) {
         if (response.explanations() == null) {
-            return new String[response.answers().length];
+            String[] empty = new String[response.answers().length];
+            Arrays.fill(empty, "");
+            return empty;
         }
         if (response.explanations().length != response.answers().length) {
             throw new ResponseStatusException(

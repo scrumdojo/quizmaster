@@ -285,6 +285,29 @@ public class AiAssistantServiceTest {
     }
 
     @Test
+    void normalizeExplanationsFillsEmptyStringsWhenAbsent() {
+        String[] result = AiAssistantService.normalizeExplanations(
+            new AiAssistantService.AssistantResponse("Q?", new String[] { "a", "b" }, new int[] { 0 }, null, null, null)
+        );
+        assertArrayEquals(new String[] { "", "" }, result);
+    }
+
+    @Test
+    void normalizeExplanationsMapsNullElementsToEmptyStrings() {
+        String[] result = AiAssistantService.normalizeExplanations(
+            new AiAssistantService.AssistantResponse(
+                "Q?",
+                new String[] { "a", "b" },
+                new int[] { 0 },
+                new String[] { "because", null },
+                null,
+                null
+            )
+        );
+        assertArrayEquals(new String[] { "because", "" }, result);
+    }
+
+    @Test
     void validateNumericalResponse_valid() {
         assertDoesNotThrow(() ->
             AiAssistantService.validateNumericalResponse(
