@@ -454,11 +454,13 @@ public class AiAssistantService {
         String[] explanations,
         @JsonProperty("tolerance") Double tolerance,
         @JsonProperty("questionExplanation") String questionExplanation,
-        // Chat-path fields; the legacy per-type prompts never emit them.
+        // Fields the unified chat prompt emits on every question.
         @JsonProperty("questionType") String questionType,
         @JsonProperty("isEasy") Boolean isEasy,
         @JsonProperty("tags") String[] tags
     ) {
+        // Test-only convenience: omits the chat fields (questionType/isEasy/tags)
+        // so the shared per-field validators can be exercised in isolation.
         AssistantResponse(
             String question,
             String[] answers,
