@@ -1,7 +1,6 @@
 Feature: Show poll results
-  Makers will get a dedicated results screen for a poll in a later phase.
-  This feature already fixes the expected behavior: the results for a specific
-  poll show the poll question, all answers, and the vote counts per answer.
+  The results screen for a specific poll shows the poll question, all
+  answers, and the vote counts per answer.
 
   Scenario: Show vote counts for a specific poll
     Given workspace "Poll Results" with polls
