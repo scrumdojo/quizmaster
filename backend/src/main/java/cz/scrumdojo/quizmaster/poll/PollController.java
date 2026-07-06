@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,6 +53,22 @@ public class PollController {
 
         return ResponseHelper.okOrNotFound(
             pollRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).map(this::toPollResultsResponse)
+        );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<IdResponse> updatePoll(
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id,
+        @Valid @RequestBody PollUpdateRequest request
+    ) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        return ResponseHelper.okOrNotFound(
+            pollRepository
+                .findByIdAndWorkspaceGuid(id, workspaceGuid)
+                .map(poll -> pollRepository.update(request.toEntity(poll.getId(), workspaceGuid)))
+                .map(updated -> new IdResponse(updated.getId()))
         );
     }
 

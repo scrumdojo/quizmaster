@@ -3,6 +3,16 @@ export interface PollRequest {
     readonly answers: readonly string[]
 }
 
+export interface PollUpdateAnswer {
+    readonly id: number | null
+    readonly text: string
+}
+
+export interface PollUpdateRequest {
+    readonly question: string
+    readonly answers: readonly PollUpdateAnswer[]
+}
+
 export interface PollAnswer {
     readonly id: number
     readonly text: string

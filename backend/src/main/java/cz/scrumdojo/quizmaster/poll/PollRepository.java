@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface PollRepository {
     Poll save(Poll poll);
 
+    Poll update(Poll poll);
+
     List<Poll> findByWorkspaceGuid(String workspaceGuid);
 
     Optional<Poll> findById(Integer id);

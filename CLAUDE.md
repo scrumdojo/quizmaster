@@ -104,7 +104,10 @@ Endpoints live under `/api/`. Two flavors:
   AI drafting — `POST .../ai-assistant/chat` is used by the FE only). Includes
   `GET /api/workspaces/{guid}/polls` for poll list,
   `GET /api/workspaces/{guid}/polls/{id}` for poll detail,
-  `GET /api/workspaces/{guid}/polls/{id}/results` for poll results, and
+  `GET /api/workspaces/{guid}/polls/{id}/results` for poll results,
+  `POST /api/workspaces/{guid}/polls` for poll creation,
+  `PUT /api/workspaces/{guid}/polls/{id}` for poll update (answers carrying
+  their id keep collected votes; answers without an id are added), and
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.
   `GET /api/workspaces/{guid}/quizzes/{id}/live-stats` for cohort live stats on the share screen.
   Question and quiz listing support optional server-side filtering via
@@ -134,7 +137,7 @@ Controllers are the source of truth: workspace authoring lives in
 The router lives in `frontend/src/`. Path families:
 
 - `/` — home.
-- `/workspace/...` — maker views (workspace, question, quiz CRUD, poll creation and results, stats).
+- `/workspace/...` — maker views (workspace, question, quiz CRUD, poll create/edit and results, stats).
 - `/quiz/:id`, `/quiz/:id/questions/:questionId?` — taker views for quizzes.
 - `/question/:id` — taker view for a standalone question.
 - `/poll/:id` — taker view for a standalone poll.

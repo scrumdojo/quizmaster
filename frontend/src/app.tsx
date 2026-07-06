@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router'
 
-import { CreatePollPage } from '#fe/make/create-poll/create-poll-page.tsx'
 import { CreateQuestionPage } from '#fe/make/create-question/create-question-page.tsx'
 import { EditQuestionPage } from '#fe/make/create-question/edit-question-page.tsx'
 import { WorkspaceCreatePage } from '#fe/make/create-workspace/workspace-create-page.tsx'
 import { HomePage } from '#fe/make/home.tsx'
 import { PollResultsPage } from '#fe/make/poll-results/poll-results-page.tsx'
+import { PollEditPage } from '#fe/make/poll/poll-edit-page.tsx'
 import { QuizStatsPage } from '#fe/make/quiz-stats/quiz-stats-page.tsx'
 import { QuizEditPage } from '#fe/make/quiz/quiz-edit-page.tsx'
 import { QuizSharePage } from '#fe/make/quiz/share/quiz-share-page.tsx'
@@ -221,7 +221,8 @@ export const App = () => {
                     <Route path={ROUTES.workspace} element={<WorkspacePage />} />
                     <Route path={ROUTES.workspaceQuestionNew} element={<CreateQuestionPage />} />
                     <Route path={ROUTES.workspaceQuestionEdit} element={<EditQuestionPage />} />
-                    <Route path={ROUTES.workspacePollNew} element={<CreatePollPage />} />
+                    <Route path={ROUTES.workspacePollNew} element={<PollEditPage />} />
+                    <Route path={ROUTES.workspacePollEdit} element={<PollEditPage />} />
                     <Route path={ROUTES.workspacePollResults} element={<PollResultsPage />} />
 
                     {/* Quiz management (workspace-scoped) */}

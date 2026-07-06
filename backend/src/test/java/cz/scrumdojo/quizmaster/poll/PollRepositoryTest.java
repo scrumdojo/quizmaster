@@ -75,6 +75,43 @@ public class PollRepositoryTest {
     }
 
     @Test
+    public void updatedQuestionAndAnswerTextsKeepCollectedVotes() {
+        Poll saved = pollRepository.save(poll(UUID.randomUUID().toString(), "Original question"));
+        pollRepository.saveVote(saved.getId(), 1);
+
+        pollRepository.update(
+            saved
+                .toBuilder()
+                .question("Updated question")
+                .answers(List.of(new PollAnswer(1, "Every week"), new PollAnswer(2, "Monthly")))
+                .build()
+        );
+
+        var found = pollRepository.findById(saved.getId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getQuestion()).isEqualTo("Updated question");
+        assertThat(found.get().getAnswers()).containsExactly(
+            new PollAnswer(1, "Every week"),
+            new PollAnswer(2, "Monthly")
+        );
+        assertThat(pollRepository.getVoteCounts(saved.getId())).isEqualTo(Map.of(1, 1, 2, 0));
+    }
+
+    @Test
+    public void removedAnswerLosesItsVotesAndAddedAnswerStartsAtZero() {
+        Poll saved = pollRepository.save(poll(UUID.randomUUID().toString(), "Reshaped poll"));
+        pollRepository.saveVote(saved.getId(), 1);
+        pollRepository.saveVote(saved.getId(), 2);
+
+        Poll updated = pollRepository.update(
+            saved.toBuilder().answers(List.of(new PollAnswer(2, "Monthly"), new PollAnswer(null, "Yearly"))).build()
+        );
+
+        assertThat(updated.getAnswers()).containsExactly(new PollAnswer(2, "Monthly"), new PollAnswer(3, "Yearly"));
+        assertThat(pollRepository.getVoteCounts(saved.getId())).isEqualTo(Map.of(2, 1, 3, 0));
+    }
+
+    @Test
     public void voteForUnknownAnswerIsIgnored() {
         Poll saved = pollRepository.save(poll(UUID.randomUUID().toString(), "Strict poll"));
 

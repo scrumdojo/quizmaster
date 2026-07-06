@@ -2,8 +2,10 @@ package cz.scrumdojo.quizmaster.poll;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -33,15 +35,74 @@ public class PostgresPollRepository implements PollRepository {
 
         List<PollAnswer> answers = poll.getAnswers() == null ? List.of() : List.copyOf(poll.getAnswers());
         for (PollAnswer answer : answers) {
-            jdbc
-                .sql("INSERT INTO poll_answer (poll_id, answer_id, text) VALUES (:pollId, :answerId, :text)")
-                .param("pollId", id)
-                .param("answerId", answer.id())
-                .param("text", answer.text())
-                .update();
+            insertAnswer(id, answer.id(), answer.text());
         }
 
         return poll.toBuilder().id(id).answers(answers).build();
+    }
+
+    @Override
+    @Transactional
+    public Poll update(Poll poll) {
+        jdbc
+            .sql("UPDATE poll SET question = :question WHERE id = :id")
+            .param("question", poll.getQuestion())
+            .param("id", poll.getId())
+            .update();
+
+        List<PollAnswer> answers = poll.getAnswers() == null ? List.of() : poll.getAnswers();
+        int nextAnswerId = nextAnswerId(poll.getId());
+        deleteRemovedAnswers(poll.getId(), answers);
+
+        List<PollAnswer> saved = new ArrayList<>(answers.size());
+        for (PollAnswer answer : answers) {
+            if (answer.id() != null) {
+                jdbc
+                    .sql("UPDATE poll_answer SET text = :text WHERE poll_id = :pollId AND answer_id = :answerId")
+                    .param("text", answer.text())
+                    .param("pollId", poll.getId())
+                    .param("answerId", answer.id())
+                    .update();
+                saved.add(answer);
+            } else {
+                insertAnswer(poll.getId(), nextAnswerId, answer.text());
+                saved.add(new PollAnswer(nextAnswerId, answer.text()));
+                nextAnswerId++;
+            }
+        }
+
+        return poll.toBuilder().answers(List.copyOf(saved)).build();
+    }
+
+    private void insertAnswer(Integer pollId, Integer answerId, String text) {
+        jdbc
+            .sql("INSERT INTO poll_answer (poll_id, answer_id, text) VALUES (:pollId, :answerId, :text)")
+            .param("pollId", pollId)
+            .param("answerId", answerId)
+            .param("text", text)
+            .update();
+    }
+
+    private int nextAnswerId(Integer pollId) {
+        return jdbc
+            .sql("SELECT COALESCE(MAX(answer_id), 0) + 1 FROM poll_answer WHERE poll_id = :pollId")
+            .param("pollId", pollId)
+            .query(Integer.class)
+            .single();
+    }
+
+    private void deleteRemovedAnswers(Integer pollId, List<PollAnswer> answers) {
+        List<Integer> keptIds = answers.stream().map(PollAnswer::id).filter(Objects::nonNull).toList();
+        if (keptIds.isEmpty()) {
+            jdbc.sql("DELETE FROM poll_answer WHERE poll_id = :pollId").param("pollId", pollId).update();
+            return;
+        }
+
+        jdbc
+            .sql("DELETE FROM poll_answer WHERE poll_id = :pollId AND answer_id NOT IN (:keptIds)")
+            .param("pollId", pollId)
+            .param("keptIds", keptIds)
+            .update();
     }
 
     @Override

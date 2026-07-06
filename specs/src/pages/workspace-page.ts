@@ -285,6 +285,11 @@ export class WorkspacePage {
         await this.pollLocator(pollQuestion).getByRole('link', { name: 'Results' }).click()
     }
 
+    editPoll = async (pollQuestion: string) => {
+        await this.showPolls()
+        await this.pollLocator(pollQuestion).getByRole('link', { name: 'Edit' }).click()
+    }
+
     // ── Quiz list (gated → activate Quizzes tab first) ──
 
     private quizLocator = (quiz: string) => this.page.locator('.quiz-item').filter({ hasText: quiz })
