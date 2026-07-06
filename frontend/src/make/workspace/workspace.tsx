@@ -2,6 +2,7 @@ import './workspace.scss'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
+import { deletePoll } from '#fe/make/api/poll.ts'
 import { deleteQuestion } from '#fe/make/api/question.ts'
 import { deleteQuiz } from '#fe/make/api/quiz.ts'
 import {
@@ -53,6 +54,7 @@ export function WorkspacePage() {
     const [quizPageSize, setQuizPageSize] = useState(0)
     const [quizTotalPages, setQuizTotalPages] = useState(1)
     const [quizToDelete, setQuizToDelete] = useState<{ id: number; title: string } | null>(null)
+    const [pollToDelete, setPollToDelete] = useState<{ id: number; question: string } | null>(null)
     const [activeTab, setActiveTab] = useState<'quizzes' | 'questions' | 'polls'>(initialTab)
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
@@ -159,6 +161,13 @@ export function WorkspacePage() {
         await loadQuestionPage(questionPage, debouncedQuestionFilter, selectedQuestionTags)
     }
 
+    const onConfirmDeletePoll = async () => {
+        if (!pollToDelete) return
+        await deletePoll(workspaceId, String(pollToDelete.id))
+        setPollToDelete(null)
+        await loadPolls()
+    }
+
     const hasQuestions = questions.length > 0
     const hasQuizzes = quizzes.length > 0
     const hasPolls = polls.length > 0
@@ -234,7 +243,9 @@ export function WorkspacePage() {
                         }
                     >
                         {hasPolls ? (
-                            polls.map(poll => <PollItem key={poll.id} poll={poll} />)
+                            polls.map(poll => (
+                                <PollItem key={poll.id} poll={poll} onDeleteClick={() => setPollToDelete(poll)} />
+                            ))
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--polls">
                                 <h3>No polls yet</h3>
@@ -416,6 +427,17 @@ export function WorkspacePage() {
                         Confirm
                     </button>
                     <button type="button" onClick={() => setQuizToDelete(null)}>
+                        Cancel
+                    </button>
+                </dialog>
+            )}
+            {pollToDelete && (
+                <dialog open>
+                    <p>Delete poll &quot;{pollToDelete.question}&quot;?</p>
+                    <button type="button" onClick={onConfirmDeletePoll}>
+                        Confirm
+                    </button>
+                    <button type="button" onClick={() => setPollToDelete(null)}>
                         Cancel
                     </button>
                 </dialog>

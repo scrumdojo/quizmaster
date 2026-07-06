@@ -290,6 +290,16 @@ export class WorkspacePage {
         await this.pollLocator(pollQuestion).getByRole('link', { name: 'Edit' }).click()
     }
 
+    deletePoll = async (pollQuestion: string) => {
+        await this.showPolls()
+        await this.pollLocator(pollQuestion).getByRole('button', { name: 'Delete' }).click()
+    }
+
+    expectPollNotVisible = async (pollQuestion: string) => {
+        await this.showPolls()
+        await expect(this.pollLocator(pollQuestion)).toHaveCount(0)
+    }
+
     // ── Quiz list (gated → activate Quizzes tab first) ──
 
     private quizLocator = (quiz: string) => this.page.locator('.quiz-item').filter({ hasText: quiz })

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +71,14 @@ public class PollController {
                 .map(poll -> pollRepository.update(request.toEntity(poll.getId(), workspaceGuid)))
                 .map(updated -> new IdResponse(updated.getId()))
         );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePoll(@PathVariable String workspaceGuid, @PathVariable Integer id) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        int deleted = pollRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
+        return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     @PostMapping

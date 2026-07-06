@@ -139,6 +139,15 @@ public class PostgresPollRepository implements PollRepository {
     }
 
     @Override
+    public int deleteByIdAndWorkspaceGuid(Integer id, String workspaceGuid) {
+        return jdbc
+            .sql("DELETE FROM poll WHERE id = :id AND workspace_guid = :workspaceGuid")
+            .param("id", id)
+            .param("workspaceGuid", workspaceGuid)
+            .update();
+    }
+
+    @Override
     public void saveVote(Integer pollId, Integer answerId) {
         jdbc
             .sql("UPDATE poll_answer SET votes = votes + 1 WHERE poll_id = :pollId AND answer_id = :answerId")

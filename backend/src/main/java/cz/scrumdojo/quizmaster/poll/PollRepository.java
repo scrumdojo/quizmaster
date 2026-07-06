@@ -15,6 +15,8 @@ public interface PollRepository {
 
     Optional<Poll> findByIdAndWorkspaceGuid(Integer id, String workspaceGuid);
 
+    int deleteByIdAndWorkspaceGuid(Integer id, String workspaceGuid);
+
     void saveVote(Integer pollId, Integer answerId);
 
     Map<Integer, Integer> getVoteCounts(Integer pollId);

@@ -112,6 +112,28 @@ public class PollRepositoryTest {
     }
 
     @Test
+    public void deletedPollIsGoneWithItsVotes() {
+        Poll saved = pollRepository.save(poll(UUID.randomUUID().toString(), "Doomed poll"));
+        pollRepository.saveVote(saved.getId(), 1);
+
+        int deleted = pollRepository.deleteByIdAndWorkspaceGuid(saved.getId(), saved.getWorkspaceGuid());
+
+        assertThat(deleted).isEqualTo(1);
+        assertThat(pollRepository.findById(saved.getId())).isEmpty();
+        assertThat(pollRepository.getVoteCounts(saved.getId())).isEmpty();
+    }
+
+    @Test
+    public void deleteIsScopedToWorkspace() {
+        Poll saved = pollRepository.save(poll(UUID.randomUUID().toString(), "Protected poll"));
+
+        int deleted = pollRepository.deleteByIdAndWorkspaceGuid(saved.getId(), UUID.randomUUID().toString());
+
+        assertThat(deleted).isZero();
+        assertThat(pollRepository.findById(saved.getId())).isPresent();
+    }
+
+    @Test
     public void voteForUnknownAnswerIsIgnored() {
         Poll saved = pollRepository.save(poll(UUID.randomUUID().toString(), "Strict poll"));
 

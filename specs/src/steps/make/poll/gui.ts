@@ -42,6 +42,20 @@ When('I submit the poll', async function () {
     await this.pollFormPage.submit()
 })
 
+When('I delete poll {string} from the workspace', async function (pollBookmark: string) {
+    const spec = this.pollBookmarks[pollBookmark]
+    if (!spec) {
+        throw new Error(`Poll bookmark "${pollBookmark}" is unknown`)
+    }
+
+    await this.workspacePage.goto(this.workspaceGuid)
+    await this.workspacePage.deletePoll(spec.question)
+})
+
+Then('I do not see poll {string} in the list', async function (pollQuestion: string) {
+    await this.workspacePage.expectPollNotVisible(pollQuestion)
+})
+
 Then('I see poll form question {string}', async function (question: string) {
     await this.pollFormPage.expectQuestionValue(question)
 })

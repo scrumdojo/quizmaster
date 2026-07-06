@@ -101,8 +101,10 @@ A poll contains:
 - A list of **answers** from which a learner selects exactly one option. Each
   answer has its own backend-generated id plus the answer text.
 
-The backend supports creating polls and listing existing poll definitions
-through workspace-scoped authoring API. The public take API lets a voter fetch
+The backend supports creating, editing, deleting, and listing polls through
+workspace-scoped authoring API. Editing keeps collected votes for answers
+that survive the edit; removed answers lose their votes and new answers
+start at zero. Deleting a poll discards its votes. The public take API lets a voter fetch
 the poll question and answer ids by poll id and then submit an anonymous vote
 using the selected answer's id. Poll definitions are stored in PostgreSQL
 (`poll` and `poll_answer` tables); votes are stored as an aggregate counter per
