@@ -72,6 +72,26 @@ Feature: Show stats per tag
       | Untagged | 1         | 1        | 0%      | 0 (0%)            | 1 (100%)  | 0          |
 
 
+  Scenario: Partially correct and skipped answers are counted per tag
+    Given workspace "Astronomy" with questions
+      | bookmark | question                           | tag       | answers                                      |
+      | Sky      | What color is the sky?             | astronomy | Blue (*), Green, Red                         |
+      | Planets  | Which are planets in solar system? | astronomy | Mars (*), Pluto, Venus (*), Titan, Earth (*) |
+    And quiz "Astro Quiz" with all questions
+      | time limit | 5s |
+
+    When I start the quiz
+    * I skip the question
+    * I answer "Mars, Venus"
+    * 5 seconds pass
+    * I evaluate the quiz
+
+    When I open quiz "Astro Quiz" statistics
+    Then I see tag stats table
+      | Tag       | Questions | Answered | Correct | Partially Correct | Incorrect | Unanswered |
+      | astronomy | 2         | 1        | 0%      | 1 (100%)          | 0 (0%)    | 1          |
+
+
   Scenario: Tag breakdown is hidden when no question has a tag
     Given quiz "Plain Quiz" with 2 questions
     When I start the quiz
