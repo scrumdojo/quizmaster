@@ -1,0 +1,800 @@
+{
+  "version": "1.0.0",
+  "common_instruction": {
+    "role": "You are an exploratory testing agent. A charter is not a scripted test case. It is a mission.",
+    "for_every_tour": [
+      "Explore the product with the stated mission.",
+      "Generate realistic variations instead of only following the obvious path.",
+      "Capture evidence: screenshots, logs, network traces, console errors, payloads, URLs, timestamps, and test data."
+    ],
+    "report_every_suspected_issue_with": [
+      "title",
+      "tour name",
+      "affected area",
+      "steps to reproduce",
+      "expected result",
+      "actual result",
+      "impact/risk",
+      "severity suggestion",
+      "confidence level",
+      "supporting evidence"
+    ],
+    "also_report": "Useful observations that are not defects.",
+    "stop_when": "The timebox ends, the mission is sufficiently covered, or a blocking defect prevents further exploration.",
+    "inputs": [
+      "system_under_test",
+      "feature_scope",
+      "persona",
+      "build_version",
+      "environment",
+      "known_risks",
+      "test_data",
+      "documentation",
+      "bug_history",
+      "usage_data"
+    ],
+    "stop_condition_planguage": "Each tour carries a stop_condition using Tom Gilb's Planguage. Evaluate it after every action. SCALE is what coverage is measured in. METER is the running list you maintain and how an item earns its check-mark — an item counts only when the Meter says it counts. GOAL is the success threshold: representative coverage, not exhaustive — when the Goal is met, stop happy and call finish_charter (this is stopping rule 2). FAIL is the floor that must hold every cycle, including the tour-specific rules that forbid lazy shortcuts; breaching FAIL invalidates the run even if the Goal is met. STOP is governed by the six stopping rules in stop_rule; each tour's stop field defines what a 'meaningful action' means for that tour.",
+    "stop_rule": "Stop the tour when ANY of these six conditions is true — check them as you work. 1. TIMEBOX REACHED: the session timebox from your mission or run inputs is spent (if none was given, adopt one when you record your plan — e.g. 20-30 minutes or a maximum number of browser actions — and state it). This is the most important rule: exploratory testing can otherwise run forever. 2. MISSION SUFFICIENTLY COVERED: you have exercised the main user paths relevant to this tour and can answer 'What did I learn about this area?' — this is the tour's Goal; stop happy. 3. NO NEW INFORMATION: after 5-8 meaningful actions you are only repeating known behavior and finding no new risks, defects, or questions. More of the same adds nothing; stop. Each tour's stop field defines what counts as a meaningful action. 4. SERIOUS BLOCKER: login impossible, a crash, a required control missing, broken navigation. Record the blocker as a finding and stop — do not attempt random workarounds forever. 5. DEFECT BUDGET REACHED: you have recorded about 5 defects/findings (or the budget your mission sets). The session's purpose is achieved — this area needs attention; report rather than piling up more findings. 6. SCOPE DRIFT DETECTED: you notice you are no longer testing the charter mission and are wandering into unrelated parts of the product. Return to the mission; if you cannot continue it productively, stop. Whichever rule fires, call finish_charter and report honestly what was covered, what was not, and WHICH rule stopped you."
+  },
+  "report_format": {
+    "tour_summary": [
+      "Tour name",
+      "Product area",
+      "Time spent",
+      "Environment",
+      "Build/version",
+      "Test data used",
+      "Coverage summary"
+    ],
+    "key_findings": [
+      "Critical issues",
+      "High-risk issues",
+      "Medium/low issues",
+      "Product observations",
+      "Questions for the team"
+    ],
+    "defect_details": [
+      "Title",
+      "Severity",
+      "Confidence",
+      "Risk",
+      "Steps to reproduce",
+      "Expected",
+      "Actual",
+      "Evidence",
+      "Suspected cause, if inferable"
+    ],
+    "coverage_notes": [
+      "What was covered",
+      "What was not covered",
+      "Suggested follow-up tours",
+      "Automation candidates"
+    ]
+  },
+  "tours": [
+    {
+      "id": "guidebook",
+      "name": "Guidebook Tour",
+      "mission": "Explore the product by following the official documentation, onboarding flow, help text, tooltips, release notes, or user manual exactly as a user would.",
+      "focus": "Find gaps between what the product says it does and what it actually does.",
+      "agent_actions": [
+        "Follow documented steps literally.",
+        "Try every documented shortcut, button, option, menu item, and setting.",
+        "Compare labels, screenshots, terminology, and expected outcomes against the real product.",
+        "Check whether a new user could complete the documented flow without outside help.",
+        "Identify outdated, misleading, missing, or ambiguous instructions."
+      ],
+      "look_for": [
+        "Documentation-product mismatch",
+        "Broken links or missing help pages",
+        "Wrong screenshots or labels",
+        "Features mentioned but not available",
+        "Steps that are impossible to complete",
+        "Unclear error recovery guidance"
+      ],
+      "output_emphasis": "Prioritize defects that would mislead users, support teams, sales teams, or onboarding material.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "documented steps and claims verified against the real product",
+        "meter": "Extract a checklist of documented steps, shortcuts, and claims at the start. Check each off only after performing it literally in the UI and comparing the outcome to what the docs say. Note whether recent checks still surface mismatches.",
+        "goal": "You have verified a representative set of the documented steps and claims — covering the main flows and any areas the docs emphasize. The doc-vs-product match can be judged; verifying every sentence of documentation is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not shrink or rewrite your doc checklist after committing it — items may be marked not-applicable only with a recorded reason. A step counts as verified ONLY after literally performing it in the UI; reading the doc and assuming it matches does not count. Never report 'docs match' for a step you did not perform.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = performing one documented step in the UI and comparing it to the docs."
+      }
+    },
+    {
+      "id": "money",
+      "name": "Money Tour",
+      "mission": "Explore the features that create the most business value, sales value, customer value, or revenue impact.",
+      "focus": "Find defects in the features that customers pay for, sales demos depend on, or leadership considers strategically important.",
+      "agent_actions": [
+        "Identify the money features from product pages, demos, pricing pages, analytics, or stakeholder notes.",
+        "Execute the most important end-to-end business flows.",
+        "Try realistic high-value scenarios.",
+        "Stress the moments where users decide whether the product is valuable.",
+        "Act like a skeptical customer asking, 'What if I try this?'"
+      ],
+      "look_for": [
+        "Demo-breaking issues",
+        "Broken core workflows",
+        "Incorrect calculations, reporting, or decisions",
+        "Confusing value proposition",
+        "Missing confirmation or trust signals",
+        "Errors in paid, premium, or differentiating features"
+      ],
+      "output_emphasis": "Prioritize issues that could block sales, renewals, adoption, or executive confidence.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "revenue-critical business flows executed end-to-end",
+        "meter": "List the money flows at the start (from demos, pricing, or stakeholder notes). Check a flow off only after driving it end-to-end to its business outcome. Note whether recent flows still surface issues.",
+        "goal": "You have executed a representative set of the money flows end-to-end — the ones sales demos and paying customers depend on. Business-critical quality can be judged; exercising every variation of every flow is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not relabel minor features as money flows to make coverage easy — the list comes from real business value signals. A flow counts as executed ONLY when driven end-to-end to its business outcome (order placed, report produced, value delivered); stopping at the first screen does not count. Never mark a flow as working without completing it.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = executing one money flow end-to-end to its business outcome."
+      }
+    },
+    {
+      "id": "landmark",
+      "name": "Landmark Tour",
+      "mission": "Visit the most important product landmarks in a deliberate order and verify that the product remains coherent across them.",
+      "focus": "Find integration, navigation, state, and consistency problems across major features.",
+      "agent_actions": [
+        "Create a list of key landmarks: dashboard, search, create, edit, save, export, settings, admin, reports, notifications, etc.",
+        "Visit each landmark in a meaningful user journey.",
+        "Vary the order of landmarks.",
+        "Move back and forth between landmarks.",
+        "Check whether data, permissions, filters, and state remain consistent."
+      ],
+      "look_for": [
+        "Navigation dead ends",
+        "State lost between areas",
+        "Inconsistent terminology",
+        "Data created in one area not visible in another",
+        "Broken cross-feature assumptions",
+        "Confusing product mental model"
+      ],
+      "output_emphasis": "Prioritize issues that make the product feel fragmented or unreliable.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "landmark features visited across varied orderings, with state checked",
+        "meter": "Build your landmark list at the start and track which landmarks you have visited in which order. Check a landmark off per ordering only after verifying data, permissions, and state remained consistent on arrival. Note whether recent visits still surface inconsistencies.",
+        "goal": "You have visited every landmark on your list at least once and a representative subset in at least two genuinely different orderings, checking cross-feature state each time. Product coherence can be judged; trying every possible ordering is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not shrink your landmark list after committing it. A visit counts ONLY if you checked state consistency on arrival — passing through a screen without checking does not count. Orderings must genuinely differ; re-walking the same sequence does not count as a new ordering.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one landmark visit with its state-consistency check."
+      }
+    },
+    {
+      "id": "intellectual",
+      "name": "Intellectual Tour",
+      "mission": "Challenge the system with complex, demanding, unusual, or edge-case inputs.",
+      "focus": "Find defects caused by complexity, scale, boundary conditions, or difficult reasoning.",
+      "agent_actions": [
+        "Use large inputs, long names, many records, deep hierarchies, complex filters, unusual combinations, and boundary values.",
+        "Ask the product difficult questions if it has AI, analytics, search, recommendation, or decision logic.",
+        "Create scenarios that require the system to process, combine, summarize, calculate, or validate complex data.",
+        "Try valid but uncommon cases."
+      ],
+      "look_for": [
+        "Wrong calculations",
+        "Poor performance",
+        "Timeouts",
+        "AI hallucinations or unsupported claims",
+        "Broken validation",
+        "Boundary bugs",
+        "Data truncation",
+        "Inconsistent results"
+      ],
+      "output_emphasis": "Prioritize issues where the product gives a confident but wrong answer.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "genuinely hard or boundary inputs submitted and their results judged",
+        "meter": "Plan your boundary and complex cases per in-scope field at the start. Check a case off only after submitting it and judging whether the product's response was correct. Note whether recent cases still expose failures.",
+        "goal": "You have submitted a representative set of genuinely demanding cases — large inputs, boundaries, unusual-but-valid combinations — across the in-scope fields, and judged each result. Robustness under complexity can be judged; exhausting every conceivable edge case is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: cases must be genuinely extreme or boundary — do not water planned cases down to near-normal inputs to make passes easy. A case counts ONLY after submission AND judging the result correct-or-not; submitting without evaluating does not count. A confident-but-wrong product answer is a finding — record it, never let it pass as acceptable.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = submitting one genuinely hard case and judging the result."
+      }
+    },
+    {
+      "id": "fedex",
+      "name": "FedEx Tour",
+      "mission": "Follow important data through its full lifecycle, like tracking a package from creation to final delivery.",
+      "focus": "Find data flow, persistence, transformation, synchronization, and auditability problems.",
+      "agent_actions": [
+        "Create or import data.",
+        "Edit it.",
+        "Save it.",
+        "View it in different screens.",
+        "Export it.",
+        "Delete or archive it.",
+        "Check notifications, reports, logs, history, and integrations that use the same data.",
+        "Verify whether permissions affect data visibility correctly."
+      ],
+      "look_for": [
+        "Data lost after save",
+        "Incorrect transformations",
+        "Stale data",
+        "Cache issues",
+        "Wrong export values",
+        "Missing audit trail",
+        "Inconsistent data between screens",
+        "Deleted data still visible",
+        "Personally sensitive data leaking into wrong places"
+      ],
+      "output_emphasis": "Prioritize issues that damage data trust.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "data lifecycle stages traversed and verified for the tracked record(s)",
+        "meter": "Use the lifecycle checklist: create, edit, save, view elsewhere, export, delete/archive, plus notifications, history, and audit trail. Check a stage off only after verifying the record's data at that stage matches what it should be. Note whether recent stages still surface data-trust issues.",
+        "goal": "You have carried at least one record through every lifecycle stage, verifying the data at each, and spot-checked a second record through the riskiest stages. Data trust can be judged; tracking many records through every stage is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not drop stages from the lifecycle checklist. A stage counts ONLY after actually verifying the data value there — assuming a save or delete worked does not count; check that deleted data is really gone and exported values really match. Skipping verification and marking the stage done is forbidden.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = verifying one lifecycle stage for the tracked record."
+      }
+    },
+    {
+      "id": "after-hours",
+      "name": "After-Hours Tour",
+      "mission": "Explore what the system does when users are not actively using it.",
+      "focus": "Find problems in scheduled jobs, background processing, backups, archiving, reminders, cleanups, batch jobs, and asynchronous work.",
+      "agent_actions": [
+        "Trigger workflows that continue in the background.",
+        "Check scheduled emails, reminders, reports, imports, exports, syncs, and cleanups.",
+        "Inspect status indicators, job history, retry behavior, and failure messages.",
+        "Test what happens when the user logs out, closes the browser, or returns later."
+      ],
+      "look_for": [
+        "Background tasks that never complete",
+        "Missing or duplicate notifications",
+        "Silent job failures",
+        "No retry or recovery path",
+        "Incorrect timestamps or time zones",
+        "Poor visibility into job status",
+        "Data created after cancellation"
+      ],
+      "output_emphasis": "Prioritize issues that users discover only later, when trust is already damaged.",
+      "agent_friendliness": "low",
+      "stop_condition": {
+        "scale": "background and asynchronous flows triggered AND their outcomes observed",
+        "meter": "List the background jobs, scheduled items, and async flows you can trigger. Check one off only after observing its outcome or final status — not merely triggering it. Note whether recent checks still surface silent failures.",
+        "goal": "You have triggered a representative set of the background flows and observed each outcome, including at least one logout-and-return check. Background reliability can be judged; waiting out every slow job is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: a flow counts ONLY after observing its outcome, status, or failure message — triggering it and moving on does not count. Do not drop flows from your list because their outcomes are slow to verify; if an outcome never arrives within your session, record that as a finding (silent non-completion), not as done.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = triggering one background flow or observing one outcome. Outcomes still pending when the timebox ends are reported as attempted-not-observed."
+      }
+    },
+    {
+      "id": "garbage-collector",
+      "name": "Garbage Collector's Tour",
+      "mission": "Systematically sweep through a chosen product surface without deep testing each item.",
+      "focus": "Find obvious defects, inconsistencies, dead ends, broken controls, and low-hanging quality problems.",
+      "agent_actions": [
+        "Choose a surface: menus, forms, dialogs, settings, reports, buttons, messages, or API endpoints.",
+        "Visit every item in that surface.",
+        "Perform a light interaction with each item.",
+        "Record anomalies quickly.",
+        "Do not go deep unless a defect is found."
+      ],
+      "look_for": [
+        "Broken links",
+        "Missing pages",
+        "Console errors",
+        "Layout issues",
+        "Buttons that do nothing",
+        "Empty states",
+        "Wrong labels",
+        "Inconsistent validation",
+        "Permission leaks"
+      ],
+      "output_emphasis": "Prioritize breadth of coverage and fast defect discovery.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "items on the chosen surface each given a real light interaction",
+        "meter": "Inventory the chosen surface (every menu, form, dialog, button, or endpoint in it) at the start. Check an item off only after an actual interaction — click, open, submit — not a visual pass. Note whether recent items still surface anomalies.",
+        "goal": "You have swept the entire inventory of the chosen surface with a light interaction each, recording anomalies as they appeared. Breadth is the point here: the sweep is done when the inventory is done.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: the surface inventory is fixed once chosen — do not trim it to finish faster. Every item needs a real interaction; looking at an item without touching it does not count. Do not go deep on any one item at the cost of finishing the sweep — depth belongs to a follow-up tour, note it and move on.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one light interaction with one inventory item. Natural endpoint: the committed inventory is exhausted — a sweep is done when the sweep is done; if the timebox ends first, report the sweep as partial with how far you got."
+      }
+    },
+    {
+      "id": "bad-neighborhood",
+      "name": "Bad-Neighborhood Tour",
+      "mission": "Explore areas with a history of defects, instability, incidents, complaints, or recent risky changes.",
+      "focus": "Find regressions and recurring quality problems.",
+      "agent_actions": [
+        "Review known bugs, support tickets, incident history, flaky tests, and recent commits if available.",
+        "Revisit historically fragile areas.",
+        "Combine old failure scenarios with new product behavior.",
+        "Check whether previous fixes still hold.",
+        "Test near the boundaries of previous defects."
+      ],
+      "look_for": [
+        "Reopened bugs",
+        "Partial fixes",
+        "Regression defects",
+        "New defects around old fixes",
+        "Fragile validation",
+        "Poor error handling",
+        "Areas with repeated failure patterns"
+      ],
+      "output_emphasis": "Prioritize issues that show the team did not really eliminate the root cause.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "historically fragile areas revisited with their original failure scenario re-attempted",
+        "meter": "List the known-risky areas from the bug history and known risks you were given. Check an area off only after re-attempting its original failure scenario and probing just beyond it. Note whether recent areas still surface regressions.",
+        "goal": "You have revisited every listed risky area and re-attempted each area's known failure mode, plus nearby variations. Regression risk can be judged; inventing new risky areas beyond the list is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not drop areas from the risky list because reproduction is tedious. An area counts ONLY after re-attempting its actual historical failure scenario — testing something easier nearby does not count. Never mark an area safe without having re-run the failure mode that made it risky.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = re-attempting one listed area's original failure scenario."
+      }
+    },
+    {
+      "id": "museum",
+      "name": "Museum Tour",
+      "mission": "Explore older, legacy, rarely changed, or technically outdated parts of the product.",
+      "focus": "Find defects in legacy areas that still matter to users but receive little attention.",
+      "agent_actions": [
+        "Identify older screens, legacy flows, old APIs, old templates, deprecated settings, or rarely maintained modules.",
+        "Test whether they still work with current data, permissions, browsers, and integrations.",
+        "Combine legacy flows with newer features.",
+        "Check whether old assumptions still hold."
+      ],
+      "look_for": [
+        "Outdated UI behavior",
+        "Broken compatibility",
+        "Old terminology",
+        "Old permission assumptions",
+        "Security weaknesses",
+        "Integration gaps",
+        "Legacy flows that bypass newer validation"
+      ],
+      "output_emphasis": "Prioritize defects where old product areas undermine the current product experience.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "legacy areas exercised with current data and combined with newer features",
+        "meter": "List the legacy screens, old flows, and deprecated settings you can find. Check one off only after exercising it with current data and permissions AND combining it once with a newer feature. Note whether recent areas still surface compatibility issues.",
+        "goal": "You have exercised a representative set of the legacy areas with current data and combined each with newer functionality at least once. Legacy risk can be judged; excavating every historical corner is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not declare 'no legacy areas exist' without recording the search you performed. An area counts ONLY after exercising it with current data AND one combination with a newer feature — loading an old screen and closing it does not count. Old terminology, stale permissions, and validation bypasses you notice must be recorded, not skipped as 'just old'.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = exercising one legacy area, including its combination with a newer feature."
+      }
+    },
+    {
+      "id": "prior-version",
+      "name": "Prior Version Tour",
+      "mission": "Compare the current version with a previous version, known baseline, or expected previous behavior.",
+      "focus": "Find unintended changes and regressions.",
+      "agent_actions": [
+        "Identify important flows from the previous version.",
+        "Execute the same flows in the current version.",
+        "Compare outputs, layout, performance, permissions, data behavior, and error messages.",
+        "Distinguish intentional product changes from unexpected regressions."
+      ],
+      "look_for": [
+        "Missing functionality",
+        "Changed behavior without explanation",
+        "Broken saved data",
+        "Slower flows",
+        "Removed options",
+        "Incompatible exports",
+        "Changed calculations",
+        "User workflows that no longer work"
+      ],
+      "output_emphasis": "Prioritize issues that existing users would experience as 'this used to work.'",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "baseline flows re-executed in the current version and differences classified",
+        "meter": "List the important flows from the previous version. Check a flow off only after executing it fully in the current version and classifying any difference as intentional (with stated evidence) or a regression. Note whether recent comparisons still surface unexplained changes.",
+        "goal": "You have re-executed a representative set of the baseline flows and classified every difference found. 'This used to work' risk can be judged; comparing every historical flow is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not trim the baseline flow list to finish faster. A flow counts ONLY after full execution in the current version — partial walks do not count. Never classify a difference as 'intentional' without stated evidence (release note, documentation, or explicit run_input); unexplained differences are findings, not intentions.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one full baseline-flow comparison with its differences classified."
+      }
+    },
+    {
+      "id": "lonely-businessman",
+      "name": "Lonely Businessman Tour",
+      "mission": "Explore long user journeys that require many steps, screens, decisions, or context switches.",
+      "focus": "Find problems caused by long navigation paths and complex workflows.",
+      "agent_actions": [
+        "Choose a destination the user needs to reach.",
+        "Take a long but realistic path to get there.",
+        "Use menus, search, filters, back buttons, breadcrumbs, tabs, and cross-links.",
+        "Interrupt the journey and resume it.",
+        "Check whether the user always knows where they are and what to do next."
+      ],
+      "look_for": [
+        "Lost context",
+        "Too many clicks",
+        "Navigation loops",
+        "Broken breadcrumbs",
+        "Confusing page titles",
+        "Filters reset unexpectedly",
+        "Unsaved work lost",
+        "Poor progress visibility"
+      ],
+      "output_emphasis": "Prioritize issues that make complex workflows tiring, risky, or confusing.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "genuinely long multi-step journeys completed and separately interrupted-and-resumed",
+        "meter": "Choose your long destinations at the start. Check a journey off only after completing it end-to-end once AND interrupting-then-resuming it once, checking context each time. Note whether recent journeys still surface navigation or context loss.",
+        "goal": "You have completed a representative set of long journeys and interrupted-resumed each, checking that the user always knows where they are. Long-workflow usability can be judged; walking every possible path is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: journeys must be genuinely long — several screens, decisions, or context switches; do not count short hops as journeys. A journey counts ONLY when both completed AND separately interrupted-and-resumed; skipping the interruption half does not count. Lost filters, unsaved work, or disorientation you experience must be recorded as findings, not endured silently.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = completing one journey, or interrupt-and-resuming one (each counts separately)."
+      }
+    },
+    {
+      "id": "supermodel",
+      "name": "Supermodel Tour",
+      "mission": "Ignore deep functionality and focus only on the product's appearance, layout, readability, and first impression.",
+      "focus": "Find visual, UX, accessibility, and polish issues.",
+      "agent_actions": [
+        "Inspect screens at common viewport sizes.",
+        "Check alignment, spacing, contrast, typography, icon clarity, labels, empty states, and responsive behavior.",
+        "Use light/dark mode if available.",
+        "Check loading states, skeleton screens, modals, notifications, and error messages.",
+        "Test with realistic long names, long text, empty data, and many records."
+      ],
+      "look_for": [
+        "Poor contrast",
+        "Clipped text",
+        "Overlapping elements",
+        "Misaligned controls",
+        "Inconsistent components",
+        "Unclear icons",
+        "Bad empty states",
+        "Poor mobile/tablet layout",
+        "Visual hierarchy problems"
+      ],
+      "output_emphasis": "Prioritize issues that reduce trust before the user even understands the feature.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "screens/states inspected for visual and UX quality",
+        "meter": "Maintain your list of screens and UI states (including planned viewports, light/dark, and empty/long data where applicable). Check a screen off only after inspecting it across those planned states, and note whether recent screens still surface visual issues.",
+        "goal": "You have inspected a representative set of the screens and states on your list across the planned viewports (and light/dark, empty/long data where they apply). The product's visual and UX quality can be judged; reviewing every screen in every state is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not shrink or rewrite your screen list after committing it — screens may be marked not-applicable only with a recorded reason. A screen counts as inspected ONLY after checking the planned viewports and applicable states (light/dark, empty data, long/many-records data) — a single default-state glance does not count. Never report a screen as reviewed or 'fine' if you skipped its planned states.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = inspecting one screen across its planned viewports and states."
+      }
+    },
+    {
+      "id": "togof",
+      "name": "TOGOF Tour",
+      "mission": "Run multiple copies, sessions, users, tabs, devices, or windows at the same time and compare behavior.",
+      "focus": "Find concurrency, synchronization, locking, caching, and session problems.",
+      "agent_actions": [
+        "Open the product in multiple tabs or browsers.",
+        "Use different users or roles if available.",
+        "Modify the same or related data in parallel.",
+        "Save, refresh, undo, delete, or submit from different sessions.",
+        "Observe how conflicts are handled."
+      ],
+      "look_for": [
+        "Lost updates",
+        "Stale data",
+        "Duplicate records",
+        "Incorrect conflict handling",
+        "Session confusion",
+        "Wrong user identity shown",
+        "Actions from one tab unexpectedly affecting another",
+        "Permissions not refreshed"
+      ],
+      "output_emphasis": "Prioritize issues where parallel usage corrupts data or confuses users.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "parallel-session conflict scenarios exercised on the same or related data",
+        "meter": "Plan concurrency scenarios that touch the SAME or related data from multiple tabs, browsers, or users. Check a scenario off only after creating a genuine overlap and observing how the conflict was handled. Note whether recent scenarios still surface sync issues.",
+        "goal": "You have exercised a representative set of genuine conflict scenarios — parallel edits, save/refresh races, cross-session visibility — and observed the outcomes. Concurrency safety can be judged; testing every pairwise combination is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: scenarios must target the SAME or related data from both sessions — parallel-but-unrelated activity does not count as a concurrency test. A scenario counts ONLY after observing the conflict outcome (refresh, save order, final state); setting up parallel sessions without forcing an overlap does not count. Lost updates and stale data are findings the moment you see them.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = exercising one genuine conflict scenario and observing its outcome."
+      }
+    },
+    {
+      "id": "scottish-pub",
+      "name": "Scottish Pub Tour",
+      "mission": "Find and test hidden, hard-to-reach, obscure, or rarely discovered product areas.",
+      "focus": "Find defects in parts of the product that are hard to access but still available.",
+      "agent_actions": [
+        "Search for deep links, old URLs, advanced settings, hidden menus, keyboard shortcuts, admin-only paths, archived areas, and uncommon filters.",
+        "Reach features through unusual navigation paths.",
+        "Test whether hidden areas are still supported, secure, and understandable.",
+        "Check whether these areas should still be accessible."
+      ],
+      "look_for": [
+        "Hidden broken pages",
+        "Forgotten admin features",
+        "Old flows still reachable",
+        "Security exposure",
+        "Missing access control",
+        "Dead-end screens",
+        "Features that bypass normal validation"
+      ],
+      "output_emphasis": "Prioritize issues in obscure areas that create security, compliance, or support risk.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "hidden or hard-to-reach areas discovered, reached, and exercised",
+        "meter": "Keep a running list of the obscure paths you attempt — deep links, old URLs, keyboard shortcuts, admin-only paths, archived areas. Check an area off only after actually reaching it and exercising it. Note whether new areas are still turning up.",
+        "goal": "You have made varied discovery attempts across several techniques and exercised the hidden areas you reached, checking them for security and validation gaps. Hidden-surface risk can be judged; proving no more hidden areas exist is not possible and not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: discovery attempts must vary in technique — repeating the same menu walk does not count as new attempts. An area counts ONLY after reaching AND exercising it; guessing that an area probably exists does not count. Areas you found but could not access must be recorded as observations, not silently dropped.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one varied discovery attempt (a genuinely different technique or path). There is no finite list here, so rules 1 (timebox) and 3 (no new information) are your main cutoffs."
+      }
+    },
+    {
+      "id": "collectors",
+      "name": "Collector's Tour",
+      "mission": "Collect and inspect every kind of output the system can produce.",
+      "focus": "Find defects in generated artifacts, messages, reports, files, notifications, exports, and logs.",
+      "agent_actions": [
+        "Trigger all relevant outputs: PDFs, CSVs, dashboards, charts, emails, notifications, API responses, audit logs, summaries, recommendations, and status messages.",
+        "Compare outputs with source data.",
+        "Check formatting, completeness, timestamps, permissions, and consistency.",
+        "Try empty, normal, large, and unusual data sets."
+      ],
+      "look_for": [
+        "Missing output",
+        "Wrong output",
+        "Incomplete export",
+        "Broken formatting",
+        "Incorrect totals",
+        "Sensitive data exposure",
+        "Wrong file names",
+        "Bad timestamps",
+        "Misleading notification content"
+      ],
+      "output_emphasis": "Prioritize defects that users would copy, share, report, or make decisions from.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "distinct output types generated with normal and edge data, and compared to source",
+        "meter": "List every output type the product produces (exports, reports, emails, notifications, logs). Check one off only after generating it with normal AND edge data (empty/large) where applicable, and comparing its content to the source data. Note whether recent outputs still surface defects.",
+        "goal": "You have collected a representative set of the output types with both normal and edge data, verifying each against its source. Output trustworthiness can be judged; generating every output with every dataset is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: an output counts ONLY after comparing its content against the source data — generating a file without opening and checking it does not count. Do not drop output types because they are slow to produce. Wrong totals, missing rows, and leaked sensitive fields are findings the moment you spot them.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = generating one output and verifying it against source data."
+      }
+    },
+    {
+      "id": "supporting-actor",
+      "name": "Supporting Actor Tour",
+      "mission": "Explore secondary features that support critical workflows.",
+      "focus": "Find defects in nearby features that users rely on while using the main product.",
+      "agent_actions": [
+        "Identify supporting features around the main flow: search, filters, comments, attachments, settings, notifications, permissions, help, history, undo, and export.",
+        "Use these features during important workflows.",
+        "Check whether they support or disrupt the core task.",
+        "Combine supporting features with money features."
+      ],
+      "look_for": [
+        "Supporting feature breaks main flow",
+        "Search/filter gives wrong results",
+        "Comments or attachments lost",
+        "Notifications not triggered",
+        "Settings not applied",
+        "Undo/history unreliable",
+        "Supporting feature creates inconsistent state"
+      ],
+      "output_emphasis": "Prioritize issues that do not block the core feature directly but make it hard to use well.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "supporting features exercised DURING core workflows, with their effect checked",
+        "meter": "List the supporting features around the main flow (search, filters, comments, attachments, undo, notifications, settings). Check one off only after using it in the middle of a core workflow and checking whether it helped or disrupted that workflow. Note whether recent features still surface disruptions.",
+        "goal": "You have exercised a representative set of the supporting features inside real core workflows and judged their effect. Supporting-feature quality can be judged; testing every feature in every workflow is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: a supporting feature counts ONLY when exercised DURING a core workflow — testing it standalone does not count, because the mission is its effect on the main task. Do not trim the supporting-feature list. A supporting feature that corrupts, resets, or loses main-flow state is a finding immediately.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = exercising one supporting feature inside a core workflow."
+      }
+    },
+    {
+      "id": "back-alley",
+      "name": "Back Alley Tour",
+      "mission": "Explore the least-used, least-visible, or least-loved areas of the product.",
+      "focus": "Find defects in neglected areas and unexpected interactions with popular features.",
+      "agent_actions": [
+        "Identify rarely used features from analytics, menus, admin areas, or stakeholder notes.",
+        "Test them directly.",
+        "Combine them with high-traffic features.",
+        "Check whether they still fit the current product model.",
+        "Try unusual but valid combinations."
+      ],
+      "look_for": [
+        "Forgotten features",
+        "Poor maintenance",
+        "Broken integration with newer areas",
+        "Confusing old terminology",
+        "Unclear ownership",
+        "Weak validation",
+        "Features that should be removed or redesigned"
+      ],
+      "output_emphasis": "Prioritize issues where neglected features damage the overall product experience.",
+      "agent_friendliness": "medium",
+      "stop_condition": {
+        "scale": "genuinely low-use features tested directly and combined with popular ones",
+        "meter": "Identify the least-used features from usage data, deep menus, or stakeholder notes. Check one off only after testing it directly AND combining it once with a high-traffic feature. Note whether recent features still surface neglect issues.",
+        "goal": "You have tested a representative set of the genuinely neglected features and combined each with mainstream functionality once. Neglect risk can be judged; excavating every unused corner is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: features must genuinely be low-use — do not relabel mainstream features as back-alley to make coverage easy. A feature counts ONLY after direct testing AND one combination with a high-traffic feature. Broken integrations with newer areas and stale validation are findings, not curiosities.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = testing one low-use feature, including its combination with a popular one."
+      }
+    },
+    {
+      "id": "all-nighter",
+      "name": "All-Nighter Tour",
+      "mission": "Keep the system active for an extended period or simulate long-running usage.",
+      "focus": "Find memory leaks, timeouts, degraded performance, stale sessions, and stability issues.",
+      "agent_actions": [
+        "Keep sessions open for a long period.",
+        "Perform repeated realistic actions.",
+        "Leave work in progress and return later.",
+        "Monitor performance, errors, session state, autosave, background jobs, and resource usage.",
+        "Test behavior after sleep/wake, network interruption, or token expiry if possible."
+      ],
+      "look_for": [
+        "Crashes",
+        "Memory growth",
+        "Slowdown over time",
+        "Session expiry without recovery",
+        "Lost unsaved data",
+        "Stale UI state",
+        "Broken reconnect behavior",
+        "Duplicate background actions"
+      ],
+      "output_emphasis": "Prioritize issues that appear only after extended use.",
+      "agent_friendliness": "low",
+      "stop_condition": {
+        "scale": "sustained active session time with periodic repeated actions and health checks",
+        "meter": "Keep the session running with repeated realistic actions, performing a health check (responsiveness, errors, session state, unsaved work) at regular intervals. Compare each check against the earlier ones. Note whether checks show a degradation trend.",
+        "goal": "The session has stayed active through the planned duration with periodic health checks, including at least one leave-and-return, and you can judge stability over time from the trend across checks.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: the timeline may not be compressed — 'long-running' means the planned duration, not a quick burst. A health check counts ONLY when compared against earlier checks (keep the earlier measurements); an isolated snapshot does not show a trend. Do not skip the leave-and-return check; session expiry without recovery is a finding.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one periodic health check compared against earlier checks. Natural endpoint: the planned duration from your session plan is reached. A stable trend across checks counts as 'no new information' for rule 3."
+      }
+    },
+    {
+      "id": "rained-out",
+      "name": "Rained-Out Tour",
+      "mission": "Start operations and then cancel, interrupt, abandon, reverse, or recover from them.",
+      "focus": "Find defects in cancellation, rollback, recovery, and partial-completion behavior.",
+      "agent_actions": [
+        "Start long-running or multi-step operations.",
+        "Cancel using visible buttons, keyboard shortcuts, browser back, close, refresh, logout, or navigation away.",
+        "Return to the product and inspect state.",
+        "Retry the operation.",
+        "Check whether partial data remains."
+      ],
+      "look_for": [
+        "Cancel does not cancel",
+        "Partial records created",
+        "Duplicate actions after retry",
+        "Loading state stuck",
+        "No recovery path",
+        "Unsaved work lost without warning",
+        "Operation continues silently",
+        "User cannot tell what happened"
+      ],
+      "output_emphasis": "Prioritize issues where interruption leaves the product in an unsafe or unclear state.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "cancellable operations interrupted by multiple methods, with aftermath inspected",
+        "meter": "List the cancellable operations you identified (save, upload, search, checkout, print). Check one off only after interrupting it via at least two different methods (cancel button, browser back, refresh, navigate away) and inspecting the resulting state each time. Note whether recent interruptions still surface unsafe states.",
+        "goal": "You have interrupted every identified operation via at least two methods and inspected the aftermath — partial data, retries, duplicates, stuck states. Interruption safety can be judged; trying every method on every operation is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not shrink your cancellable-operations list after committing it. An operation counts ONLY after interruption by at least two DIFFERENT methods AND inspecting the resulting state — cancelling without checking the aftermath does not count. A stuck spinner or ambiguous state is a finding to record and inspect, never a reason to skip.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one interruption of an operation plus inspection of its aftermath."
+      }
+    },
+    {
+      "id": "couch-potato",
+      "name": "Couch Potato Tour",
+      "mission": "Use the product with minimal effort: accept defaults, skip optional fields, avoid customization, and do as little as possible.",
+      "focus": "Find defects in defaults, empty states, optional fields, and passive user behavior.",
+      "agent_actions": [
+        "Move through flows by accepting defaults.",
+        "Leave optional fields blank.",
+        "Avoid filters or advanced settings.",
+        "Submit minimal valid data.",
+        "Wait and observe what the system does automatically."
+      ],
+      "look_for": [
+        "Bad defaults",
+        "Required logic hidden behind optional fields",
+        "Empty data errors",
+        "Confusing blank states",
+        "Incorrect assumptions",
+        "Missing guidance",
+        "Poor default permissions",
+        "Dangerous default values"
+      ],
+      "output_emphasis": "Prioritize issues that affect new, passive, or low-effort users.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "flows completed with genuine minimal effort — defaults accepted, optionals blank",
+        "meter": "List the flows you can attempt passively. Check a flow off only after completing (or attempting) it while accepting all defaults and leaving every optional field blank. Note whether recent flows still surface bad-default issues.",
+        "goal": "You have attempted every in-scope flow with genuinely minimal effort and judged how the product treats a passive user. Default-experience quality can be judged; creative passivity beyond the flows is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: stay genuinely passive — if you filled an optional field or changed a default to make a flow work, that flow does not count as passive (and the fact you HAD to is a finding). Do not drop flows because defaults get stuck; a flow that cannot be completed passively is exactly what this tour exists to find.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one flow attempted fully passively (defaults accepted, optionals blank)."
+      }
+    },
+    {
+      "id": "saboteur",
+      "name": "Saboteur Tour",
+      "mission": "Force the product to operate while removing, blocking, or degrading resources it depends on.",
+      "focus": "Find resilience, error handling, recovery, and dependency failures.",
+      "agent_actions": [
+        "Trigger actions while blocking or degrading network, storage, permissions, third-party services, files, APIs, or background jobs where possible.",
+        "Upload invalid or unavailable files.",
+        "Simulate service errors if tools allow.",
+        "Test recovery after the resource becomes available again.",
+        "Observe whether the product fails safely."
+      ],
+      "look_for": [
+        "Crashes",
+        "Silent failures",
+        "Misleading success messages",
+        "Data corruption",
+        "No retry path",
+        "Poor error messages",
+        "Infinite spinners",
+        "Security problems under failure conditions"
+      ],
+      "output_emphasis": "Prioritize issues where the product claims success but the operation actually failed.",
+      "agent_friendliness": "low",
+      "stop_condition": {
+        "scale": "dependency-degradation scenarios exercised, including recovery",
+        "meter": "Plan which resources you can realistically block or degrade (network, files, third-party calls) and which actions to attempt under each. Check a scenario off only after attempting the action UNDER the degraded condition, observing the behavior, and testing recovery after restoring the resource. Note whether recent scenarios still surface false-success or unsafe failures.",
+        "goal": "You have exercised the degradation scenarios that are feasible with your tools, observed how the product fails, and verified recovery for each. Resilience can be judged; simulating outages beyond your means is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: a scenario counts ONLY when the action was attempted while the resource was actually degraded — planning a degradation without performing it does not count. Always test recovery after restoring the resource. If a planned degradation is impossible with available tools, record it as not-covered rather than silently skipping it. A success message shown for a failed operation is a critical finding.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one degradation scenario attempted under the degraded condition, including its recovery check. Planned degradations that prove infeasible with your tools are reported as not-covered, not silently dropped."
+      }
+    },
+    {
+      "id": "antisocial",
+      "name": "Antisocial Tour",
+      "mission": "Act against the intended product logic while staying within what the interface technically allows.",
+      "focus": "Find validation, sequencing, authorization, and business-rule defects.",
+      "agent_actions": [
+        "Enter unexpected, invalid, extreme, contradictory, or contextually wrong data.",
+        "Do steps in the wrong order.",
+        "Try to skip required steps.",
+        "Try duplicate submissions.",
+        "Try actions with wrong roles or permissions.",
+        "Try values that are technically valid but semantically wrong."
+      ],
+      "look_for": [
+        "Weak validation",
+        "Business rules bypassed",
+        "Wrong permissions",
+        "Broken sequencing",
+        "Duplicate records",
+        "Inconsistent error messages",
+        "Unsafe assumptions",
+        "System accepts impossible states"
+      ],
+      "output_emphasis": "Prioritize issues where the product allows users to create invalid, illegal, or nonsensical states.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "genuine rule-breaking attempts made within what the UI allows, with responses judged",
+        "meter": "Plan your against-the-logic attempts: wrong orderings, skipped steps, duplicates, contradictory or semantically-wrong data, wrong-role actions. Check one off only after attempting it and judging whether the product correctly rejected it. Note whether recent attempts still get through.",
+        "goal": "You have made a representative set of genuine rule-breaking attempts across the in-scope flows and judged every response. Business-rule enforcement can be judged; enumerating every possible violation is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: attempts must genuinely violate the intended logic while staying within what the interface allows — near-valid inputs do not count as rule-breaking. An attempt counts ONLY after judging the product's response (correctly rejected, or wrongly accepted). Any bypass that succeeds — an impossible state accepted — is a defect to record immediately with the exact input, never just a mental note.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one rule-breaking attempt with the product's response judged."
+      }
+    },
+    {
+      "id": "obsessive-compulsive",
+      "name": "Obsessive-Compulsive Tour",
+      "mission": "Repeat the same action, sequence, or pattern many times and observe whether the system remains stable and consistent.",
+      "focus": "Find defects caused by repetition, idempotency failure, duplicate actions, race conditions, and accumulated state.",
+      "agent_actions": [
+        "Repeat create, save, edit, delete, undo, submit, search, refresh, export, upload, and navigation actions.",
+        "Use rapid repeated clicks where safe.",
+        "Repeat the same workflow with small variations.",
+        "Check whether the system creates duplicates, degrades, or changes behavior over time."
+      ],
+      "look_for": [
+        "Duplicate submissions",
+        "Multiple notifications",
+        "State drift",
+        "Performance degradation",
+        "Button not disabled after click",
+        "Repeated undo/redo failure",
+        "Data inconsistency",
+        "Rate limiting problems"
+      ],
+      "output_emphasis": "Prioritize issues where repeated normal use creates abnormal results.",
+      "agent_friendliness": "high",
+      "stop_condition": {
+        "scale": "repetition cycles completed per targeted action, with outcomes compared across cycles",
+        "meter": "List the actions you are repeating and track the repeat count reached for each. A repetition counts only when its outcome was observed and compared against earlier cycles (duplicates, drift, slowdown). Note whether later cycles still surface instability.",
+        "goal": "You have repeated every targeted action to the repeat count you committed in your session plan (state the count when planning; if the mission gives none, choose one and record it), plus rapid-click bursts where safe, and compared outcomes across cycles. Repetition stability can be judged; endless repetition is not required.",
+        "fail": "Stay black-box: test only through the UI as a real user; never inspect source, config, or implementation. Stay within the provided test environment; never touch production or real user data. Record every finding with the capture tools the moment you observe it. Specific to this tour: do not lower the planned repeat counts mid-run or swap demanding actions for trivial ones to hit counts faster. A repetition counts ONLY when its outcome was observed — blind rapid clicking without checking results does not count. Duplicates, drift, or degradation appearing at cycle N is a finding with N recorded.",
+        "stop": "Apply the six stopping rules (see stop_rule in the common instruction). For this tour, a meaningful action = one full repetition cycle of a targeted action with its outcome compared to earlier cycles. Natural endpoint: every targeted action repeated to the count committed in your session plan."
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "launchOptions": {
+      "chromiumSandbox": false,
+      "args": ["--no-sandbox"]
+    }
+  }
+}

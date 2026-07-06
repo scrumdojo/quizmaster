@@ -1,0 +1,6 @@
+# Generated tour reports (see finish_charter in charterTool.ts)
+reports/
+
+# Playwright MCP run output (screenshots, console logs, traces) when the
+# --output-dir override in agent.ts is not used.
+.playwright-mcp/
