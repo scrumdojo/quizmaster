@@ -38,9 +38,9 @@ export const questionDraftToRequest = (q: QuestionDraft): QuestionRequest =>
               explanations: [''],
               questionExplanation: q.questionExplanation,
               questionType: q.questionType,
-              isEasy: false,
+              isEasy: q.isEasy ?? false,
               tolerance: q.tolerance ?? 0,
-              tags: [],
+              tags: q.tags ? Array.from(q.tags) : [],
           }
         : {
               question: q.question,
