@@ -466,6 +466,56 @@ public class AiAssistantServiceTest {
         );
     }
 
+    @Test
+    void findChatDuplicateMatchesExactTextWithoutEmbeddings() {
+        AiAssistantService.DuplicateMatch match = aiAssistantService.findChatDuplicate(
+            chatResponse(
+                "Which country is the largest producer of coffee?",
+                new String[] { "a", "b" },
+                new int[] { 0 },
+                "single"
+            ),
+            // Different casing and trailing punctuation still normalize to a match.
+            List.of("which country is the LARGEST producer of coffee?!"),
+            List.of()
+        );
+
+        assertNotNull(match);
+        assertEquals("which country is the LARGEST producer of coffee?!", match.matchedQuestion());
+    }
+
+    @Test
+    void findChatDuplicateReturnsNullWhenTextDiffersAndNoEmbeddings() {
+        AiAssistantService.DuplicateMatch match = aiAssistantService.findChatDuplicate(
+            chatResponse("What is the capital of France?", new String[] { "a", "b" }, new int[] { 0 }, "single"),
+            List.of("Which country is the largest producer of coffee?"),
+            List.of()
+        );
+
+        assertNull(match);
+    }
+
+    @Test
+    void duplicateNoticeUsesSingularForOneQuestion() {
+        String notice = AiAssistantService.duplicateNotice(List.of("Which country is the largest producer of coffee?"));
+
+        assertTrue(notice.contains("one question"));
+        assertTrue(notice.contains("Which country is the largest producer of coffee?"));
+    }
+
+    @Test
+    void duplicateNoticeUsesPluralAndJoinsQuestions() {
+        String notice = AiAssistantService.duplicateNotice(List.of("First question", "Second question"));
+
+        assertTrue(notice.contains("2 questions"));
+        assertTrue(notice.contains("First question; Second question"));
+    }
+
+    @Test
+    void duplicateNoticeIsNullWhenNothingFiltered() {
+        assertNull(AiAssistantService.duplicateNotice(List.of()));
+    }
+
     private static AiAssistantService.AssistantResponse chatResponse(
         String question,
         String[] answers,

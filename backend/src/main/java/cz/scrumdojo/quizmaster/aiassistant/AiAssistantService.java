@@ -90,7 +90,7 @@ public class AiAssistantService {
         return new RobinChatResponse(drafts, duplicateNotice(duplicatedQuestions));
     }
 
-    private static String duplicateNotice(List<String> duplicatedQuestions) {
+    static String duplicateNotice(List<String> duplicatedQuestions) {
         if (duplicatedQuestions.isEmpty()) {
             return null;
         }
@@ -180,7 +180,7 @@ public class AiAssistantService {
         }
     }
 
-    private DuplicateMatch findChatDuplicate(
+    DuplicateMatch findChatDuplicate(
         AssistantResponse response,
         List<String> allQuestionTexts,
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
@@ -479,5 +479,5 @@ public class AiAssistantService {
 
     private record CanonicalDrafts(List<QuestionDraft> questions) {}
 
-    private record DuplicateMatch(String generatedQuestion, String matchedQuestion, double similarity) {}
+    record DuplicateMatch(String generatedQuestion, String matchedQuestion, double similarity) {}
 }
