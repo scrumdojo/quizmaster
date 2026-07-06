@@ -1,0 +1,20 @@
+#create-poll-page,
+#edit-poll-page {
+    .poll-answer-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        > input {
+            flex: 1;
+        }
+    }
+
+    .poll-answer-row + .poll-answer-row {
+        margin-top: 0.5rem;
+    }
+
+    #add-poll-answer {
+        margin-top: 0.5rem;
+    }
+}

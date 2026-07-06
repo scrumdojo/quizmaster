@@ -30,6 +30,14 @@ When('I enter poll answer {int} text {string}', async function (answerNumber: nu
     await this.pollFormPage.enterAnswer(answerNumber - 1, text)
 })
 
+When('I add poll answer {string}', async function (text: string) {
+    await this.pollFormPage.addAnswer(text)
+})
+
+When('I delete poll answer {int}', async function (answerNumber: number) {
+    await this.pollFormPage.deleteAnswer(answerNumber - 1)
+})
+
 When('I submit the poll', async function () {
     await this.pollFormPage.submit()
 })

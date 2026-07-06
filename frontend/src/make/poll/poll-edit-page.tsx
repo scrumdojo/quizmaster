@@ -1,8 +1,9 @@
+import './poll-edit-page.scss'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { fetchWorkspacePoll, postPoll, putPoll } from '#fe/make/api/poll.ts'
-import { Button, Field, Form, SubmitButton, TextInput } from '#fe/shared'
+import { Button, Field, Form, SubmitButton, TextInput, TrashButton } from '#fe/shared'
 import { useApi } from '#fe/shared/api/hooks.ts'
 import { Page } from '#fe/shared/page.tsx'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
@@ -44,6 +45,8 @@ export const PollEditPage = () => {
     const addAnswer = () =>
         setAnswers([...answers, { key: Math.max(...answers.map(a => a.key)) + 1, id: null, text: '' }])
 
+    const removeAnswer = (key: number) => setAnswers(answers.filter(answer => answer.key !== key))
+
     const submit = () => {
         const filled = answers.filter(answer => answer.text.trim() !== '')
         const save = isEdit
@@ -66,13 +69,15 @@ export const PollEditPage = () => {
                     </Field>
                     <Field label="Answers" required>
                         {answers.map(answer => (
-                            <TextInput
-                                key={answer.key}
-                                className="poll-answer"
-                                placeholder="answer"
-                                value={answer.text}
-                                onChange={text => setAnswerText(answer.key, text)}
-                            />
+                            <div key={answer.key} className="poll-answer-row">
+                                <TextInput
+                                    className="poll-answer"
+                                    placeholder="answer"
+                                    value={answer.text}
+                                    onChange={text => setAnswerText(answer.key, text)}
+                                />
+                                <TrashButton onClick={() => removeAnswer(answer.key)} disabled={answers.length < 3} />
+                            </div>
                         ))}
                         <Button id="add-poll-answer" onClick={addAnswer}>
                             + Add answer

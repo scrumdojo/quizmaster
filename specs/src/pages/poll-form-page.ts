@@ -17,6 +17,13 @@ export class PollFormPage {
 
     enterAnswer = (index: number, text: string) => this.answerInputs().nth(index).fill(text)
 
+    addAnswer = async (text: string) => {
+        await this.addAnswerButton().click()
+        await this.answerInputs().last().fill(text)
+    }
+
+    deleteAnswer = (index: number) => this.page.locator('.poll-answer-row').nth(index).locator('.trash-button').click()
+
     enterAnswers = async (answers: readonly string[]) => {
         for (const [idx, answer] of answers.entries()) {
             if ((await this.answerInputs().count()) <= idx) {

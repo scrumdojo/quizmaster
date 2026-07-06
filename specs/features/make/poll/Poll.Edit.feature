@@ -18,6 +18,23 @@ Feature: Edit Poll in Workspace
       | Quarterly |
 
 
+  Scenario: Removed answer loses its votes, added answer starts at zero
+    Given poll "Retro Frequency" has votes
+      | answer    | count |
+      | Weekly    | 3     |
+      | Quarterly | 2     |
+    When I start editing poll "Retro Frequency"
+    * I delete poll answer 3
+    * I add poll answer "Yearly"
+    * I submit the poll
+    When I open poll "Retro Frequency" results
+    Then I see poll "Retro Frequency" results
+      | answer  | votes |
+      | Weekly  | 3     |
+      | Monthly | 0     |
+      | Yearly  | 0     |
+
+
   Scenario: Edited question and answers keep collected votes
     Given poll "Retro Frequency" has votes
       | answer  | count |
