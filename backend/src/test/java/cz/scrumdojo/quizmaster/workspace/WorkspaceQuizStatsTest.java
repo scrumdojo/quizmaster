@@ -310,6 +310,56 @@ public class WorkspaceQuizStatsTest {
     }
 
     @Test
+    public void tagStatisticsAggregateAnswersPerTagWeakestFirst() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question sprint = fixtures.save(
+            fixtures.questionIn(workspace).question("What is a Sprint?").tags(new String[] { "scrum", "timeboxes" })
+        );
+        Question daily = fixtures.save(
+            fixtures.questionIn(workspace).question("What is a Daily Scrum?").tags(new String[] { "timeboxes" })
+        );
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(sprint, daily).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build()
+        );
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz), sprint, daily);
+        fixtures.score(attempt, sprint, AnswerStatus.CORRECT, LocalDateTime.now());
+        fixtures.score(attempt, daily, AnswerStatus.INCORRECT, LocalDateTime.now());
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tagStatistics[0].tag").value("timeboxes"))
+            .andExpect(jsonPath("$.tagStatistics[1].tag").value("scrum"))
+            .andExpect(
+                content().json(
+                    """
+                        {
+                          "tagStatistics": [
+                            {
+                              "tag": "timeboxes",
+                              "questions": 2,
+                              "answered": 2,
+                              "correctAnswers": 1,
+                              "partiallyCorrectAnswers": 0,
+                              "incorrectAnswers": 1,
+                              "unanswered": 0
+                            },
+                            {
+                              "tag": "scrum",
+                              "questions": 1,
+                              "answered": 1,
+                              "correctAnswers": 1,
+                              "partiallyCorrectAnswers": 0,
+                              "incorrectAnswers": 0,
+                              "unanswered": 0
+                            }
+                          ]
+                        }
+                    """
+                )
+            );
+    }
+
+    @Test
     public void nonExistentQuizReturns404() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         mockMvc

@@ -10,6 +10,9 @@ import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizService;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,47 +60,96 @@ public class QuizStatsService {
                     )
                     .toList();
                 SummaryStats summary = computeSummary(attemptRecords);
-                List<QuestionStatsRecord> questionRecords = buildQuestionRecords(quiz, allScores);
-                return new QuizStatsResponse(summary, attemptRecords, questionRecords);
+                List<Question> questions = quizService.loadQuestions(quiz);
+                Map<Integer, List<AttemptQuestion>> scoresByQuestionId = allScores
+                    .stream()
+                    .collect(Collectors.groupingBy(AttemptQuestion::getQuestionId));
+                List<QuestionStatsRecord> questionRecords = buildQuestionRecords(questions, scoresByQuestionId);
+                List<TagStatsRecord> tagRecords = buildTagRecords(questions, scoresByQuestionId);
+                return new QuizStatsResponse(summary, attemptRecords, questionRecords, tagRecords);
             });
     }
 
-    private List<QuestionStatsRecord> buildQuestionRecords(Quiz quiz, List<AttemptQuestion> allScores) {
-        List<Question> questions = quizService.loadQuestions(quiz);
-        if (questions.isEmpty()) {
-            return List.of();
-        }
-        Map<Integer, List<AttemptQuestion>> scoresByQuestionId = allScores
-            .stream()
-            .collect(Collectors.groupingBy(AttemptQuestion::getQuestionId));
+    private List<QuestionStatsRecord> buildQuestionRecords(
+        List<Question> questions,
+        Map<Integer, List<AttemptQuestion>> scoresByQuestionId
+    ) {
         return questions
             .stream()
-            .map(question -> {
-                var rows = scoresByQuestionId.getOrDefault(question.getId(), List.of());
-                return toQuestionRecord(question, rows.size(), rows);
-            })
+            .map(question -> toQuestionRecord(question, scoresByQuestionId.getOrDefault(question.getId(), List.of())))
             .toList();
     }
 
-    private QuestionStatsRecord toQuestionRecord(Question question, int drawCount, List<AttemptQuestion> scores) {
+    private QuestionStatsRecord toQuestionRecord(Question question, List<AttemptQuestion> scores) {
+        AnswerCounts counts = countAnswers(scores);
+        int flagged = (int) scores.stream().filter(AttemptQuestion::isFlagged).count();
+        return new QuestionStatsRecord(
+            question.getQuestion(),
+            counts.answered(),
+            counts.correct(),
+            counts.partiallyCorrect(),
+            counts.incorrect(),
+            counts.unanswered(),
+            flagged
+        );
+    }
+
+    private List<TagStatsRecord> buildTagRecords(
+        List<Question> questions,
+        Map<Integer, List<AttemptQuestion>> scoresByQuestionId
+    ) {
+        Map<String, List<Question>> questionsByTag = new HashMap<>();
+        for (Question question : questions) {
+            for (String tag : question.getTags() == null ? new String[0] : question.getTags()) {
+                questionsByTag.computeIfAbsent(tag, t -> new ArrayList<>()).add(question);
+            }
+        }
+        return questionsByTag
+            .entrySet()
+            .stream()
+            .map(entry -> toTagRecord(entry.getKey(), entry.getValue(), scoresByQuestionId))
+            .sorted(Comparator.comparingDouble(QuizStatsService::accuracy).thenComparing(TagStatsRecord::tag))
+            .toList();
+    }
+
+    private TagStatsRecord toTagRecord(
+        String tag,
+        List<Question> tagQuestions,
+        Map<Integer, List<AttemptQuestion>> scoresByQuestionId
+    ) {
+        List<AttemptQuestion> scores = tagQuestions
+            .stream()
+            .flatMap(question -> scoresByQuestionId.getOrDefault(question.getId(), List.<AttemptQuestion>of()).stream())
+            .toList();
+        AnswerCounts counts = countAnswers(scores);
+        return new TagStatsRecord(
+            tag,
+            tagQuestions.size(),
+            counts.answered(),
+            counts.correct(),
+            counts.partiallyCorrect(),
+            counts.incorrect(),
+            counts.unanswered()
+        );
+    }
+
+    private static double accuracy(TagStatsRecord record) {
+        return record.answered() == 0 ? 0 : (double) record.correctAnswers() / record.answered();
+    }
+
+    private record AnswerCounts(int answered, int correct, int partiallyCorrect, int incorrect, int unanswered) {}
+
+    private AnswerCounts countAnswers(List<AttemptQuestion> scores) {
         List<AttemptQuestion> answeredScores = scores
             .stream()
             .filter(s -> s.getStatus() != AnswerStatus.UNANSWERED)
             .toList();
-        int answered = answeredScores.size();
-        int unanswered = drawCount - answered;
-        int correctAnswers = countByStatus(answeredScores, AnswerStatus.CORRECT);
-        int partiallyCorrectAnswers = countByStatus(answeredScores, AnswerStatus.PARTIAL);
-        int incorrectAnswers = countByStatus(answeredScores, AnswerStatus.INCORRECT);
-        int flagged = (int) scores.stream().filter(AttemptQuestion::isFlagged).count();
-        return new QuestionStatsRecord(
-            question.getQuestion(),
-            answered,
-            correctAnswers,
-            partiallyCorrectAnswers,
-            incorrectAnswers,
-            unanswered,
-            flagged
+        return new AnswerCounts(
+            answeredScores.size(),
+            countByStatus(answeredScores, AnswerStatus.CORRECT),
+            countByStatus(answeredScores, AnswerStatus.PARTIAL),
+            countByStatus(answeredScores, AnswerStatus.INCORRECT),
+            scores.size() - answeredScores.size()
         );
     }
 

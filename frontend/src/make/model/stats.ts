@@ -1,1 +1,7 @@
-export type { AttemptStatsRecord, QuestionStatsRecord, QuizStatsResponse, SummaryStats } from '#shared/types/stats.ts'
+export type {
+    AttemptStatsRecord,
+    QuestionStatsRecord,
+    QuizStatsResponse,
+    SummaryStats,
+    TagStatsRecord,
+} from '#shared/types/stats.ts'

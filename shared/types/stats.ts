@@ -17,6 +17,15 @@ export interface QuestionStatsRecord {
     readonly unanswered: number
     readonly flagged: number
 }
+export interface TagStatsRecord {
+    readonly tag: string
+    readonly questions: number
+    readonly answered: number
+    readonly correctAnswers: number
+    readonly partiallyCorrectAnswers: number
+    readonly incorrectAnswers: number
+    readonly unanswered: number
+}
 export interface SummaryStats {
     readonly started: number
     readonly finished: number
@@ -29,4 +38,5 @@ export interface QuizStatsResponse {
     readonly questions?: readonly QuestionStatsRecord[]
     readonly questionStats?: readonly QuestionStatsRecord[]
     readonly questionStatistics?: readonly QuestionStatsRecord[]
+    readonly tagStatistics?: readonly TagStatsRecord[]
 }

@@ -100,6 +100,11 @@ export const expectQuestionStatsTable = async (quizStatsPage: QuizStatsPage, dat
     await quizStatsPage.expectLabeledTable('question', 'Questions', headerCells, bodyRows)
 }
 
+export const expectTagStatsTable = async (quizStatsPage: QuizStatsPage, data: DataTable) => {
+    const { headerCells, bodyRows } = parseStatsData(data)
+    await quizStatsPage.expectLabeledTable('tag', 'Tags', headerCells, bodyRows)
+}
+
 export const expectCorrectAnswersCounts = (correctAnswersCounts: Record<string, string>, rows: string[][]) => {
     for (const [bookmark, expected] of rows) {
         expect(correctAnswersCounts[bookmark]).toBe(expected)

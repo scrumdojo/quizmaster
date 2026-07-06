@@ -48,8 +48,9 @@ Desktop.
   schedule and is excluded from stats.
 - **Statistics** — attempt-by-attempt table (duration, points, score,
   status: in-progress / finished / timeout / abandoned) plus
-  per-question success rates and how often each question was flagged
-  as problematic.
+  per-question success rates, how often each question was flagged
+  as problematic, and a per-tag category breakdown (weakest tag
+  first).
 
 ### Taking (learner side)
 
@@ -105,8 +106,8 @@ Desktop.
   is hand-entry or one-question-at-a-time AI drafting.
 - **Cohort management is write-only.** Cohorts can be created but not
   renamed, reordered, or deleted from the share screen.
-- **Tags are minimal.** One optional tag per question; no
-  multi-tagging, no tag hierarchy, no tag-based stats.
+- **Tags are minimal.** Optional free-form tags per question; no tag
+  hierarchy.
 - **Images are URL-only.** No upload or hosting; the maker must put
   the image on a public URL elsewhere.
 - **Single-language UI.** App chrome is in English; content and AI

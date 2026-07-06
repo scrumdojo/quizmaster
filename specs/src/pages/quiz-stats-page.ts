@@ -9,6 +9,7 @@ export class QuizStatsPage {
     private attemptStatsTableLocator = () => this.page.getByTestId('attempt-stats-table')
     private questionStatsTableLocator = () => this.page.getByTestId('question-stats-table')
     private summaryStatsTableLocator = () => this.page.getByTestId('summary-stats-table')
+    private tagStatsTableLocator = () => this.page.getByTestId('tag-stats-table')
 
     private tableCaptionLocator = (table: Locator) => table.locator('caption')
     private tableHeaderCellsLocator = (table: Locator) => table.locator('thead .stats-table__column-text')
@@ -41,17 +42,18 @@ export class QuizStatsPage {
     }
 
     expectLabeledTable = async (
-        table: 'attempt' | 'question' | 'summary',
+        table: 'attempt' | 'question' | 'summary' | 'tag',
         captionText: string | undefined,
         headerCells: string[],
         bodyRows: string[][],
     ) => {
-        const tableLocator =
-            table === 'attempt'
-                ? this.attemptStatsTableLocator()
-                : table === 'question'
-                  ? this.questionStatsTableLocator()
-                  : this.summaryStatsTableLocator()
+        const tableLocators = {
+            attempt: this.attemptStatsTableLocator,
+            question: this.questionStatsTableLocator,
+            summary: this.summaryStatsTableLocator,
+            tag: this.tagStatsTableLocator,
+        }
+        const tableLocator = tableLocators[table]()
 
         if (captionText) {
             await expectTextToBe(this.tableCaptionLocator(tableLocator), captionText)

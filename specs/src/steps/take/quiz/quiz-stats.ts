@@ -1,7 +1,12 @@
 import type { DataTable } from '@cucumber/cucumber'
 
 import { Then, When } from '#steps/fixture.ts'
-import { expectAttemptStatsTable, expectQuestionStatsTable, expectSummaryStatsTable } from '#steps/quiz/expects.ts'
+import {
+    expectAttemptStatsTable,
+    expectQuestionStatsTable,
+    expectSummaryStatsTable,
+    expectTagStatsTable,
+} from '#steps/quiz/expects.ts'
 import { finishQuizInSeconds } from '#steps/quiz/ops.ts'
 
 When('I finish the quiz in {int} seconds', async function (seconds: number) {
@@ -22,6 +27,10 @@ Then('I see attempt stats table', async function (data: DataTable) {
 
 Then('I see question stats table', async function (data: DataTable) {
     await expectQuestionStatsTable(this.quizStatsPage, data)
+})
+
+Then('I see tag stats table', async function (data: DataTable) {
+    await expectTagStatsTable(this.quizStatsPage, data)
 })
 
 Then(

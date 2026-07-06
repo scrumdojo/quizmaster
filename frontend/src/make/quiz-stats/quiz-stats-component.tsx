@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 
-import type { AttemptStatsRecord, QuestionStatsRecord, QuizStatsResponse, SummaryStats } from '#fe/make/model/stats.ts'
+import type {
+    AttemptStatsRecord,
+    QuestionStatsRecord,
+    QuizStatsResponse,
+    SummaryStats,
+    TagStatsRecord,
+} from '#fe/make/model/stats.ts'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 
 import { formatDuration } from './duration.ts'
@@ -65,6 +71,15 @@ const questionRow = (question: QuestionStatsRecord): ReactNode[] => [
     String(question.unanswered),
     pct(question.flagged, question.answered + question.unanswered),
 ]
+const tagRow = (tag: TagStatsRecord): ReactNode[] => [
+    tag.tag,
+    String(tag.questions),
+    String(tag.answered),
+    accuracyPill(tag.correctAnswers, tag.answered),
+    pct(tag.partiallyCorrectAnswers, tag.answered),
+    pct(tag.incorrectAnswers, tag.answered),
+    String(tag.unanswered),
+]
 const averageDuration = (attempts: readonly AttemptStatsRecord[]): string => {
     const durations = attempts.flatMap(attempt => (attempt.durationSeconds == null ? [] : [attempt.durationSeconds]))
     if (durations.length === 0) {
@@ -91,6 +106,7 @@ const resolveQuestionStats = (quiz: Quiz, stats: QuizStatsResponse): readonly Qu
 }
 export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
     const questions = resolveQuestionStats(quiz, stats)
+    const tags = stats.tagStatistics ?? []
     const completionRate = rate(stats.summary.finished, stats.summary.started)
     const highlights = [
         {
@@ -189,6 +205,34 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                     </div>
                 )}
             </section>
+            {tags.length > 0 && (
+                <section className="quiz-stats__section">
+                    <div className="quiz-stats__section-header">
+                        <div>
+                            <p className="quiz-stats__section-kicker">Categories</p>
+                            <h3>Performance by tag</h3>
+                        </div>
+                        <p>How takers did per question tag, aggregated across all attempts. Weakest category first.</p>
+                    </div>
+                    <StatsTable
+                        testId="tag-stats-table"
+                        caption="Tags"
+                        columns={[
+                            'Tag',
+                            { label: 'Questions', tooltip: 'How many questions in this quiz carry the tag.' },
+                            'Answered',
+                            'Correct',
+                            {
+                                label: 'Partially Correct',
+                                tooltip: 'A multiple choice answer with exactly one mistake.',
+                            },
+                            'Incorrect',
+                            { label: 'Unanswered', tooltip: 'Questions not answered during the attempt.' },
+                        ]}
+                        rows={tags.map(tagRow)}
+                    />
+                </section>
+            )}
             {questions.length > 0 && (
                 <section className="quiz-stats__section">
                     <div className="quiz-stats__section-header">
