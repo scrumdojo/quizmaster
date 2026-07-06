@@ -20,6 +20,15 @@ Feature: Show poll results
       | Quarterly | 0     |
 
 
+  Scenario: Results page shows a QR code for taking the poll
+    Given workspace "Poll Results" with polls
+      | poll           | question                       | answers            |
+      | Team Mood Poll | How is the team feeling today? | Great, Okay, Stuck |
+    When I open poll "Team Mood Poll" results
+    Then I see the poll take QR code
+    And the poll QR code value matches the poll take link
+
+
   Scenario: Show empty vote counts for a new poll
     Given workspace "Poll Results" with polls
       | poll           | question                       | answers            |

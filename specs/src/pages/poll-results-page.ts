@@ -10,6 +10,8 @@ export class PollResultsPage {
     private resultsTableLocator = () => this.page.getByTestId('poll-results-table')
     private bodyRowsLocator = () => this.resultsTableLocator().locator('tbody tr')
     private rowLocator = (answer: string) => this.bodyRowsLocator().filter({ hasText: answer })
+    private takeQrLocator = () => this.page.getByTestId('poll-take-qr')
+    private takeLinkLocator = () => this.page.getByTestId('poll-take-link')
 
     waitForLoaded = async () => {
         await expect(this.pageLocator()).toBeVisible()
@@ -26,4 +28,13 @@ export class PollResultsPage {
         await expectTextToBe(row.locator('th').first(), answer)
         await expectTextToBe(row.locator('td').first(), votes)
     }
+
+    expectTakeQrVisible = async () => {
+        await expect(this.takeQrLocator()).toBeVisible()
+        await expect(this.takeQrLocator().locator('svg')).toBeVisible()
+    }
+
+    takeQrValue = async () => (await this.takeQrLocator().getAttribute('data-qr-value')) ?? ''
+
+    takeLink = async () => (await this.takeLinkLocator().getAttribute('href')) ?? ''
 }

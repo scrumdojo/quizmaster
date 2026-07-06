@@ -1,4 +1,5 @@
 import './poll-results-page.scss'
+import { QRCodeSVG } from 'qrcode.react'
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router'
 
@@ -19,6 +20,8 @@ export const PollResultsPage = () => {
     useApi(params.id, id => fetchWorkspacePoll(workspaceId, id), setPoll)
     useApi(params.id, fetchPollResults, setResults)
 
+    const takeUrl = poll ? `${window.location.origin}${urls.pollTake(poll.id)}` : ''
+
     return poll && results ? (
         <Page
             id="poll-results-page"
@@ -30,6 +33,15 @@ export const PollResultsPage = () => {
                 <h2 id="poll-results-question" data-testid="poll-results-question" className="poll-results__question">
                     {poll.question}
                 </h2>
+
+                <aside className="poll-share" aria-label="Take this poll">
+                    <div className="poll-share__qr" data-testid="poll-take-qr" data-qr-value={takeUrl}>
+                        <QRCodeSVG value={takeUrl} size={200} level="H" />
+                    </div>
+                    <a className="poll-share__link" data-testid="poll-take-link" href={takeUrl}>
+                        {takeUrl}
+                    </a>
+                </aside>
 
                 <table className="poll-results__table" data-testid="poll-results-table">
                     <caption>Results</caption>

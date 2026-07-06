@@ -1,4 +1,5 @@
 import type { DataTable } from '@cucumber/cucumber'
+import { expect } from '@playwright/test'
 
 import { Given, Then, When } from '#steps/fixture.ts'
 import { createWorkspacePoll, openPollResults, seedPollVotes, type PollVoteSeed } from '#steps/make/poll/ops.ts'
@@ -40,6 +41,18 @@ When('I open poll {string} results', async function (pollBookmark: string) {
 
 Then('I see poll results question {string}', async function (question: string) {
     await this.pollResultsPage.expectQuestionText(question)
+})
+
+Then('I see the poll take QR code', async function () {
+    await this.pollResultsPage.expectTakeQrVisible()
+})
+
+Then('the poll QR code value matches the poll take link', async function () {
+    const pollId = this.pollIds[this.activePollBookmark]
+    const qrValue = await this.pollResultsPage.takeQrValue()
+
+    expect(qrValue).toBe(await this.pollResultsPage.takeLink())
+    expect(qrValue.endsWith(`/poll/${pollId}`)).toBe(true)
 })
 
 Then('I see poll {string} results', async function (_pollBookmark: string, data: DataTable) {
