@@ -370,9 +370,11 @@ export const App = () => {
                         <Route path={ROUTES.quizBuzzerLobby} element={<QuizBuzzerLobbyPage />} />
                     </Routes>
                 </div>
-                <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
-                <AppThemeFab />
-                <LanguageFab />
+                <div className="corner-fabs">
+                    <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
+                    <AppThemeFab />
+                    <LanguageFab />
+                </div>
                 <XpTaskbar />
                 <LcarsBar />
             </BrowserRouter>
