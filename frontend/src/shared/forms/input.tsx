@@ -39,6 +39,12 @@ export const NumberInput = Input<number>(
     s => Number(s),
 )
 
+export const DateInput = Input<string>(
+    'date',
+    v => v,
+    s => s,
+)
+
 export const DecimalInput = ({ id, className, placeholder, value, onChange }: InputProps<string>) => (
     <input
         type="text"

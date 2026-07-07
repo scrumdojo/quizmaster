@@ -655,6 +655,14 @@ html[data-app-theme='windows-xp'] .home-highlight-card {
     @include xp-window-titlebar('Tip');
 }
 
+html[data-app-theme='windows-xp'] .home-workspaces {
+    @include xp-window-titlebar('Jump Back In');
+}
+
+html[data-app-theme='windows-xp'] .home-workspaces__link {
+    border-radius: 3px;
+}
+
 html[data-app-theme='windows-xp'] #inline-question-modal {
     @include xp-window-titlebar('New Question', #ece9df);
     padding-top: 2.6rem;
@@ -1218,6 +1226,14 @@ html[data-app-theme='star-trek'] .home-hero__panel {
 
 html[data-app-theme='star-trek'] .home-highlight-card {
     @include lcars-panel('Tip', #cc6666);
+}
+
+html[data-app-theme='star-trek'] .home-workspaces {
+    @include lcars-panel('Jump Back In', #9999cc);
+}
+
+html[data-app-theme='star-trek'] .home-workspaces__link {
+    background: #111111;
 }
 
 html[data-app-theme='star-trek'] .home-hero__panel-item {

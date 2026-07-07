@@ -14,6 +14,19 @@ export const postWorkspace = async (workspace: WorkspaceRequest) =>
 
 export const fetchWorkspace = async (guid: string) => await fetchJson<Workspace>(`/api/workspaces/${guid}`)
 
+export interface WorkspaceDateFilter {
+    readonly from?: string
+    readonly to?: string
+}
+
+export const fetchWorkspaces = async (filter: WorkspaceDateFilter = {}): Promise<readonly Workspace[]> => {
+    const searchParams = new URLSearchParams()
+    if (filter.from) searchParams.set('from', filter.from)
+    if (filter.to) searchParams.set('to', filter.to)
+    const query = searchParams.toString()
+    return await fetchJson<readonly Workspace[]>(`/api/workspaces${query ? `?${query}` : ''}`)
+}
+
 export const fetchWorkspaceQuestions = async (
     guid: string,
     page = 0,

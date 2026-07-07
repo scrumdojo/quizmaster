@@ -164,7 +164,7 @@ public class TestFixtures {
     }
 
     public Workspace.WorkspaceBuilder workspace() {
-        return Workspace.builder().title("Test Workspace");
+        return Workspace.builder().title("Test Workspace").createdAt(LocalDateTime.now());
     }
 
     public Workspace save(Workspace.WorkspaceBuilder builder) {

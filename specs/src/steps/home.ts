@@ -10,6 +10,18 @@ When('I start creating a new workspace', async function () {
     await this.homePage.createWorkspaceLink().click()
 })
 
+When('I open workspace {string} from home', async function (this: QuizmasterWorld, title: string) {
+    await this.homePage.openWorkspace(title)
+})
+
+When('I search workspaces from home', async function (this: QuizmasterWorld) {
+    await this.homePage.submitWorkspaceFilter()
+})
+
 Then('I can create a new workspace', async function (this: QuizmasterWorld) {
     await this.homePage.expectCreateWorkspaceLinkVisible()
+})
+
+Then('I do not see any workspace listed on home', async function (this: QuizmasterWorld) {
+    await this.homePage.expectNoWorkspacesListed()
 })

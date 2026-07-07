@@ -1,6 +1,7 @@
 package cz.scrumdojo.quizmaster.workspace;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 
 @Getter
@@ -16,4 +17,7 @@ public class Workspace {
     private String guid;
 
     private String title;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 }
