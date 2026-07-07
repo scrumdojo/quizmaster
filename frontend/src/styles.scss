@@ -265,3 +265,94 @@ body {
         color: #fff;
     }
 }
+
+// ── App theme FAB ─────────────────────────────────────────────────────────────
+
+.theme-fab {
+    position: fixed;
+    bottom: 20px;
+    left: 210px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.theme-label {
+    background: white;
+    color: #0e7490;
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.theme-trigger {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    box-shadow: 0 4px 18px rgba(8, 145, 178, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(8, 145, 178, 0.5);
+    }
+}
+
+.theme-icon {
+    font-size: 32px;
+    line-height: 1;
+    user-select: none;
+}
+
+.theme-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(8, 145, 178, 0.22);
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+    padding: 6px;
+    backdrop-filter: blur(8px);
+    animation: bgGameSlideUp 0.18s ease-out;
+    min-width: 160px;
+}
+
+.theme-option {
+    padding: 9px 16px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: #10233f;
+    text-align: left;
+    white-space: nowrap;
+    transition: background 0.12s ease;
+
+    &:hover {
+        background: rgba(8, 145, 178, 0.08);
+    }
+
+    &.theme-option--active {
+        background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+        color: #fff;
+    }
+}
