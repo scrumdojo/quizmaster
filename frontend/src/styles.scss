@@ -857,6 +857,29 @@ html[data-app-theme='star-trek'] textarea {
     }
 }
 
+html[data-app-theme='star-trek'] input[type='checkbox'],
+html[data-app-theme='star-trek'] input[type='radio'] {
+    accent-color: #ff9900;
+}
+
+html[data-app-theme='star-trek'] .radio-set .check {
+    border: 1px solid #9999cc;
+    background: #111111;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+// .help-tooltip__content uses --text-strong as its background (a dark-bg
+// trick that assumes --text-strong is dark). LCARS flips --text-strong to
+// white for panel text, which turned this into white-on-white — give it an
+// explicit dark background instead of relying on that variable.
+html[data-app-theme='star-trek'] .help-tooltip__content {
+    background: #000000;
+    border: 1px solid #ff9900;
+    color: #ffffff;
+    box-shadow: none;
+}
+
 // Flat, solid-color pill button — no gradients, no shadows, black bold caps text.
 @mixin lcars-button-face($color: #ff9900) {
     font-family: 'Antonio', 'Arial Narrow', sans-serif;
