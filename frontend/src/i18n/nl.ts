@@ -340,5 +340,9 @@ export const nl: Translations = {
         thinking: 'Robin denkt na...',
         savedOneQuestion: 'Vraag opgeslagen in de workspace.',
         savedManyQuestions: n => `${n} ${n === 1 ? 'vraag' : 'vragen'} opgeslagen in de workspace.`,
+        errorRequestFailed: 'AI-assistent-aanvraag mislukt.',
+        errorAiTokenNotConfigured: 'AI-token is niet geconfigureerd.',
+        errorEmptyChatMessages: 'Berichten mogen niet leeg zijn.',
+        errorInvalidLastMessage: 'Laatste bericht moet een gebruikersbericht met niet-lege inhoud zijn.',
     },
 }

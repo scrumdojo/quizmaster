@@ -338,5 +338,9 @@ export const en: Translations = {
         thinking: 'Robin is thinking...',
         savedOneQuestion: 'Saved question to workspace.',
         savedManyQuestions: n => `Saved ${n} question${n === 1 ? '' : 's'} to workspace.`,
+        errorRequestFailed: 'AI assistant request failed.',
+        errorAiTokenNotConfigured: 'AI token is not configured.',
+        errorEmptyChatMessages: 'Messages must not be empty.',
+        errorInvalidLastMessage: 'Last message must be a user message with non-empty content.',
     },
 }

@@ -1,3 +1,17 @@
+export class ApiError extends Error {
+    readonly code?: string
+
+    constructor(message: string, code?: string) {
+        super(message)
+        this.code = code
+    }
+}
+
+const throwApiError = async (response: Response): Promise<never> => {
+    const error = await response.json()
+    throw new ApiError(error.message, error.code)
+}
+
 const mergeHeaders = (headers: HeadersInit | undefined, extra: HeadersInit): HeadersInit => {
     const merged = new Headers(headers)
     new Headers(extra).forEach((value, key) => merged.set(key, value))
@@ -8,8 +22,7 @@ export const fetchJson = async <T>(url: string, init?: RequestInit): Promise<T> 
     fetch(url, init)
         .then(async response => {
             if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.message)
+                return throwApiError(response)
             }
             return response
         })
@@ -42,8 +55,7 @@ export const postNoContent = async <T>(url: string, data?: T, init?: RequestInit
         body: JSON.stringify(data),
     })
     if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message)
+        await throwApiError(response)
     }
 }
 
@@ -57,16 +69,14 @@ export const putNoContent = async <T>(url: string, data?: T, init?: RequestInit)
         body: JSON.stringify(data),
     })
     if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message)
+        await throwApiError(response)
     }
 }
 
 export const callDelete = async (url: string, init?: RequestInit) =>
     fetch(url, { ...init, method: 'DELETE' }).then(async response => {
         if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.message)
+            return throwApiError(response)
         }
         return response
     })
