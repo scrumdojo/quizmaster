@@ -433,6 +433,11 @@ html[data-app-theme='windows-xp'] textarea {
     }
 }
 
+html[data-app-theme='windows-xp'] input[type='checkbox'],
+html[data-app-theme='windows-xp'] input[type='radio'] {
+    accent-color: #1a5fd0;
+}
+
 // Classic Windows 3D button face — most XP dialogs keep this "Classic" gray
 // button style rather than a themed blue one, so this is what real XP
 // buttons actually look like (see docs/screenshots/winxppro.png).
