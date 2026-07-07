@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import { tagToColor } from '#fe/make/model/tag.ts'
 import { Button, HelpTooltip, LinkButton } from '#fe/shared'
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
+    const { t } = useLanguage()
     const workspaceId = useWorkspaceId()
     const [showQuizList, setShowQuizList] = useState(false)
     return (
@@ -33,10 +35,10 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                         {question.imageUrl && <img src={question.imageUrl} alt="" className="question-thumbnail" />}
                     </div>
                     <LinkButton
-                        label="Edit"
+                        label={t.common.edit}
                         to={`${urls.workspaceQuestionEdit(workspaceId, question.id)}?tab=questions`}
                     />
-                    <LinkButton label="Take" to={urls.questionTake(question.id)} />
+                    <LinkButton label={t.common.take} to={urls.questionTake(question.id)} />
                     {question.isInAnyQuiz ? (
                         <div className="question-used-wrapper">
                             <button
@@ -44,10 +46,10 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                                 className="question-used-badge link-button link-button--secondary"
                                 onClick={() => setShowQuizList(v => !v)}
                             >
-                                In Quiz
+                                {t.workspace.inQuiz}
                             </button>
-                            <HelpTooltip label={`In Quiz action for ${question.question}`}>
-                                Lists the quizzes that use this question.
+                            <HelpTooltip label={t.workspace.inQuizTooltipLabel(question.question)}>
+                                {t.workspace.inQuizTooltipBody}
                             </HelpTooltip>
                             {showQuizList && (
                                 <ul className="in-quiz-list">
@@ -59,7 +61,7 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                         </div>
                     ) : (
                         <Button className="link-button" onClick={onDeleteQuestion}>
-                            Delete
+                            {t.common.delete}
                         </Button>
                     )}
                 </div>

@@ -1,6 +1,7 @@
 import './create-question.scss'
 import { useNavigate, useSearchParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { type QuestionRequest, saveQuestion } from '#fe/make/api/question.ts'
 import { Page } from '#fe/shared/page.tsx'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
@@ -8,6 +9,7 @@ import { urls, useWorkspaceId } from '#fe/urls.ts'
 import { QuestionEditForm } from './form/question-form.tsx'
 
 export function CreateQuestionPage() {
+    const { t } = useLanguage()
     const workspaceId = useWorkspaceId()
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
@@ -22,9 +24,9 @@ export function CreateQuestionPage() {
 
     return (
         <Page
-            title="Create Question"
-            back={{ to: workspaceUrl, label: 'Back to workspace' }}
-            subtitle="Draft a clean quiz question, refine the answers, and use AI as a starting point when it helps."
+            title={t.question.createTitle}
+            back={{ to: workspaceUrl, label: t.question.backToWorkspace }}
+            subtitle={t.question.createSubtitle}
             id="create-question-page"
         >
             <QuestionEditForm workspaceId={workspaceId} onSubmit={handleSubmit} />
