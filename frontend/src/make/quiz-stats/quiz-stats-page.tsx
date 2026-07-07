@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { fetchWorkspaceQuiz } from '#fe/make/api/quiz.ts'
 import { fetchQuizStats } from '#fe/make/api/stats.ts'
 import type { QuizStatsResponse } from '#fe/make/model/stats.ts'
@@ -11,6 +12,7 @@ import { urls } from '#fe/urls.ts'
 
 import { QuizStats } from './quiz-stats-component.tsx'
 export const QuizStatsPage = () => {
+    const { t } = useLanguage()
     const params = useParams()
     const workspaceId = params.workspaceId ?? ''
     const [quiz, setQuiz] = useState<Quiz>()
@@ -21,9 +23,9 @@ export const QuizStatsPage = () => {
     return quiz && stats ? (
         <Page
             id="quiz-stats-page"
-            title="Quiz statistics"
-            subtitle={`See completion, pacing, and question-level performance for "${quiz.title}".`}
-            back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
+            title={t.quiz.statsTitle}
+            subtitle={t.quiz.statsSubtitle(quiz.title)}
+            back={{ to: urls.workspace(workspaceId), label: t.question.backToWorkspace }}
         >
             <QuizStats quiz={quiz} stats={stats} />
         </Page>
