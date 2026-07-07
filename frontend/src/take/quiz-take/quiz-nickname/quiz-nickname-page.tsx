@@ -2,6 +2,7 @@ import './quiz-nickname-page.scss'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { Button, Field, Page, TextInput } from '#fe/shared'
 import { useApi } from '#fe/shared/api/hooks.ts'
 import type { QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
@@ -17,6 +18,7 @@ interface QuizNicknamePageProps {
 }
 
 export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
+    const { t } = useLanguage()
     const navigate = useNavigate()
     const params = useParams()
     const cohortGuid = params.cohortGuid
@@ -50,25 +52,25 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
 
     return (
         quiz && (
-            <Page id="quiz-nickname" title="Choose your nickname">
+            <Page id="quiz-nickname" title={t.take.chooseNickname}>
                 <TakeCard id="quiz-nickname-card" className="quiz-nickname-card">
                     <header>
-                        <span className="eyebrow">Quiz</span>
-                        <h2>Choose your nickname</h2>
+                        <span className="eyebrow">{t.take.quizBadge}</span>
+                        <h2>{t.take.chooseNickname}</h2>
                         <p>
-                            Enter the nickname you want to use for <strong>{quiz.title}</strong> before the quiz starts.
+                            {t.take.nicknameIntroPrefix} <strong>{quiz.title}</strong> {t.take.nicknameIntroSuffix}
                         </p>
                     </header>
                     <div className="quiz-nickname-card__form">
-                        <Field label="Nickname" required={true}>
+                        <Field label={t.take.nicknameFieldLabel} required={true}>
                             <TextInput
                                 id="quiz-nickname-input"
                                 value={nickname}
                                 onChange={setNickname}
-                                placeholder="Your nickname"
+                                placeholder={t.take.nicknamePlaceholder}
                             />
                         </Field>
-                        <p className="quiz-nickname-card__hint">This name is shown for your quiz attempt.</p>
+                        <p className="quiz-nickname-card__hint">{t.take.nicknameHint}</p>
                     </div>
                     <footer className="quiz-nickname-card__actions">
                         <Button
@@ -82,7 +84,7 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
                                 )
                             }
                         >
-                            Back
+                            {t.common.back}
                         </Button>
                         <Button
                             id="start-quiz"
@@ -91,7 +93,7 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
                             onClick={onStart}
                             disabled={!canStart}
                         >
-                            Start quiz
+                            {t.take.startQuiz}
                         </Button>
                     </footer>
                 </TakeCard>

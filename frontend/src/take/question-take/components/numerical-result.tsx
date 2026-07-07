@@ -1,4 +1,5 @@
 import './numerical-result.scss'
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { type AnswerStatus, type Question, numericalAnswer } from '#fe/take/model/question.ts'
 
 interface NumericalResultProps {
@@ -8,6 +9,7 @@ interface NumericalResultProps {
 }
 
 export const NumericalResult = ({ question, userInput, status }: NumericalResultProps) => {
+    const { t } = useLanguage()
     const correctAnswer = question.answers[0]
     const answer = numericalAnswer(userInput)
     if (!answer || answer.type !== 'numerical') return null
@@ -21,7 +23,7 @@ export const NumericalResult = ({ question, userInput, status }: NumericalResult
         return (
             <div className="numerical-result">
                 <div className="numerical-bar correct" data-testid="correct-bar">
-                    <span className="bar-label correct-label">Correct answer:</span> {correctAnswer}
+                    <span className="bar-label correct-label">{t.take.correctAnswerLabel}</span> {correctAnswer}
                 </div>
             </div>
         )
@@ -32,12 +34,12 @@ export const NumericalResult = ({ question, userInput, status }: NumericalResult
     return (
         <div className="numerical-result">
             <div className="numerical-bar correct" data-testid="correct-bar">
-                <span className="bar-label correct-label">Correct answer:</span> {correctAnswer}
-                {!isCorrect && <span className="bar-note"> (missed)</span>}
+                <span className="bar-label correct-label">{t.take.correctAnswerLabel}</span> {correctAnswer}
+                {!isCorrect && <span className="bar-note"> {t.take.missedNote}</span>}
             </div>
             <div className={`numerical-bar ${userBarClass}`} data-testid="user-bar">
-                <span className="bar-label">Your answer:</span> {userValue}
-                {isCorrect && <span className="bar-note"> (within tolerance)</span>}
+                <span className="bar-label">{t.take.yourAnswerLabel}</span> {userValue}
+                {isCorrect && <span className="bar-note"> {t.take.withinToleranceNote}</span>}
             </div>
         </div>
     )

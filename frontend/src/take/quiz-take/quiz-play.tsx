@@ -1,6 +1,8 @@
 import './quiz-play.scss'
 import { useRef, useState } from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
+import type { Translations } from '#fe/i18n/types.ts'
 import type { QuizMode, QuizTake } from '#fe/shared/model/quiz.ts'
 import { recordTimeout, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
 import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
@@ -22,9 +24,11 @@ interface QuizPlayFormProps {
     readonly onEvaluate: (quizAnswers: QuizAnswers) => void | Promise<void>
 }
 
-const feedbackModeLabel = (mode: QuizMode): string => (mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end')
+const feedbackModeLabel = (mode: QuizMode, t: Translations): string =>
+    mode === 'learn' ? t.take.continuousFeedback : t.take.feedbackAtEnd
 
 export const QuizPlayForm = (props: QuizPlayFormProps) => {
+    const { t } = useLanguage()
     const { quizAnswers, answerQuestion } = useQuizAnswersState()
     const nav = useQuizNavigationState(props.quiz, props.questionsBaseUrl)
     const bookmarks = useQuizBookmarkState()
@@ -127,7 +131,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
         <div className="page quiz-play" id="quiz-play">
             <div className="quiz-play-status">
                 <span className="feedback-mode-chip" id="feedback-mode" data-mode={props.quiz.mode}>
-                    {feedbackModeLabel(props.quiz.mode)}
+                    {feedbackModeLabel(props.quiz.mode, t)}
                 </span>
                 <TimeLimit
                     timeLimit={props.quiz.timeLimit}

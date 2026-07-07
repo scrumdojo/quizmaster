@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import './timeout-reached-modal.scss'
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { EvaluateButton } from '#fe/take/quiz-take/components/buttons.tsx'
 
 interface TimeOutReachedModalProps {
@@ -7,6 +8,7 @@ interface TimeOutReachedModalProps {
 }
 
 export const TimeOutReachedModal = ({ onConfirm }: TimeOutReachedModalProps) => {
+    const { t } = useLanguage()
     const dialogRef = useRef<HTMLDialogElement>(null)
     useEffect(() => {
         if (dialogRef.current) {
@@ -16,7 +18,7 @@ export const TimeOutReachedModal = ({ onConfirm }: TimeOutReachedModalProps) => 
 
     return (
         <dialog ref={dialogRef} className="timeout-modal">
-            <p>Time's up</p>
+            <p>{t.take.timesUp}</p>
             <EvaluateButton onClick={onConfirm} />
         </dialog>
     )

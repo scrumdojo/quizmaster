@@ -2,6 +2,7 @@ import './poll-edit-page.scss'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { fetchWorkspacePoll, postPoll, putPoll } from '#fe/make/api/poll.ts'
 import { Button, Field, Form, SubmitButton, TextInput, TrashButton } from '#fe/shared'
 import { useApi } from '#fe/shared/api/hooks.ts'
@@ -21,14 +22,10 @@ const emptyAnswers: readonly AnswerDraft[] = [
     { key: 2, id: null, text: '' },
 ]
 
-const errorMessage = {
-    'empty-question': 'Question must not be empty.',
-    'empty-answer': 'Answers must not be empty.',
-}
-
-type ErrorCode = keyof typeof errorMessage
+type ErrorCode = 'empty-question' | 'empty-answer'
 
 export const PollEditPage = () => {
+    const { t } = useLanguage()
     const workspaceId = useWorkspaceId()
     const { id: pollId } = useParams()
     const navigate = useNavigate()
@@ -62,6 +59,11 @@ export const PollEditPage = () => {
         return errors
     }
 
+    const errorMessage: Record<ErrorCode, string> = {
+        'empty-question': t.question.errorEmptyQuestion,
+        'empty-answer': t.question.errorEmptyAnswer,
+    }
+
     const validator = createValidator(validate, errorMessage)
 
     const submit = () => {
@@ -74,22 +76,27 @@ export const PollEditPage = () => {
     return (
         <Page
             id={isEdit ? 'edit-poll-page' : 'create-poll-page'}
-            title={isEdit ? 'Edit Poll' : 'Create Poll'}
-            subtitle="Ask one question, offer a few answers, and collect votes from your audience."
-            back={{ to: workspaceUrl, label: 'Back to workspace' }}
+            title={isEdit ? t.poll.editTitle : t.poll.createTitle}
+            subtitle={t.poll.subtitle}
+            back={{ to: workspaceUrl, label: t.question.backToWorkspace }}
         >
             {(!isEdit || pollLoaded) && (
                 <Form validator={validator} onSubmit={submit}>
-                    <Field label="Poll question" required>
-                        <TextInput id="poll-question" placeholder="question" value={question} onChange={setQuestion} />
+                    <Field label={t.poll.questionFieldLabel} required>
+                        <TextInput
+                            id="poll-question"
+                            placeholder={t.poll.questionPlaceholder}
+                            value={question}
+                            onChange={setQuestion}
+                        />
                         <ErrorMessage errorCode="empty-question" />
                     </Field>
-                    <Field label="Answers" required>
+                    <Field label={t.poll.answersFieldLabel} required>
                         {answers.map(answer => (
                             <div key={answer.key} className="poll-answer-row">
                                 <TextInput
                                     className="poll-answer"
-                                    placeholder="answer"
+                                    placeholder={t.question.answerPlaceholder}
                                     value={answer.text}
                                     onChange={text => setAnswerText(answer.key, text)}
                                 />
@@ -98,7 +105,7 @@ export const PollEditPage = () => {
                         ))}
                         <ErrorMessage errorCode="empty-answer" />
                         <Button id="add-poll-answer" onClick={addAnswer}>
-                            + Add answer
+                            {t.poll.addAnswer}
                         </Button>
                     </Field>
                     <SubmitButton />

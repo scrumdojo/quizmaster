@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { fetchWorkspacePoll, fetchWorkspacePollResults } from '#fe/make/api/poll.ts'
 import { useApi } from '#fe/shared/api/hooks.ts'
 import { Page } from '#fe/shared/page.tsx'
@@ -12,6 +13,7 @@ import type { PollResultsResponse, PollTake } from '#shared/types/poll.ts'
 const RESULTS_REFRESH_MS = 2000
 
 export const PollResultsPage = () => {
+    const { t } = useLanguage()
     const params = useParams()
     const workspaceId = params.workspaceId ?? ''
     const [poll, setPoll] = useState<PollTake>()
@@ -38,16 +40,16 @@ export const PollResultsPage = () => {
     return poll && results ? (
         <Page
             id="poll-results-page"
-            title="Poll results"
-            subtitle={`See how respondents voted on "${poll.question}".`}
-            back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
+            title={t.poll.resultsTitle}
+            subtitle={t.poll.resultsSubtitle(poll.question)}
+            back={{ to: urls.workspace(workspaceId), label: t.question.backToWorkspace }}
         >
             <section className="poll-results" aria-labelledby="poll-results-question">
                 <h2 id="poll-results-question" data-testid="poll-results-question" className="poll-results__question">
                     {poll.question}
                 </h2>
 
-                <aside className="poll-share" aria-label="Take this poll">
+                <aside className="poll-share" aria-label={t.poll.takeThisPollAriaLabel}>
                     <div className="poll-share__qr" data-testid="poll-take-qr" data-qr-value={takeUrl}>
                         <QRCodeSVG value={takeUrl} size={200} level="H" />
                     </div>
@@ -57,11 +59,11 @@ export const PollResultsPage = () => {
                 </aside>
 
                 <table className="poll-results__table" data-testid="poll-results-table">
-                    <caption>Results</caption>
+                    <caption>{t.poll.resultsCaption}</caption>
                     <thead>
                         <tr>
-                            <th scope="col">Answer</th>
-                            <th scope="col">Votes</th>
+                            <th scope="col">{t.poll.colAnswer}</th>
+                            <th scope="col">{t.poll.colVotes}</th>
                         </tr>
                     </thead>
                     <tbody>
