@@ -643,7 +643,6 @@ html[data-app-theme='windows-xp'] .theme-fab {
 html[data-app-theme='windows-xp'] .workspace-page {
     @include xp-window-titlebar('Quizmaster - Workspace');
     position: relative;
-    overflow: hidden;
 }
 
 html[data-app-theme='windows-xp'] .workspace-header {
@@ -913,7 +912,6 @@ html[data-app-theme='star-trek'] .link-button--secondary {
 // square on the left and rounded on the right — the classic LCARS "elbow".
 @mixin lcars-panel($title, $bar-color: #ff9900) {
     position: relative;
-    overflow: hidden;
     background: #050505;
     border: none;
     border-radius: 0 26px 26px 0;
@@ -1013,6 +1011,19 @@ html[data-app-theme='star-trek'] .inline-question-modal__close {
 html[data-app-theme='star-trek'] .bg-game-fab,
 html[data-app-theme='star-trek'] .theme-fab {
     bottom: 54px;
+}
+
+html[data-app-theme='star-trek'] .take-card {
+    @include lcars-panel('Quizmaster', #ff9900);
+}
+
+html[data-app-theme='star-trek'] .take-card > header {
+    border-bottom: 1px solid #222222;
+}
+
+html[data-app-theme='star-trek'] .take-card > footer {
+    background: transparent;
+    border-top: 1px solid #222222;
 }
 
 // ── LCARS: workspace page ─────────────────────────────────────────────────────
