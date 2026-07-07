@@ -632,3 +632,139 @@ html[data-app-theme='windows-xp'] .bg-game-fab,
 html[data-app-theme='windows-xp'] .theme-fab {
     bottom: 54px;
 }
+
+// ── Windows XP: workspace page ────────────────────────────────────────────────
+// The workspace page has its own bespoke panels/tabs/cards that don't route
+// through .page or the shared --radius-* variables, so they need explicit
+// flattening — XP has no pill-shaped or heavily-rounded chrome.
+
+html[data-app-theme='windows-xp'] .workspace-page {
+    @include xp-window-titlebar('Quizmaster - Workspace');
+}
+
+html[data-app-theme='windows-xp'] .workspace-header {
+    border-radius: 4px;
+    border: 1px solid #7f9db9;
+    background: linear-gradient(180deg, #ffffff 0%, #dce9fa 100%);
+}
+
+html[data-app-theme='windows-xp'] .workspace-header__eyebrow {
+    border-radius: 3px;
+    background: #d3e5fa;
+    color: #0a246a;
+    letter-spacing: 0.02em;
+}
+
+html[data-app-theme='windows-xp'] .workspace-header__stat {
+    border-radius: 4px;
+    border: 1px solid #7f9db9;
+    background: #ffffff;
+}
+
+html[data-app-theme='windows-xp'] .workspace-tabs {
+    align-items: flex-end;
+    gap: 0;
+    padding: 0;
+    border: none;
+    border-bottom: 2px solid #0a246a;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+html[data-app-theme='windows-xp'] .workspace-tab {
+    font-family: Tahoma, Verdana, sans-serif;
+    font-size: 0.85rem;
+    font-weight: normal;
+    letter-spacing: 0;
+    min-height: 2.2rem;
+    padding: 0.5rem 1.1rem;
+    margin-bottom: -2px;
+    border: 1px solid #7f9db9;
+    border-bottom: 2px solid #0a246a;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, #dce9fa 0%, #b7d2f0 100%);
+    color: #000;
+
+    &:hover {
+        background: linear-gradient(180deg, #eaf3fd 0%, #cfe3f7 100%);
+        color: #000;
+    }
+
+    &[aria-selected='true'] {
+        background: linear-gradient(180deg, #ffffff 0%, #eef5fc 100%);
+        border-color: #0a246a;
+        border-bottom-color: #eef5fc;
+        color: #000;
+        font-weight: bold;
+    }
+}
+
+html[data-app-theme='windows-xp'] .workspace-pagination__page {
+    border-radius: 3px;
+    background: linear-gradient(180deg, #fdfdfd 0%, #ece9df 48%, #d4d0c8 52%, #dedad0 100%);
+    border: 1px solid #8c8c8c;
+    color: #000;
+
+    &:hover {
+        color: #000;
+        background: linear-gradient(180deg, #eaf3fd 0%, #cfe3f7 100%);
+    }
+
+    &--active {
+        background: linear-gradient(180deg, #5c9ff2 0%, #1a5fd0 100%);
+        color: #fff;
+
+        &:hover {
+            color: #fff;
+        }
+    }
+}
+
+html[data-app-theme='windows-xp'] .workspace-question-tag-filter__button {
+    border-radius: 3px;
+    background: linear-gradient(180deg, #fdfdfd 0%, #ece9df 48%, #d4d0c8 52%, #dedad0 100%);
+    color: #000;
+
+    &:hover {
+        color: #000;
+    }
+
+    &--selected,
+    &[aria-pressed='true'] {
+        border-color: #0a246a;
+        background: linear-gradient(180deg, #5c9ff2 0%, #1a5fd0 100%);
+        color: #fff;
+    }
+}
+
+html[data-app-theme='windows-xp'] .workspace-empty-state,
+html[data-app-theme='windows-xp'] .workspace-empty-state--questions,
+html[data-app-theme='windows-xp'] .workspace-empty-state--quizzes {
+    border-radius: 4px;
+    border: 1px dashed #7f9db9;
+    background: #ffffff;
+}
+
+html[data-app-theme='windows-xp'] .workspace-empty-state__badge {
+    border-radius: 3px;
+    background: #d3e5fa;
+    color: #0a246a;
+}
+
+html[data-app-theme='windows-xp'] .question-item,
+html[data-app-theme='windows-xp'] .quiz-item {
+    border-radius: 3px;
+    border: 1px solid #7f9db9;
+    background: #ffffff;
+}
+
+html[data-app-theme='windows-xp'] .quiz-item__dropdown-menu,
+html[data-app-theme='windows-xp'] .question-used-wrapper .in-quiz-list {
+    border-radius: 3px;
+    border: 1px solid #7f9db9;
+}
+
+html[data-app-theme='windows-xp'] .question-used-wrapper .in-quiz-list li {
+    border-color: #d3e5fa;
+}
