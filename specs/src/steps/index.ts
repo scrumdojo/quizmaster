@@ -1,4 +1,5 @@
 import './animation.ts'
+import './app-theme.ts'
 import './browser.ts'
 import './common.ts'
 import './home.ts'

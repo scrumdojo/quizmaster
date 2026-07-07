@@ -50,6 +50,79 @@ const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] 
 
 const ICONS = ['🦣', '😇'] as const
 
+// ─── App theme (reskin) selector ─────────────────────────────────────────────
+// Scaffolding for a future full app reskin: persists the chosen theme and
+// exposes it as `data-app-theme` on <html> for CSS to hook into later.
+
+type AppTheme = 'default' | 'windows-xp' | 'star-trek'
+
+const APP_THEME_STORAGE_KEY = 'app-theme'
+
+const readAppTheme = (): AppTheme => {
+    const v = localStorage.getItem(APP_THEME_STORAGE_KEY)
+    return v === 'windows-xp' || v === 'star-trek' ? v : 'default'
+}
+
+document.documentElement.dataset.appTheme = readAppTheme()
+
+const APP_THEME_OPTIONS: { value: AppTheme; label: string }[] = [
+    { value: 'default', label: 'Standaard' },
+    { value: 'windows-xp', label: 'Windows XP' },
+    { value: 'star-trek', label: 'Star Trek' },
+]
+
+const AppThemeFab = () => {
+    const [theme, setTheme] = useState<AppTheme>(readAppTheme)
+    const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        document.documentElement.dataset.appTheme = theme
+        localStorage.setItem(APP_THEME_STORAGE_KEY, theme)
+    }, [theme])
+
+    // Close on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    const select = (t: AppTheme) => {
+        setTheme(t)
+        setOpen(false)
+    }
+
+    return (
+        <div ref={ref} data-testid="app-theme-settings" className="theme-fab">
+            <div className="theme-label">Theme</div>
+            <button type="button" className="theme-trigger" aria-label="App theme" onClick={() => setOpen(v => !v)}>
+                <span className="theme-icon" aria-hidden="true">
+                    🎨
+                </span>
+            </button>
+            {open && (
+                <div className="theme-dropdown">
+                    {APP_THEME_OPTIONS.map(({ value, label }) => (
+                        <button
+                            key={value}
+                            type="button"
+                            aria-label={label}
+                            aria-pressed={theme === value}
+                            onClick={() => select(value)}
+                            className={`theme-option${theme === value ? ' theme-option--active' : ''}`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
 interface BackgroundGameFabProps {
     readonly battleOnly: boolean
     readonly onBattleOnlyChange: (value: boolean) => void
@@ -244,6 +317,7 @@ export const App = () => {
             </div>
             <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />
             <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
+            <AppThemeFab />
         </BrowserRouter>
     )
 }

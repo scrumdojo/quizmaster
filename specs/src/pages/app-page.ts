@@ -8,9 +8,11 @@ export class AppPage {
     private lastPhotoCategory: string | null = null
 
     private settingsPanel = () => this.page.locator('[data-testid="animation-settings"]')
+    private themeSettingsPanel = () => this.page.locator('[data-testid="app-theme-settings"]')
     private canvas = () => this.page.locator('#crazy-bg')
     private photoImage = () => this.page.locator('#crazy-bg-photo')
     private tooltipLocator = () => this.page.getByRole('tooltip')
+    private htmlElement = () => this.page.locator('html')
 
     // Opens the dropdown by clicking the FAB trigger button
     openAnimationSettings = async () => {
@@ -132,4 +134,34 @@ export class AppPage {
     expectMammothDodgeVisual = () => expect(this.canvas()).toHaveAttribute('data-mammoth-dodge-visual', 'true')
 
     expectBattleAudio = () => expect(this.canvas()).toHaveAttribute('data-battle-audio', 'cave_throat_singing')
+
+    // ── App theme (reskin) selector ─────────────────────────────
+
+    openThemeSettings = async () => {
+        const trigger = this.themeSettingsPanel().locator('.theme-trigger')
+        const isOpen = await this.themeSettingsPanel().locator('.theme-dropdown').isVisible()
+        if (!isOpen) await trigger.click()
+    }
+
+    selectAppTheme = async (label: string) => {
+        await this.openThemeSettings()
+        await this.page.getByRole('button', { name: label }).click()
+    }
+
+    expectAppThemeSettingsAlwaysVisible = async () => {
+        await expect(this.themeSettingsPanel()).toBeVisible()
+    }
+
+    expectAppThemeFabLabel = async (label: string) => {
+        await expect(this.themeSettingsPanel().locator('.theme-label')).toHaveText(label)
+    }
+
+    expectAppThemeDropdownOptionsVisible = async () => {
+        await this.openThemeSettings()
+        await expect(this.page.getByRole('button', { name: 'Standaard' })).toBeVisible()
+        await expect(this.page.getByRole('button', { name: 'Windows XP' })).toBeVisible()
+        await expect(this.page.getByRole('button', { name: 'Star Trek' })).toBeVisible()
+    }
+
+    expectAppTheme = (theme: string) => expect(this.htmlElement()).toHaveAttribute('data-app-theme', theme)
 }
