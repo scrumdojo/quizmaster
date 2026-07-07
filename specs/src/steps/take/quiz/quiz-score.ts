@@ -1,8 +1,16 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import { Then } from '#steps/fixture.ts'
+import { Then, When } from '#steps/fixture.ts'
 import { expectAllOptionsForQuestion, expectQuizResult } from '#steps/quiz/expects.ts'
+
+When('I go back to home', async function () {
+    await this.quizScorePage.goToHome()
+})
+
+Then('I return to the home page', async function () {
+    await this.homePage.waitForLoaded()
+})
 
 Then('I see the quiz result', async function (data: DataTable) {
     const [row] = data.hashes()

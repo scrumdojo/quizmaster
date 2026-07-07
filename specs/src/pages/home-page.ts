@@ -11,7 +11,14 @@ export class HomePage {
 
     // Locators for the links
     createWorkspaceLink = () => this.page.locator('a[href="/workspace/new"]')
+    workspaceLink = (title: string) => this.page.locator('.home-workspaces__link', { hasText: title })
+    private workspaceListLocator = () => this.page.locator('.home-workspaces__list')
+    private workspaceFilterSubmitLocator = () => this.page.locator('#workspace-filter-form button[type="submit"]')
 
     // Retrying assertions
     expectCreateWorkspaceLinkVisible = () => expect(this.createWorkspaceLink()).toBeVisible()
+    expectNoWorkspacesListed = () => expect(this.workspaceListLocator()).toHaveCount(0)
+
+    openWorkspace = (title: string) => this.workspaceLink(title).click()
+    submitWorkspaceFilter = () => this.workspaceFilterSubmitLocator().click()
 }

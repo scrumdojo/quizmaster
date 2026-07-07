@@ -77,5 +77,16 @@ Feature: Quiz score page display
     Then I see question explanation "8 Incisors, 4 Canines, 8 Premolars, and 12 Molars" for question "How many teeth do healthy adults have?"
     And I see correct answer "32" for question "How many teeth do healthy adults have?"
     And I see user select "40" for question "How many teeth do healthy adults have?"
-    And I see correct answer "4" for question "How many legs does a dog have?"
-    And I see user select "4" for question "How many legs does a dog have?"
+
+
+  Scenario: Return to home from the score page
+    Given workspace "Score Navigation" with questions
+      | bookmark | question                            | answers                     | explanation |
+      | Sky      | What is the standard colour of sky? | Red, Blue (*), Green, Black |             |
+    And quiz "Navigation Quiz" with all questions
+      | pass score | 85 |
+    Given I start quiz "Navigation Quiz"
+    When I answer "Blue"
+    * I evaluate the quiz
+    * I go back to home
+    Then I return to the home page

@@ -22,6 +22,11 @@ export interface Translations {
         readonly title: string
         readonly intro: string
         readonly createWorkspace: string
+        readonly existingWorkspacesTitle: string
+        readonly workspaceFilterFromLabel: string
+        readonly workspaceFilterToLabel: string
+        readonly workspaceFilterSubmitLabel: string
+        readonly workspaceFilterEmptyResult: string
         readonly workflowBadge: string
         readonly workflowStep1Title: string
         readonly workflowStep1Body: string
@@ -292,6 +297,7 @@ export interface Translations {
         readonly pointsLabel: string
         readonly requiredToPassLabel: string
         readonly answerOverviewTitle: string
+        readonly backToHome: string
         readonly welcomeToQuizTitle: string
         readonly quizBadge: string
         readonly timeLimitLabel: string

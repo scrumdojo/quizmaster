@@ -6,6 +6,9 @@ export class QuizScorePage {
     private resultTableLocator = () => this.page.locator('#results')
     resultTableExists = () => this.resultTableLocator().isVisible()
 
+    private backToHomeLinkLocator = () => this.page.locator('#quiz-score #back')
+    goToHome = () => this.backToHomeLinkLocator().click()
+
     private correctAnswerLocator = () => this.page.locator('#correct-answers')
 
     private totalQuestionsLocator = () => this.page.locator('#total-questions')
