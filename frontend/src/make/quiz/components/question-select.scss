@@ -10,12 +10,12 @@
         row-gap: 0.2rem;
         align-items: center;
         padding: 0.8rem 1rem;
-        border: 1px solid #eee;
+        border: 1px solid var(--border-subtle);
         border-radius: 8px;
         transition: background 0.2s ease;
 
         &:hover {
-            background: #f9f9f9;
+            background: var(--surface-soft);
         }
 
         .question-tag-row {
@@ -41,7 +41,7 @@
             grid-column: 2;
             grid-row: 2;
             font-size: 1rem;
-            color: #444;
+            color: var(--text-strong);
             cursor: pointer;
         }
 
@@ -52,7 +52,7 @@
             align-items: center;
             gap: 0.4rem;
             font-size: 0.85rem;
-            color: #666;
+            color: var(--text-muted);
 
             .question-weight-input {
                 width: 3.5rem;

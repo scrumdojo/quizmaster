@@ -13,7 +13,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1.25rem;
-    background: rgba(255, 255, 255, 0.82);
+    background: var(--surface-soft);
     border-radius: 1rem;
     justify-self: center;
 }
@@ -33,7 +33,7 @@
 .poll-results__table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(255, 255, 255, 0.82);
+    background: var(--surface-soft);
     border-radius: 1rem;
     overflow: hidden;
 }
@@ -47,7 +47,7 @@
 .poll-results__table th,
 .poll-results__table td {
     padding: 0.9rem 1.25rem;
-    border-bottom: 1px solid rgba(16, 35, 63, 0.12);
+    border-bottom: 1px solid var(--border-subtle);
     text-align: left;
 }
 

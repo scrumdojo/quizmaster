@@ -685,6 +685,25 @@ html[data-app-theme='windows-xp'] .inline-question-modal__close {
     }
 }
 
+// ── Windows XP: quiz stats & share ─────────────────────────────────────────────
+
+html[data-app-theme='windows-xp'] .share-qr-dialog {
+    @include xp-window-titlebar('QR Code');
+}
+
+html[data-app-theme='windows-xp'] .live-stats-dialog {
+    @include xp-window-titlebar('Live Stats');
+}
+
+html[data-app-theme='windows-xp'] .cohort-row,
+html[data-app-theme='windows-xp'] .quiz-stats__hero,
+html[data-app-theme='windows-xp'] .quiz-stats__section,
+html[data-app-theme='windows-xp'] .quiz-stats__highlight,
+html[data-app-theme='windows-xp'] .quiz-stats table {
+    border-radius: 3px;
+    border-color: #7f9db9;
+}
+
 // ── Windows XP: Robin AI chatsheet ────────────────────────────────────────────
 
 html[data-app-theme='windows-xp'] .robin-sheet {
@@ -1232,6 +1251,37 @@ html[data-app-theme='star-trek'] .inline-question-modal__close {
         color: #ffcc66;
         background: #000;
     }
+}
+
+// ── Star Trek: quiz stats & share ──────────────────────────────────────────────
+
+html[data-app-theme='star-trek'] .share-qr-dialog {
+    @include lcars-panel('QR Code', #ff9900);
+    color: #f5f5f5;
+}
+
+html[data-app-theme='star-trek'] .live-stats-dialog {
+    @include lcars-panel('Live Stats', #cc99cc);
+    color: #f5f5f5;
+}
+
+html[data-app-theme='star-trek'] .live-stats-table th,
+html[data-app-theme='star-trek'] .live-stats-table td {
+    border-bottom-color: #333333;
+}
+
+html[data-app-theme='star-trek'] .cohort-row {
+    border-radius: 4px 16px 16px 4px;
+    border-color: #9999cc;
+    background: #111111;
+}
+
+html[data-app-theme='star-trek'] .quiz-stats__hero,
+html[data-app-theme='star-trek'] .quiz-stats__section,
+html[data-app-theme='star-trek'] .quiz-stats__highlight,
+html[data-app-theme='star-trek'] .quiz-stats table {
+    border-color: #333333;
+    background: #111111;
 }
 
 // ── Star Trek: Robin AI chatsheet ─────────────────────────────────────────────
