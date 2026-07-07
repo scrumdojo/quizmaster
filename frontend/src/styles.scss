@@ -640,6 +640,8 @@ html[data-app-theme='windows-xp'] .theme-fab {
 
 html[data-app-theme='windows-xp'] .workspace-page {
     @include xp-window-titlebar('Quizmaster - Workspace');
+    position: relative;
+    overflow: hidden;
 }
 
 html[data-app-theme='windows-xp'] .workspace-header {
