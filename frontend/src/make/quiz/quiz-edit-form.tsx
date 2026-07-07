@@ -1,6 +1,7 @@
 import './quiz-edit-form.scss'
 import { useState } from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import { Field, FieldNote, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#fe/shared'
 import { ErrorMessage, createValidator } from '#fe/shared/forms/validations.tsx'
@@ -12,7 +13,7 @@ import { QuestionSelect } from './components/question-select.tsx'
 import { RandomSubsetSection } from './components/random-subset-section.tsx'
 import { useQuizFormState, stateToQuizApiData, type QuizEditFormData } from './quiz-form-state.ts'
 import { formatTimeLimit } from './utils/formatTimeLimit.ts'
-import { validateQuizForm, errorMessage } from './validations.ts'
+import { validateQuizForm, type ErrorCode } from './validations.ts'
 
 const TIME_LIMIT_PARTIAL_REGEX = /^(?:\d*|\d+m|\d+s|\d+m\d*|\d+s\d*|\d+m\d+s|\d+s\d+m)$/i
 
@@ -23,8 +24,18 @@ interface QuizEditFormProps {
     readonly onCreateNewQuestion?: () => void
 }
 export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }: QuizEditFormProps) => {
+    const { t } = useLanguage()
     const state = useQuizFormState(questions, quiz)
     const [timeLimitText, setTimeLimitText] = useState(`${state.timeLimit}s`)
+
+    const errorMessage: Record<ErrorCode, string> = {
+        'empty-title': t.quiz.errorEmptyTitle,
+        'time-limit-above-max': t.quiz.errorTimeLimitAboveMax,
+        'time-limit-invalid-format': t.quiz.errorTimeLimitInvalidFormat,
+        'score-above-max': t.quiz.errorScoreAboveMax,
+        'few-questions': t.quiz.errorFewQuestions,
+        'too-many-randomized-questions': t.quiz.errorTooManyRandomized,
+    }
 
     const validator = createValidator(() => validateQuizForm(state), errorMessage)
 
@@ -44,15 +55,15 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
 
     return (
         <Form id="create-quiz" validator={validator} onSubmit={() => onSubmit(stateToQuizApiData(state))}>
-            <Field label="Quiz title" required>
+            <Field label={t.quiz.titleFieldLabel} required>
                 <TextInput id="quiz-title" value={state.title} onChange={state.setTitle} />
                 <ErrorMessage errorCode="empty-title" />
             </Field>
-            <Field label="Quiz description">
+            <Field label={t.quiz.descriptionFieldLabel}>
                 <TextArea id="quiz-description" value={state.description} onChange={state.setDescription} />
             </Field>
             <Row>
-                <Field label="Quiz start date and time">
+                <Field label={t.quiz.startDateFieldLabel}>
                     <input
                         id="quiz-start-at"
                         type="datetime-local"
@@ -60,7 +71,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                         onChange={e => state.setStartAt(e.target.value)}
                     />
                 </Field>
-                <Field label="Quiz end date and time">
+                <Field label={t.quiz.endDateFieldLabel}>
                     <input
                         id="quiz-end-at"
                         type="datetime-local"
@@ -69,19 +80,13 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                     />
                 </Field>
             </Row>
-            <FieldNote id="quiz-availability-note">
-                Empty start or end dates do not restrict that side of the quiz availability window.
-            </FieldNote>
+            <FieldNote id="quiz-availability-note">{t.quiz.availabilityNote}</FieldNote>
             <Row>
-                <Field label="Pass score (in %)" tooltip="The minimum final percentage required to pass the quiz.">
+                <Field label={t.quiz.passScoreFieldLabel} tooltip={t.quiz.passScoreTooltip}>
                     <NumberInput id="pass-score" value={state.passScore} onChange={state.setPassScore} />
                     <ErrorMessage errorCode="score-above-max" />
                 </Field>
-                <Field
-                    label="Time limit (eg. 10m30s)"
-                    tooltip="The time limit applies to the complete quiz."
-                    note="Use a duration such as 10m30s. The maximum time limit is 6 hours."
-                >
+                <Field label={t.quiz.timeLimitFieldLabel} tooltip={t.quiz.timeLimitTooltip} note={t.quiz.timeLimitNote}>
                     <Row>
                         <TextInput id="time-limit" value={timeLimitText} onChange={onTimeLimitTextChange} />
                         <span id="formatted-time-limit" className="bold-count">
@@ -93,40 +98,34 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                 </Field>
             </Row>
             <Field
-                label="Feedback mode"
-                note={
-                    <span id="feedback-mode-note">
-                        Exam mode shows feedback at the end. Learning mode shows feedback after each answer and allows
-                        the taker to try again. Buzzer mode pairs two cohorts and starts the quiz for both at once.
-                    </span>
-                }
+                label={t.quiz.feedbackModeFieldLabel}
+                note={<span id="feedback-mode-note">{t.quiz.feedbackModeNote}</span>}
             >
                 <RadioSet
                     name="mode"
                     value={state.feedbackMode}
                     onChange={state.setFeedbackMode}
-                    options={{ exam: 'Exam', learn: 'Learning', buzzer: 'Buzzer' }}
+                    options={{ exam: t.quiz.modeExam, learn: t.quiz.modeLearn, buzzer: t.quiz.modeBuzzer }}
                 />
             </Field>
             <Field
-                label="Difficulty"
-                note={
-                    <span id="quiz-difficulty-note">
-                        Keep Question respects each question setting. Easy reveals correct answer counts. Hard hides
-                        correct answer counts.
-                    </span>
-                }
+                label={t.quiz.difficultyFieldLabel}
+                note={<span id="quiz-difficulty-note">{t.quiz.difficultyNote}</span>}
             >
                 <RadioSet
                     name="difficulty"
                     value={state.difficulty}
                     onChange={state.setDifficulty}
-                    options={{ easy: 'Easy', hard: 'Hard', 'keep-question': 'Keep Question' }}
+                    options={{
+                        easy: t.question.easyLabel,
+                        hard: t.quiz.difficultyHard,
+                        'keep-question': t.quiz.difficultyKeepQuestion,
+                    }}
                 />
             </Field>
-            <div className="label">Select quiz questions</div>
-            <FieldNote>At least two questions must be selected.</FieldNote>
-            <Field label="Search questions">
+            <div className="label">{t.quiz.selectQuestionsLabel}</div>
+            <FieldNote>{t.quiz.selectQuestionsNote}</FieldNote>
+            <Field label={t.quiz.searchQuestionsFieldLabel}>
                 <TextInput id="question-filter" value={state.filter} onChange={state.setFilter} />
                 {onCreateNewQuestion && (
                     <button
@@ -135,7 +134,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                         className="quiz-create-new-question"
                         onClick={onCreateNewQuestion}
                     >
-                        + Create new question
+                        {t.quiz.createNewQuestionButton}
                     </button>
                 )}
             </Field>

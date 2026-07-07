@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useParams } from 'react-router'
 import './quiz-share-page.scss'
+import { useLanguage } from '#fe/i18n/language-context.tsx'
+import type { Translations } from '#fe/i18n/types.ts'
 import {
     createCohort,
     deleteCohort,
@@ -26,10 +28,10 @@ type CohortErrorTarget = 'add' | `edit:${string}`
 type AnimationTheme = 'angels' | 'mammoths' | 'photo' | 'off'
 type QrThemeImage = 'angel' | 'mammoth'
 
-const cohortErrorMessages: Record<CohortCreateError, string> = {
-    'empty-cohort-name': 'Name cannot be empty.',
-    'duplicate-cohort-name': 'A cohort with this name already exists.',
-}
+const cohortErrorMessages = (t: Translations): Record<CohortCreateError, string> => ({
+    'empty-cohort-name': t.quiz.emptyCohortNameError,
+    'duplicate-cohort-name': t.quiz.duplicateCohortNameError,
+})
 
 const qrThemeImage = (emoji: string, label: string) =>
     `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
@@ -98,6 +100,7 @@ interface ShareBird {
 }
 
 export const QuizSharePage = () => {
+    const { t } = useLanguage()
     const workspaceId = useWorkspaceId()
     const { id: quizId } = useParams()
     const navigate = useNavigate()
@@ -292,7 +295,7 @@ export const QuizSharePage = () => {
         error?.target === target && (
             <div className="cohort-inline-error">
                 <Alert type="error" dataTestId={error.code}>
-                    {cohortErrorMessages[error.code]}
+                    {cohortErrorMessages(t)[error.code]}
                 </Alert>
             </div>
         )
@@ -316,16 +319,16 @@ export const QuizSharePage = () => {
                 onClick={() => setActiveQrCode({ key, label, testId: qrTestId, url })}
                 aria-haspopup="dialog"
             >
-                Show QR code
+                {t.quiz.showQrCode}
             </Button>
             <Button
                 className="button secondary"
                 data-testid={`share-link-${key}`}
                 onClick={event => void handleShareClick(event, key, url)}
             >
-                {copiedKey === key ? 'Copied' : 'Share'}
+                {copiedKey === key ? t.quiz.copied : t.common.share}
             </Button>
-            <HelpTooltip label={`Share ${label}`}>Copies the take link to the clipboard.</HelpTooltip>
+            <HelpTooltip label={t.quiz.shareActionTooltip(label)}>{t.quiz.shareActionTooltipBody}</HelpTooltip>
             {options?.showLiveStats && (
                 <>
                     <Button
@@ -333,11 +336,9 @@ export const QuizSharePage = () => {
                         data-testid="live-stats-button"
                         onClick={() => setLiveStatsOpen(true)}
                     >
-                        Live stats
+                        {t.quiz.liveStats}
                     </Button>
-                    <HelpTooltip label="Live stats">
-                        Opens live cohort standings by weighted points while participants answer the quiz.
-                    </HelpTooltip>
+                    <HelpTooltip label={t.quiz.liveStats}>{t.quiz.liveStatsTooltipBody}</HelpTooltip>
                 </>
             )}
             {options?.showEpicBattle && (
@@ -370,18 +371,18 @@ export const QuizSharePage = () => {
                 <div className="live-stats-backdrop" onClick={() => setLiveStatsOpen(false)} />
                 <div className="live-stats-dialog">
                     <div className="live-stats-header">
-                        <h2 id="live-stats-title">Live stats</h2>
+                        <h2 id="live-stats-title">{t.quiz.liveStats}</h2>
                         <Button className="button secondary" onClick={() => setLiveStatsOpen(false)}>
-                            Close
+                            {t.common.close}
                         </Button>
                     </div>
                     <table className="live-stats-table" data-testid="cohort-live-stats-table">
-                        <caption>Cohort live stats</caption>
+                        <caption>{t.quiz.cohortLiveStatsCaption}</caption>
                         <thead>
                             <tr>
-                                <th scope="col">Order</th>
-                                <th scope="col">Cohort</th>
-                                <th scope="col">Points</th>
+                                <th scope="col">{t.quiz.colOrder}</th>
+                                <th scope="col">{t.quiz.colCohort}</th>
+                                <th scope="col">{t.quiz.colPoints}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -410,7 +411,7 @@ export const QuizSharePage = () => {
                     <div className="share-qr-header">
                         <h2 id="share-qr-title">{activeQrCode.label}</h2>
                         <Button className="button secondary" onClick={() => setActiveQrCode(null)}>
-                            Close
+                            {t.common.close}
                         </Button>
                     </div>
                     <div
@@ -474,16 +475,14 @@ export const QuizSharePage = () => {
 
     return (
         <Page
-            title={`Share ${quiz.title}`}
+            title={t.quiz.shareTitle(quiz.title)}
             id="share-page"
-            back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
+            back={{ to: urls.workspace(workspaceId), label: t.question.backToWorkspace }}
         >
             {renderShareBirds()}
             <section>
-                <h2>Take link</h2>
-                <FieldNote id="general-take-link-note">
-                    The general take link lets participants join without assigning them to a cohort.
-                </FieldNote>
+                <h2>{t.quiz.takeLinkTitle}</h2>
+                <FieldNote id="general-take-link-note">{t.quiz.takeLinkNote}</FieldNote>
                 {renderHiddenLink('quiz-take-link', '', takeUrl)}
                 {renderShareActions(quizQrKey, quiz.title, takeUrl, 'quiz-take-qr', {
                     showLiveStats: cohorts.length > 0,
@@ -491,11 +490,9 @@ export const QuizSharePage = () => {
                 })}
             </section>
             <section>
-                <h2>Cohorts</h2>
-                <FieldNote id="cohort-take-link-note">
-                    Each cohort receives a unique take link, and its attempts contribute to the cohort leaderboard.
-                </FieldNote>
-                {cohorts.length === 0 && <p id="no-cohorts">No cohorts yet</p>}
+                <h2>{t.quiz.cohortsTitle}</h2>
+                <FieldNote id="cohort-take-link-note">{t.quiz.cohortsNote}</FieldNote>
+                {cohorts.length === 0 && <p id="no-cohorts">{t.quiz.noCohortsYet}</p>}
                 {cohorts.length > 0 && (
                     <ul id="cohort-list">
                         {cohorts.map(cohort => {
@@ -513,7 +510,7 @@ export const QuizSharePage = () => {
                                                 }
                                             />
                                             <Button className="button secondary" onClick={() => handleSaveEdit(cohort)}>
-                                                Save
+                                                {t.common.save}
                                             </Button>
                                             {renderCohortError(editErrorTarget(cohort.guid))}
                                             <Button
@@ -523,7 +520,7 @@ export const QuizSharePage = () => {
                                                     clearCohortError(editErrorTarget(cohort.guid))
                                                 }}
                                             >
-                                                Cancel
+                                                {t.common.cancel}
                                             </Button>
                                         </div>
                                     ) : (
@@ -545,18 +542,18 @@ export const QuizSharePage = () => {
                                                             setEditing({ guid: cohort.guid, name: cohort.name })
                                                         }}
                                                     >
-                                                        Edit
+                                                        {t.common.edit}
                                                     </Button>
                                                     <Button
                                                         className="button secondary"
                                                         onClick={() => handleDelete(cohort)}
                                                         disabled={!cohort.canDelete}
                                                     >
-                                                        Delete
+                                                        {t.common.delete}
                                                     </Button>
                                                     {!cohort.canDelete && (
                                                         <FieldNote id={`cohort-delete-note-${cohort.guid}`}>
-                                                            Cohorts with attempts cannot be deleted.
+                                                            {t.quiz.cohortsWithAttemptsNote}
                                                         </FieldNote>
                                                     )}
                                                 </div>
@@ -574,10 +571,10 @@ export const QuizSharePage = () => {
                         type="text"
                         value={draft}
                         onChange={event => setDraft(event.target.value)}
-                        placeholder="Cohort name"
+                        placeholder={t.quiz.cohortNamePlaceholder}
                     />
                     <Button id="add-cohort-button" className="button primary" onClick={handleAdd}>
-                        Add cohort
+                        {t.quiz.addCohort}
                     </Button>
                     {renderCohortError('add')}
                 </div>

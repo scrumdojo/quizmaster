@@ -1,13 +1,10 @@
-export const errorMessage = {
-    'empty-title': 'Quiz title is required.',
-    'time-limit-above-max': 'Time limit cannot exceed 21600 seconds (6 hours).',
-    'time-limit-invalid-format': 'Time limit format is invalid.',
-    'score-above-max': 'Pass score cannot exceed 100%.',
-    'few-questions': 'At least two questions must be selected.',
-    'too-many-randomized-questions': 'Final question count cannot exceed the number of selected questions.',
-}
-
-type ErrorCode = keyof typeof errorMessage
+export type ErrorCode =
+    | 'empty-title'
+    | 'time-limit-above-max'
+    | 'time-limit-invalid-format'
+    | 'score-above-max'
+    | 'few-questions'
+    | 'too-many-randomized-questions'
 
 export interface QuizFormState {
     readonly title: string

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import type {
     AttemptStatsRecord,
     QuestionStatsRecord,
@@ -16,12 +17,6 @@ export interface QuizStatsProps {
     readonly quiz: Quiz
     readonly stats: QuizStatsResponse
 }
-const statusLabels: Record<string, string> = {
-    FINISHED: 'Finished',
-    IN_PROGRESS: 'In Progress',
-    TIMEOUT: 'Timeout',
-    ABANDONED: 'Abandoned',
-}
 const pct = (value: number, total: number): string => {
     const percentage = total > 0 ? Math.round((value / total) * 100) : 0
     return `${value} (${percentage}%)`
@@ -37,7 +32,7 @@ const summaryRow = (summary: SummaryStats): string[] => [
     String(summary.unfinished),
     String(summary.timeout),
 ]
-const attemptRow = (attempt: AttemptStatsRecord): string[] => {
+const attemptRow = (attempt: AttemptStatsRecord, statusLabels: Record<string, string>): string[] => {
     const earnedPoints = attempt.correctAnswers + 0.5 * attempt.partiallyCorrectAnswers
     return [
         attempt.durationSeconds != null ? formatDuration(attempt.durationSeconds) : '',
@@ -105,41 +100,48 @@ const resolveQuestionStats = (quiz: Quiz, stats: QuizStatsResponse): readonly Qu
     return quiz.questions.map(question => emptyQuestionStats(question.question))
 }
 export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
+    const { t } = useLanguage()
+    const statusLabels: Record<string, string> = {
+        FINISHED: t.quiz.statusFinished,
+        IN_PROGRESS: t.quiz.statusInProgress,
+        TIMEOUT: t.quiz.statusTimeout,
+        ABANDONED: t.quiz.statusAbandoned,
+    }
     const questions = resolveQuestionStats(quiz, stats)
     const tags = stats.tagStatistics ?? []
     const completionRate = rate(stats.summary.finished, stats.summary.started)
-    const highlights = [
+    const highlights: { label: string; value: string; detail: string }[] = [
         {
-            label: 'Started attempts',
+            label: t.quiz.startedAttemptsLabel,
             value: String(stats.summary.started),
-            detail: `${stats.summary.finished} finished`,
+            detail: t.quiz.startedAttemptsDetail(stats.summary.finished),
         },
         {
-            label: 'Completion rate',
+            label: t.quiz.completionRateLabel,
             value: completionRate,
-            detail: `${stats.summary.unfinished} unfinished`,
+            detail: t.quiz.completionRateDetail(stats.summary.unfinished),
         },
         {
-            label: 'Questions in quiz',
+            label: t.quiz.questionsInQuizLabel,
             value: String(quiz.questions.length),
-            detail: `${questions.length} tracked in stats`,
+            detail: t.quiz.questionsInQuizDetail(questions.length),
         },
         {
-            label: 'Average duration',
+            label: t.quiz.averageDurationLabel,
             value: averageDuration(stats.attempts),
-            detail: stats.attempts.length === 0 ? 'No attempts yet' : `Across ${stats.attempts.length} attempts`,
+            detail:
+                stats.attempts.length === 0
+                    ? t.quiz.averageDurationDetailNone
+                    : t.quiz.averageDurationDetail(stats.attempts.length),
         },
     ]
     return (
         <div className="quiz-stats">
             <section className="quiz-stats__hero">
                 <div>
-                    <div className="quiz-stats__eyebrow">Quiz analytics</div>
-                    <h2>Statistics for quiz: {quiz.title}</h2>
-                    <p>
-                        Clear overview of participation, completion, and how individual questions perform across all
-                        attempts.
-                    </p>
+                    <div className="quiz-stats__eyebrow">{t.quiz.statsEyebrow}</div>
+                    <h2>{t.quiz.statsHeading(quiz.title)}</h2>
+                    <p>{t.quiz.statsIntro}</p>
                 </div>
                 <dl className="quiz-stats__highlights">
                     {highlights.map(highlight => (
@@ -154,19 +156,19 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
             <section className="quiz-stats__section">
                 <div className="quiz-stats__section-header">
                     <div>
-                        <p className="quiz-stats__section-kicker">Overview</p>
-                        <h3>Attempt summary</h3>
+                        <p className="quiz-stats__section-kicker">{t.quiz.overviewKicker}</p>
+                        <h3>{t.quiz.attemptSummaryTitle}</h3>
                     </div>
-                    <p>How many runs started, finished, timed out, or are still unfinished.</p>
+                    <p>{t.quiz.attemptSummaryIntro}</p>
                 </div>
                 <StatsTable
                     testId="summary-stats-table"
-                    caption="Summary"
+                    caption={t.quiz.captionSummary}
                     columns={[
-                        'Started',
-                        'Finished',
-                        { label: 'Unfinished', tooltip: 'Attempts that have not reached a final state.' },
-                        'Timeout',
+                        t.quiz.colStarted,
+                        t.quiz.colFinished,
+                        { label: t.quiz.colUnfinished, tooltip: t.quiz.colUnfinishedTooltip },
+                        t.quiz.colTimeout,
                     ]}
                     rows={[summaryRow(stats.summary)]}
                 />
@@ -174,60 +176,47 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
             <section className="quiz-stats__section">
                 <div className="quiz-stats__section-header">
                     <div>
-                        <p className="quiz-stats__section-kicker">Attempts</p>
-                        <h3>Performance by run</h3>
+                        <p className="quiz-stats__section-kicker">{t.quiz.attemptsKicker}</p>
+                        <h3>{t.quiz.performanceByRunTitle}</h3>
                     </div>
-                    <p>Duration, points, score, and status for each recorded attempt.</p>
+                    <p>{t.quiz.performanceByRunIntro}</p>
                 </div>
                 <StatsTable
                     testId="attempt-stats-table"
-                    caption="Attempts"
+                    caption={t.quiz.attemptsKicker}
                     columns={[
-                        'Duration',
-                        {
-                            label: 'Points',
-                            tooltip: 'Correct answers earn 1 point and partially correct answers earn 0.5 points.',
-                        },
-                        'Correct Answers',
-                        'Incorrect Answers',
-                        { label: 'Score', tooltip: 'The final percentage score for the attempt.' },
-                        'Status',
-                        {
-                            label: 'Partially Correct Answers',
-                            tooltip: 'A multiple choice answer with exactly one mistake.',
-                        },
+                        t.quiz.colDuration,
+                        { label: t.quiz.colPoints, tooltip: t.quiz.colPointsTooltip },
+                        t.quiz.colCorrectAnswers,
+                        t.quiz.colIncorrectAnswers,
+                        { label: t.quiz.colScore, tooltip: t.quiz.colScoreTooltip },
+                        t.quiz.colStatus,
+                        { label: t.quiz.colPartiallyCorrectAnswers, tooltip: t.quiz.colPartiallyCorrectTooltip },
                     ]}
-                    rows={stats.attempts.map(attemptRow)}
+                    rows={stats.attempts.map(attempt => attemptRow(attempt, statusLabels))}
                 />
-                {stats.attempts.length === 0 && (
-                    <div className="quiz-stats__empty">
-                        No attempts yet. Once someone starts this quiz, detailed run statistics will appear here.
-                    </div>
-                )}
+                {stats.attempts.length === 0 && <div className="quiz-stats__empty">{t.quiz.noAttemptsYet}</div>}
             </section>
             {tags.length > 0 && (
                 <section className="quiz-stats__section">
                     <div className="quiz-stats__section-header">
                         <div>
-                            <p className="quiz-stats__section-kicker">Categories</p>
-                            <h3>Performance by tag</h3>
+                            <p className="quiz-stats__section-kicker">{t.quiz.categoriesKicker}</p>
+                            <h3>{t.quiz.performanceByTagTitle}</h3>
                         </div>
-                        <p>How takers did per question tag, aggregated across all attempts. Weakest category first.</p>
+                        <p>{t.quiz.performanceByTagIntro}</p>
                     </div>
                     <StatsTable
                         testId="tag-stats-table"
-                        caption="Tags"
+                        caption={t.quiz.captionTags}
                         columns={[
-                            'Tag',
-                            { label: 'Questions', tooltip: 'How many questions in this quiz carry the tag.' },
-                            'Answered',
-                            'Correct',
-                            {
-                                label: 'Partially Correct',
-                                tooltip: 'A multiple choice answer with exactly one mistake.',
-                            },
-                            'Incorrect',
-                            { label: 'Unanswered', tooltip: 'Questions not answered during the attempt.' },
+                            t.quiz.colTag,
+                            { label: t.quiz.questionsKicker, tooltip: t.quiz.colQuestionsTooltip },
+                            t.quiz.colAnswered,
+                            t.quiz.colCorrect,
+                            { label: t.quiz.colPartiallyCorrect, tooltip: t.quiz.colPartiallyCorrectTooltip },
+                            t.quiz.colIncorrect,
+                            { label: t.quiz.colUnanswered, tooltip: t.quiz.colUnansweredTooltip },
                         ]}
                         rows={tags.map(tagRow)}
                     />
@@ -237,29 +226,22 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                 <section className="quiz-stats__section">
                     <div className="quiz-stats__section-header">
                         <div>
-                            <p className="quiz-stats__section-kicker">Questions</p>
-                            <h3>Question-level breakdown</h3>
+                            <p className="quiz-stats__section-kicker">{t.quiz.questionsKicker}</p>
+                            <h3>{t.quiz.questionLevelBreakdownTitle}</h3>
                         </div>
-                        <p>Shows visibility, completion, and answer accuracy for every question in the quiz.</p>
+                        <p>{t.quiz.questionLevelBreakdownIntro}</p>
                     </div>
                     <StatsTable
                         testId="question-stats-table"
-                        caption="Questions"
+                        caption={t.quiz.questionsKicker}
                         columns={[
-                            'Question',
-                            'Answered',
-                            'Correct',
-                            {
-                                label: 'Partially Correct',
-                                tooltip: 'A multiple choice answer with exactly one mistake.',
-                            },
-                            'Incorrect',
-                            { label: 'Unanswered', tooltip: 'Questions not answered during the attempt.' },
-                            {
-                                label: 'Flagged',
-                                tooltip:
-                                    'How often takers flagged this question as problematic, relative to the attempts that drew it.',
-                            },
+                            t.quiz.colQuestion,
+                            t.quiz.colAnswered,
+                            t.quiz.colCorrect,
+                            { label: t.quiz.colPartiallyCorrect, tooltip: t.quiz.colPartiallyCorrectTooltip },
+                            t.quiz.colIncorrect,
+                            { label: t.quiz.colUnanswered, tooltip: t.quiz.colUnansweredTooltip },
+                            { label: t.quiz.colFlagged, tooltip: t.quiz.colFlaggedTooltip },
                         ]}
                         rows={questions.map(questionRow)}
                     />

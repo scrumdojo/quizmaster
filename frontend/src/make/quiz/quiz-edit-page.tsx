@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { type QuestionRequest, saveQuestion } from '#fe/make/api/question.ts'
 import { postQuiz, fetchWorkspaceQuiz, putQuiz } from '#fe/make/api/quiz.ts'
 import { fetchWorkspaceQuestions } from '#fe/make/api/workspace.ts'
@@ -16,6 +17,7 @@ import { QuizEditForm } from './quiz-edit-form.tsx'
 import type { QuizEditFormData } from './quiz-form-state.ts'
 
 export const QuizEditPage = () => {
+    const { t } = useLanguage()
     const workspaceId = useWorkspaceId()
     const navigate = useNavigate()
     const { id: quizId } = useParams()
@@ -56,11 +58,11 @@ export const QuizEditPage = () => {
     )
 
     const isEdit = quizId !== undefined
-    const title = isEdit ? 'Edit Quiz' : 'Create Quiz'
+    const title = isEdit ? t.quiz.editTitle : t.quiz.createTitle
     const pageId = isEdit ? 'edit-quiz-page' : 'create-quiz-page'
 
     return (
-        <Page title={title} id={pageId} back={{ to: workspaceUrl, label: 'Back to workspace' }}>
+        <Page title={title} id={pageId} back={{ to: workspaceUrl, label: t.question.backToWorkspace }}>
             {(!isEdit || quiz) && (
                 <QuizEditForm
                     key={quiz?.id}
@@ -77,12 +79,12 @@ export const QuizEditPage = () => {
                     <button
                         type="button"
                         className="inline-question-modal__close"
-                        aria-label="Close"
+                        aria-label={t.common.close}
                         onClick={() => setShowCreateQuestion(false)}
                     >
                         ✕
                     </button>
-                    <h2>Create new question</h2>
+                    <h2>{t.quiz.createNewQuestionModalTitle}</h2>
                     <QuestionEditForm workspaceId={workspaceId} onSubmit={handleInlineQuestionSave} />
                 </dialog>
             )}

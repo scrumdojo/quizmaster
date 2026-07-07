@@ -1,4 +1,5 @@
 import './question-select.scss'
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import { tagToColor } from '#fe/make/model/tag.ts'
 
@@ -14,6 +15,7 @@ interface QuestionItemProps {
 }
 
 export const QuestionItem = ({ question, selected, weight, onSelect, onWeightChange }: QuestionItemProps) => {
+    const { t } = useLanguage()
     const inputId = `question-select-${question.id}`
     const weightId = `question-weight-${question.id}`
 
@@ -36,7 +38,7 @@ export const QuestionItem = ({ question, selected, weight, onSelect, onWeightCha
             <input id={inputId} type="checkbox" checked={selected} onChange={() => onSelect(question.id)} />
             <label htmlFor={inputId}>{question.question}</label>
             <label className="question-weight-label">
-                Weight:
+                {t.quiz.weightLabel}
                 <input
                     id={weightId}
                     type="number"

@@ -15,6 +15,7 @@ export interface Translations {
         readonly create: string
         readonly confirm: string
         readonly results: string
+        readonly close: string
     }
     readonly home: {
         readonly eyebrow: string
@@ -113,6 +114,125 @@ export interface Translations {
         readonly errorFewCorrectAnswers: string
         readonly errorEmptyNumericalAnswer: string
         readonly errorInvalidNumericalAnswer: string
+    }
+    readonly quiz: {
+        readonly editTitle: string
+        readonly createTitle: string
+        readonly createNewQuestionModalTitle: string
+        readonly titleFieldLabel: string
+        readonly descriptionFieldLabel: string
+        readonly startDateFieldLabel: string
+        readonly endDateFieldLabel: string
+        readonly availabilityNote: string
+        readonly passScoreFieldLabel: string
+        readonly passScoreTooltip: string
+        readonly timeLimitFieldLabel: string
+        readonly timeLimitTooltip: string
+        readonly timeLimitNote: string
+        readonly feedbackModeFieldLabel: string
+        readonly feedbackModeNote: string
+        readonly modeExam: string
+        readonly modeLearn: string
+        readonly modeBuzzer: string
+        readonly difficultyFieldLabel: string
+        readonly difficultyNote: string
+        readonly difficultyHard: string
+        readonly difficultyKeepQuestion: string
+        readonly selectQuestionsLabel: string
+        readonly selectQuestionsNote: string
+        readonly searchQuestionsFieldLabel: string
+        readonly createNewQuestionButton: string
+        readonly weightLabel: string
+        readonly selectedQuestionsLabel: string
+        readonly totalQuestionsLabel: string
+        readonly randomSubsetLabel: string
+        readonly randomSubsetNote: string
+        readonly questionsPerTakeLabel: string
+        readonly errorEmptyTitle: string
+        readonly errorTimeLimitAboveMax: string
+        readonly errorTimeLimitInvalidFormat: string
+        readonly errorScoreAboveMax: string
+        readonly errorFewQuestions: string
+        readonly errorTooManyRandomized: string
+        readonly statsTitle: string
+        readonly statsSubtitle: (title: string) => string
+        readonly statsEyebrow: string
+        readonly statsHeading: (title: string) => string
+        readonly statsIntro: string
+        readonly startedAttemptsLabel: string
+        readonly startedAttemptsDetail: (n: number) => string
+        readonly completionRateLabel: string
+        readonly completionRateDetail: (n: number) => string
+        readonly questionsInQuizLabel: string
+        readonly questionsInQuizDetail: (n: number) => string
+        readonly averageDurationLabel: string
+        readonly averageDurationDetailNone: string
+        readonly averageDurationDetail: (n: number) => string
+        readonly overviewKicker: string
+        readonly attemptSummaryTitle: string
+        readonly attemptSummaryIntro: string
+        readonly colStarted: string
+        readonly colFinished: string
+        readonly colUnfinished: string
+        readonly colUnfinishedTooltip: string
+        readonly colTimeout: string
+        readonly attemptsKicker: string
+        readonly performanceByRunTitle: string
+        readonly performanceByRunIntro: string
+        readonly colDuration: string
+        readonly colPoints: string
+        readonly colPointsTooltip: string
+        readonly colCorrectAnswers: string
+        readonly colIncorrectAnswers: string
+        readonly colScore: string
+        readonly colScoreTooltip: string
+        readonly colStatus: string
+        readonly colPartiallyCorrectAnswers: string
+        readonly colPartiallyCorrectTooltip: string
+        readonly noAttemptsYet: string
+        readonly categoriesKicker: string
+        readonly performanceByTagTitle: string
+        readonly performanceByTagIntro: string
+        readonly captionSummary: string
+        readonly captionTags: string
+        readonly colTag: string
+        readonly colQuestionsTooltip: string
+        readonly colAnswered: string
+        readonly colCorrect: string
+        readonly colPartiallyCorrect: string
+        readonly colIncorrect: string
+        readonly colUnanswered: string
+        readonly colUnansweredTooltip: string
+        readonly questionsKicker: string
+        readonly questionLevelBreakdownTitle: string
+        readonly questionLevelBreakdownIntro: string
+        readonly colQuestion: string
+        readonly colFlagged: string
+        readonly colFlaggedTooltip: string
+        readonly statusFinished: string
+        readonly statusInProgress: string
+        readonly statusTimeout: string
+        readonly statusAbandoned: string
+        readonly shareTitle: (title: string) => string
+        readonly takeLinkTitle: string
+        readonly takeLinkNote: string
+        readonly cohortsTitle: string
+        readonly cohortsNote: string
+        readonly noCohortsYet: string
+        readonly showQrCode: string
+        readonly copied: string
+        readonly shareActionTooltip: (label: string) => string
+        readonly shareActionTooltipBody: string
+        readonly liveStats: string
+        readonly liveStatsTooltipBody: string
+        readonly cohortLiveStatsCaption: string
+        readonly colOrder: string
+        readonly colCohort: string
+        readonly cohortNamePlaceholder: string
+        readonly addCohort: string
+        readonly cohortsWithAttemptsNote: string
+        readonly emptyCohortNameError: string
+        readonly duplicateCohortNameError: string
     }
     readonly robin: {
         readonly tooltip: string
