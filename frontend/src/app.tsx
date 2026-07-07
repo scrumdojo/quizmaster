@@ -149,6 +149,28 @@ const XpTaskbar = () => {
     )
 }
 
+// Decorative LCARS status bar — same pattern as XpTaskbar, only shown via CSS
+// when data-app-theme="star-trek" (see .lcars-bar in styles.scss).
+const LcarsBar = () => {
+    const [now, setNow] = useState<Date>(() => new Date())
+
+    useEffect(() => {
+        const id = window.setInterval(() => setNow(new Date()), 30_000)
+        return () => window.clearInterval(id)
+    }, [])
+
+    const stardate = (now.getFullYear() - 2000 + now.getMonth() / 12).toFixed(1)
+
+    return (
+        <div className="lcars-bar" aria-hidden="true">
+            <span className="lcars-bar__chip lcars-bar__chip--orange">LCARS</span>
+            <span className="lcars-bar__chip lcars-bar__chip--gold">04</span>
+            <span className="lcars-bar__chip lcars-bar__chip--lavender">17</span>
+            <span className="lcars-bar__stardate">Stardate {stardate}</span>
+        </div>
+    )
+}
+
 interface BackgroundGameFabProps {
     readonly battleOnly: boolean
     readonly onBattleOnlyChange: (value: boolean) => void
@@ -347,6 +369,7 @@ export const App = () => {
             <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
             <AppThemeFab />
             <XpTaskbar />
+            <LcarsBar />
         </BrowserRouter>
     )
 }
