@@ -315,58 +315,6 @@ const BackgroundGameFab = ({ battleOnly, onBattleOnlyChange }: BackgroundGameFab
     )
 }
 
-type PiCornerToggleProps = {
-    readonly animationOnly: boolean
-    readonly onToggle: () => void
-}
-
-const PiCornerToggle = ({ animationOnly, onToggle }: PiCornerToggleProps) => {
-    const [isVisible, setVisible] = useState(false)
-
-    return (
-        <div
-            onMouseEnter={() => setVisible(true)}
-            onMouseLeave={() => setVisible(false)}
-            style={{
-                position: 'fixed',
-                left: 0,
-                bottom: 0,
-                zIndex: 3,
-                width: 72,
-                height: 72,
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'flex-start',
-                padding: 14,
-            }}
-        >
-            <button
-                aria-label={animationOnly ? 'Show interface' : 'Show animation only'}
-                onBlur={() => setVisible(false)}
-                onClick={onToggle}
-                onFocus={() => setVisible(true)}
-                style={{
-                    width: 26,
-                    height: 26,
-                    border: '1px solid rgba(16, 35, 63, 0.24)',
-                    borderRadius: '50%',
-                    background: 'rgba(255, 255, 255, 0.82)',
-                    color: '#10233f',
-                    cursor: 'pointer',
-                    fontFamily: 'Georgia, serif',
-                    fontSize: 15,
-                    lineHeight: 1,
-                    opacity: isVisible ? 0.88 : 0,
-                    transition: 'opacity 0.18s ease',
-                }}
-                type="button"
-            >
-                π
-            </button>
-        </div>
-    )
-}
-
 const ScrollToTop = () => {
     const { pathname, search } = useLocation()
     useEffect(() => {
@@ -418,7 +366,6 @@ export const App = () => {
                         <Route path={ROUTES.quizNicknameWithCohort} element={<QuizNicknamePage isDryRun={false} />} />
                     </Routes>
                 </div>
-                <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />
                 <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
                 <AppThemeFab />
                 <LanguageFab />
