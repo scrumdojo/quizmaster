@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { useApi } from '#fe/shared/api/hooks.ts'
 import { fetchPoll, submitPollVote } from '#fe/take/api/poll.ts'
 import type { PollTake } from '#fe/take/model/poll.ts'
 import './poll-take-page.scss'
 
 export const PollTakePage = () => {
+    const { t } = useLanguage()
     const params = useParams()
 
     const [poll, setPoll] = useState<PollTake | null>(null)
@@ -21,7 +23,7 @@ export const PollTakePage = () => {
             <main id="poll-take-page">
                 <section className="poll-thank-you-state" aria-live="polite">
                     <div className="poll-thank-you-icon" aria-hidden="true" />
-                    <p className="poll-thank-you">Thank you for voting</p>
+                    <p className="poll-thank-you">{t.take.thankYouForVoting}</p>
                 </section>
             </main>
         )
@@ -68,7 +70,7 @@ export const PollTakePage = () => {
                     type="submit"
                     disabled={selectedAnswerId === null || submitting}
                 >
-                    Submit
+                    {t.take.submit}
                 </button>
             </form>
         </main>

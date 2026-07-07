@@ -1,5 +1,7 @@
 import type React from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
+
 import { Explanation } from './explanation.tsx'
 import './answer.scss'
 
@@ -17,6 +19,7 @@ export interface AnswerProps {
 }
 
 export const Answer = (props: AnswerProps) => {
+    const { t } = useLanguage()
     const { disabled = false } = props
     const answerId = `answer-row-${props.idx}`
     const checkType = props.isMultipleChoice ? 'checkbox' : 'radio'
@@ -31,13 +34,13 @@ export const Answer = (props: AnswerProps) => {
 
     const barLabel = props.showFeedback
         ? props.isCorrect
-            ? 'Correct answer:'
+            ? t.take.correctAnswerLabel
             : isChecked
-              ? 'Your answer:'
+              ? t.take.yourAnswerLabel
               : null
         : null
     const barLabelClass = props.isCorrect ? 'bar-label correct-label' : 'bar-label'
-    const barNote = props.showFeedback && props.isCorrect && !isChecked ? '(missed)' : null
+    const barNote = props.showFeedback && props.isCorrect && !isChecked ? t.take.missedNote : null
 
     return (
         <li key={props.idx} id={`answer-row-${props.idx}`}>

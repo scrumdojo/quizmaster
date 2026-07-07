@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './countdown.scss'
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 
 interface CountdownProps {
     readonly timeLimit: number
@@ -10,6 +11,7 @@ const LOW_TIME_THRESHOLD_MS = 60_000
 const getNow = () => window.__quizClockNow ?? Date.now()
 
 export const Countdown = ({ onTimeLimit, timeLimit }: CountdownProps) => {
+    const { t } = useLanguage()
     const durationMs = (timeLimit || 120) * 1000
 
     const [timeLeft, setTimeLeft] = useState(durationMs)
@@ -58,7 +60,7 @@ export const Countdown = ({ onTimeLimit, timeLimit }: CountdownProps) => {
 
     return (
         <div className={`countdown${isLow ? ' is-low' : ''}`}>
-            <span className="label">Time left</span>
+            <span className="label">{t.take.timeLeftLabel}</span>
             <span className="value" data-testid="timerID">
                 {formatted}
             </span>

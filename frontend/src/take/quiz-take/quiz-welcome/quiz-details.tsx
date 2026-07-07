@@ -1,4 +1,6 @@
 import './quiz-details.scss'
+import { useLanguage } from '#fe/i18n/language-context.tsx'
+import type { Translations } from '#fe/i18n/types.ts'
 import { Page } from '#fe/shared'
 import type { QuizLeaderboardIndividual, QuizMetadata } from '#fe/shared/model/quiz.ts'
 import { StartButton } from '#fe/take/quiz-take/components/buttons.tsx'
@@ -19,7 +21,8 @@ export interface QuizDetailsProps {
     readonly onStart: () => void
 }
 
-const getFeedbackText = (mode: string): string => (mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end')
+const getFeedbackText = (mode: string, t: Translations): string =>
+    mode === 'learn' ? t.take.continuousFeedback : t.take.feedbackAtEnd
 
 const rankTone = (rank: number) => {
     if (rank === 1) return 'gold'
@@ -34,130 +37,133 @@ export const QuizDetails = ({
     cohortLeaderboard,
     individualsLeaderboard,
     onStart,
-}: QuizDetailsProps) => (
-    <Page id="quiz-welcome" title="Welcome to the quiz">
-        <TakeCard id="quiz-details" className="quiz-welcome-card">
-            <header>
-                <span className="eyebrow">Quiz</span>
-                <h2 id="quiz-name">{quiz.title}</h2>
-                <p id="quiz-description">{quiz.description}</p>
-            </header>
-            <div className="details">
-                <div className="detail">
-                    <span className="label">Time limit</span>
-                    <span id="time-limit" className="value">
-                        {quiz.timeLimit} seconds
-                    </span>
-                </div>
-                <div className="detail">
-                    <span className="label">Question count</span>
-                    <span id="question-count" className="value">
-                        {questionCount}
-                    </span>
-                </div>
-                <div className="detail">
-                    <span className="label">Pass score</span>
-                    <span id="pass-score" className="value">
-                        {quiz.passScore}%
-                    </span>
-                </div>
-                <div className="detail">
-                    <span className="label">Feedback</span>
-                    <span id="question-feedback" className="value">
-                        {getFeedbackText(quiz.mode)}
-                    </span>
-                </div>
-            </div>
-            {cohortLeaderboard.length > 0 && (
-                <section className="leaderboard-panel" aria-labelledby="cohort-leaderboard-heading">
-                    <div className="leaderboard-panel__header">
-                        <span className="leaderboard-panel__kicker">Workshop standing</span>
-                        <h3 id="cohort-leaderboard-heading">Cohort leaderboard</h3>
-                        <p>Compare the strongest cohorts before you begin your own run.</p>
+}: QuizDetailsProps) => {
+    const { t } = useLanguage()
+    return (
+        <Page id="quiz-welcome" title={t.take.welcomeToQuizTitle}>
+            <TakeCard id="quiz-details" className="quiz-welcome-card">
+                <header>
+                    <span className="eyebrow">{t.take.quizBadge}</span>
+                    <h2 id="quiz-name">{quiz.title}</h2>
+                    <p id="quiz-description">{quiz.description}</p>
+                </header>
+                <div className="details">
+                    <div className="detail">
+                        <span className="label">{t.take.timeLimitLabel}</span>
+                        <span id="time-limit" className="value">
+                            {t.take.timeLimitSeconds(quiz.timeLimit)}
+                        </span>
                     </div>
-                    <table data-testid="cohort-leaderboard-table">
-                        <caption>Cohort leaderboard</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Rank</th>
-                                <th scope="col">Cohort</th>
-                                <th scope="col">Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {cohortLeaderboard.map(entry => (
-                                <tr
-                                    key={entry.cohort}
-                                    className={`leaderboard-row leaderboard-row--${rankTone(entry.rank)}`}
-                                >
-                                    <td>
-                                        <div className="leaderboard-rank">
-                                            <span
-                                                aria-hidden="true"
-                                                className={`leaderboard-rank__cup leaderboard-rank__cup--${rankTone(entry.rank)}`}
-                                            >
-                                                <span className="leaderboard-rank__cup-bowl" />
-                                                <span className="leaderboard-rank__cup-stem" />
-                                                <span className="leaderboard-rank__cup-base" />
-                                            </span>
-                                            <span>{entry.rank}</span>
-                                        </div>
-                                    </td>
-                                    <td>{entry.cohort}</td>
-                                    <td>{entry.score}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </section>
-            )}
-            {individualsLeaderboard.length > 0 && (
-                <section className="leaderboard-panel" aria-labelledby="individuals-leaderboard-heading">
-                    <div className="leaderboard-panel__header">
-                        <span className="leaderboard-panel__kicker">Top players</span>
-                        <h3 id="individuals-leaderboard-heading">Individuals leaderboard</h3>
-                        <p>Compare your score against the strongest individual runs recorded for this quiz.</p>
+                    <div className="detail">
+                        <span className="label">{t.take.questionCountLabel}</span>
+                        <span id="question-count" className="value">
+                            {questionCount}
+                        </span>
                     </div>
-                    <table data-testid="individuals-leaderboard-table">
-                        <caption>Individuals leaderboard</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Rank</th>
-                                <th scope="col">Nickname</th>
-                                <th scope="col">Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {individualsLeaderboard.map(entry => (
-                                <tr
-                                    key={`${entry.rank}-${entry.nickname}`}
-                                    className={`leaderboard-row leaderboard-row--${rankTone(entry.rank)}`}
-                                >
-                                    <td>
-                                        <div className="leaderboard-rank">
-                                            <span
-                                                aria-hidden="true"
-                                                className={`leaderboard-rank__cup leaderboard-rank__cup--${rankTone(entry.rank)}`}
-                                            >
-                                                <span className="leaderboard-rank__cup-bowl" />
-                                                <span className="leaderboard-rank__cup-stem" />
-                                                <span className="leaderboard-rank__cup-base" />
-                                            </span>
-                                            <span>{entry.rank}</span>
-                                        </div>
-                                    </td>
-                                    <td>{entry.nickname}</td>
-                                    <td>{entry.score}</td>
+                    <div className="detail">
+                        <span className="label">{t.take.passScoreLabel}</span>
+                        <span id="pass-score" className="value">
+                            {quiz.passScore}%
+                        </span>
+                    </div>
+                    <div className="detail">
+                        <span className="label">{t.take.feedbackLabel}</span>
+                        <span id="question-feedback" className="value">
+                            {getFeedbackText(quiz.mode, t)}
+                        </span>
+                    </div>
+                </div>
+                {cohortLeaderboard.length > 0 && (
+                    <section className="leaderboard-panel" aria-labelledby="cohort-leaderboard-heading">
+                        <div className="leaderboard-panel__header">
+                            <span className="leaderboard-panel__kicker">{t.take.workshopStandingKicker}</span>
+                            <h3 id="cohort-leaderboard-heading">{t.take.cohortLeaderboardTitle}</h3>
+                            <p>{t.take.cohortLeaderboardIntro}</p>
+                        </div>
+                        <table data-testid="cohort-leaderboard-table">
+                            <caption>{t.take.cohortLeaderboardTitle}</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">{t.take.colRank}</th>
+                                    <th scope="col">{t.quiz.colCohort}</th>
+                                    <th scope="col">{t.quiz.colScore}</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </section>
-            )}
-            <footer>
-                <p id="statusMessage">{canStart ? 'Enjoy the quiz' : "It's too early"}</p>
-                <StartButton onClick={onStart} disabled={!canStart} />
-            </footer>
-        </TakeCard>
-    </Page>
-)
+                            </thead>
+                            <tbody>
+                                {cohortLeaderboard.map(entry => (
+                                    <tr
+                                        key={entry.cohort}
+                                        className={`leaderboard-row leaderboard-row--${rankTone(entry.rank)}`}
+                                    >
+                                        <td>
+                                            <div className="leaderboard-rank">
+                                                <span
+                                                    aria-hidden="true"
+                                                    className={`leaderboard-rank__cup leaderboard-rank__cup--${rankTone(entry.rank)}`}
+                                                >
+                                                    <span className="leaderboard-rank__cup-bowl" />
+                                                    <span className="leaderboard-rank__cup-stem" />
+                                                    <span className="leaderboard-rank__cup-base" />
+                                                </span>
+                                                <span>{entry.rank}</span>
+                                            </div>
+                                        </td>
+                                        <td>{entry.cohort}</td>
+                                        <td>{entry.score}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </section>
+                )}
+                {individualsLeaderboard.length > 0 && (
+                    <section className="leaderboard-panel" aria-labelledby="individuals-leaderboard-heading">
+                        <div className="leaderboard-panel__header">
+                            <span className="leaderboard-panel__kicker">{t.take.topPlayersKicker}</span>
+                            <h3 id="individuals-leaderboard-heading">{t.take.individualsLeaderboardTitle}</h3>
+                            <p>{t.take.individualsLeaderboardIntro}</p>
+                        </div>
+                        <table data-testid="individuals-leaderboard-table">
+                            <caption>{t.take.individualsLeaderboardTitle}</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">{t.take.colRank}</th>
+                                    <th scope="col">{t.take.colNickname}</th>
+                                    <th scope="col">{t.quiz.colScore}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {individualsLeaderboard.map(entry => (
+                                    <tr
+                                        key={`${entry.rank}-${entry.nickname}`}
+                                        className={`leaderboard-row leaderboard-row--${rankTone(entry.rank)}`}
+                                    >
+                                        <td>
+                                            <div className="leaderboard-rank">
+                                                <span
+                                                    aria-hidden="true"
+                                                    className={`leaderboard-rank__cup leaderboard-rank__cup--${rankTone(entry.rank)}`}
+                                                >
+                                                    <span className="leaderboard-rank__cup-bowl" />
+                                                    <span className="leaderboard-rank__cup-stem" />
+                                                    <span className="leaderboard-rank__cup-base" />
+                                                </span>
+                                                <span>{entry.rank}</span>
+                                            </div>
+                                        </td>
+                                        <td>{entry.nickname}</td>
+                                        <td>{entry.score}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </section>
+                )}
+                <footer>
+                    <p id="statusMessage">{canStart ? t.take.enjoyTheQuiz : t.take.tooEarly}</p>
+                    <StartButton onClick={onStart} disabled={!canStart} />
+                </footer>
+            </TakeCard>
+        </Page>
+    )
+}

@@ -1,4 +1,5 @@
 import './question-summary.scss'
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import type { AnswerStatus, Question, QuestionAnswer } from '#fe/take/model/question.ts'
 import { Answer, QuestionExplanation } from '#fe/take/question-take'
 import { NumericalResult } from '#fe/take/question-take/components/numerical-result.tsx'
@@ -10,6 +11,7 @@ interface QuestionSummaryProps {
 }
 
 export const QuestionSummary = ({ question, status, answer }: QuestionSummaryProps) => {
+    const { t } = useLanguage()
     const isMultipleChoice = question.correctAnswers.length > 1
     const selectedIdxs = answer?.type === 'choice' ? answer.selectedIdxs : undefined
     const isNumerical = question.questionType === 'numerical'
@@ -50,7 +52,7 @@ export const QuestionSummary = ({ question, status, answer }: QuestionSummaryPro
             )}
             {question.questionExplanation && (
                 <div className="question-explanation-row">
-                    <span className="explanation-label">Question explanation:</span>
+                    <span className="explanation-label">{t.take.questionExplanationLabel}</span>
                     <QuestionExplanation text={question.questionExplanation} />
                 </div>
             )}

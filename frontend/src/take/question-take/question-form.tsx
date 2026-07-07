@@ -1,6 +1,7 @@
 import './question-form.scss'
 import { useEffect } from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { Form } from '#fe/shared'
 import type { Question, QuestionTake } from '#fe/take/model/question.ts'
 import { countDecimalDigits } from '#fe/take/model/question.ts'
@@ -20,6 +21,7 @@ interface QuestionFormProps {
 }
 
 export const QuestionForm = ({ question }: QuestionFormProps) => {
+    const { t } = useLanguage()
     useEffect(() => {
         window.__setPhotoQuestion?.(question.id)
         return () => window.__setPhotoQuestion?.(null)
@@ -61,7 +63,7 @@ export const QuestionForm = ({ question }: QuestionFormProps) => {
                 {state.isNumerical ? (
                     <>
                         <NumericalAnswerInput value={state.numericalAnswer} onChange={state.onNumericalAnswerChange} />
-                        {decimalDigits > 0 && <p>{decimalDigits} decimal digits will be required in the answer.</p>}
+                        {decimalDigits > 0 && <p>{t.question.decimalDigitsHint(decimalDigits)}</p>}
                     </>
                 ) : (
                     <ChoiceAnswerList

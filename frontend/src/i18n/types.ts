@@ -234,6 +234,85 @@ export interface Translations {
         readonly emptyCohortNameError: string
         readonly duplicateCohortNameError: string
     }
+    readonly poll: {
+        readonly editTitle: string
+        readonly createTitle: string
+        readonly subtitle: string
+        readonly questionFieldLabel: string
+        readonly questionPlaceholder: string
+        readonly answersFieldLabel: string
+        readonly addAnswer: string
+        readonly resultsTitle: string
+        readonly resultsSubtitle: (question: string) => string
+        readonly takeThisPollAriaLabel: string
+        readonly resultsCaption: string
+        readonly colAnswer: string
+        readonly colVotes: string
+    }
+    readonly take: {
+        readonly correctAnswersCountPrefix: string
+        readonly correctAnswerLabel: string
+        readonly yourAnswerLabel: string
+        readonly missedNote: string
+        readonly correctLabel: string
+        readonly partiallyCorrectLabel: string
+        readonly incorrectLabel: string
+        readonly withinToleranceNote: string
+        readonly scoreLabel: (score: number) => string
+        readonly submit: string
+        readonly bookmarkedQuestionsTitle: string
+        readonly removeBookmarkTitle: string
+        readonly nextQuestion: string
+        readonly evaluate: string
+        readonly start: string
+        readonly removeFlag: string
+        readonly flagThisQuestion: string
+        readonly flagged: string
+        readonly flag: string
+        readonly bookmarkThisQuestion: string
+        readonly bookmarked: string
+        readonly bookmark: string
+        readonly questionPosition: (current: number, total: number) => string
+        readonly questionExplanationLabel: string
+        readonly dryRunNotice: string
+        readonly chooseNickname: string
+        readonly nicknameIntroPrefix: string
+        readonly nicknameIntroSuffix: string
+        readonly nicknameFieldLabel: string
+        readonly nicknamePlaceholder: string
+        readonly nicknameHint: string
+        readonly startQuiz: string
+        readonly continuousFeedback: string
+        readonly feedbackAtEnd: string
+        readonly quizResultTitle: string
+        readonly passedLabel: string
+        readonly failedLabel: string
+        readonly yourScoreLabel: string
+        readonly correctAnswersLabel: string
+        readonly pointsLabel: string
+        readonly requiredToPassLabel: string
+        readonly answerOverviewTitle: string
+        readonly welcomeToQuizTitle: string
+        readonly quizBadge: string
+        readonly timeLimitLabel: string
+        readonly timeLimitSeconds: (n: number) => string
+        readonly questionCountLabel: string
+        readonly passScoreLabel: string
+        readonly feedbackLabel: string
+        readonly workshopStandingKicker: string
+        readonly cohortLeaderboardTitle: string
+        readonly cohortLeaderboardIntro: string
+        readonly colRank: string
+        readonly topPlayersKicker: string
+        readonly individualsLeaderboardTitle: string
+        readonly individualsLeaderboardIntro: string
+        readonly colNickname: string
+        readonly enjoyTheQuiz: string
+        readonly tooEarly: string
+        readonly timeLeftLabel: string
+        readonly timesUp: string
+        readonly thankYouForVoting: string
+    }
     readonly robin: {
         readonly tooltip: string
         readonly chatTitle: string
