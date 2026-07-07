@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router'
 
+import { LanguageProvider, useLanguage } from '#fe/i18n/language-context.tsx'
+import type { Language } from '#fe/i18n/types.ts'
 import { CreateQuestionPage } from '#fe/make/create-question/create-question-page.tsx'
 import { EditQuestionPage } from '#fe/make/create-question/edit-question-page.tsx'
 import { WorkspaceCreatePage } from '#fe/make/create-workspace/workspace-create-page.tsx'
@@ -115,6 +117,60 @@ const AppThemeFab = () => {
                             aria-pressed={theme === value}
                             onClick={() => select(value)}
                             className={`theme-option${theme === value ? ' theme-option--active' : ''}`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
+// ─── Language selector ────────────────────────────────────────────────────────
+
+const LANGUAGE_OPTIONS: { value: Language; label: string }[] = [
+    { value: 'en', label: 'English' },
+    { value: 'nl', label: 'Nederlands' },
+]
+
+const LanguageFab = () => {
+    const { language, setLanguage } = useLanguage()
+    const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    // Close on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    const select = (l: Language) => {
+        setLanguage(l)
+        setOpen(false)
+    }
+
+    return (
+        <div ref={ref} data-testid="language-settings" className="language-fab">
+            <div className="language-label">Language</div>
+            <button type="button" className="language-trigger" aria-label="Language" onClick={() => setOpen(v => !v)}>
+                <span className="language-icon" aria-hidden="true">
+                    🌐
+                </span>
+            </button>
+            {open && (
+                <div className="language-dropdown">
+                    {LANGUAGE_OPTIONS.map(({ value, label }) => (
+                        <button
+                            key={value}
+                            type="button"
+                            aria-label={label}
+                            aria-pressed={language === value}
+                            onClick={() => select(value)}
+                            className={`language-option${language === value ? ' language-option--active' : ''}`}
                         >
                             {label}
                         </button>
@@ -325,51 +381,54 @@ export const App = () => {
     const [animationOnly, setAnimationOnly] = useState(false)
 
     return (
-        <BrowserRouter>
-            <ScrollToTop />
-            <div
-                data-testid="app-interface"
-                style={{ display: animationOnly ? 'none' : undefined, position: 'relative', zIndex: 1 }}
-            >
-                <Routes>
-                    <Route path={ROUTES.home} element={<HomePage />} />
+        <LanguageProvider>
+            <BrowserRouter>
+                <ScrollToTop />
+                <div
+                    data-testid="app-interface"
+                    style={{ display: animationOnly ? 'none' : undefined, position: 'relative', zIndex: 1 }}
+                >
+                    <Routes>
+                        <Route path={ROUTES.home} element={<HomePage />} />
 
-                    {/* Public question taking */}
-                    <Route path={ROUTES.questionTake} element={<QuestionTakePage />} />
-                    <Route path={ROUTES.pollTake} element={<PollTakePage />} />
+                        {/* Public question taking */}
+                        <Route path={ROUTES.questionTake} element={<QuestionTakePage />} />
+                        <Route path={ROUTES.pollTake} element={<PollTakePage />} />
 
-                    {/* Workspace */}
-                    <Route path={ROUTES.workspaceNew} element={<WorkspaceCreatePage />} />
-                    <Route path={ROUTES.workspace} element={<WorkspacePage />} />
-                    <Route path={ROUTES.workspaceQuestionNew} element={<CreateQuestionPage />} />
-                    <Route path={ROUTES.workspaceQuestionEdit} element={<EditQuestionPage />} />
-                    <Route path={ROUTES.workspacePollNew} element={<PollEditPage />} />
-                    <Route path={ROUTES.workspacePollEdit} element={<PollEditPage />} />
-                    <Route path={ROUTES.workspacePollResults} element={<PollResultsPage />} />
+                        {/* Workspace */}
+                        <Route path={ROUTES.workspaceNew} element={<WorkspaceCreatePage />} />
+                        <Route path={ROUTES.workspace} element={<WorkspacePage />} />
+                        <Route path={ROUTES.workspaceQuestionNew} element={<CreateQuestionPage />} />
+                        <Route path={ROUTES.workspaceQuestionEdit} element={<EditQuestionPage />} />
+                        <Route path={ROUTES.workspacePollNew} element={<PollEditPage />} />
+                        <Route path={ROUTES.workspacePollEdit} element={<PollEditPage />} />
+                        <Route path={ROUTES.workspacePollResults} element={<PollResultsPage />} />
 
-                    {/* Quiz management (workspace-scoped) */}
-                    <Route path={ROUTES.workspaceQuizNew} element={<QuizEditPage />} />
-                    <Route path={ROUTES.workspaceQuizEdit} element={<QuizEditPage />} />
-                    <Route path={ROUTES.workspaceQuizStats} element={<QuizStatsPage />} />
-                    <Route path={ROUTES.workspaceQuizShare} element={<QuizSharePage />} />
-                    <Route path={ROUTES.workspaceQuizEpicBattle} element={<EpicBattlePage />} />
-                    <Route path={ROUTES.workspaceQuizDryRun} element={<QuizWelcomePage isDryRun={true} />} />
-                    <Route path={ROUTES.workspaceQuizDryRunTake} element={<QuizTakePage isDryRun={true} />} />
+                        {/* Quiz management (workspace-scoped) */}
+                        <Route path={ROUTES.workspaceQuizNew} element={<QuizEditPage />} />
+                        <Route path={ROUTES.workspaceQuizEdit} element={<QuizEditPage />} />
+                        <Route path={ROUTES.workspaceQuizStats} element={<QuizStatsPage />} />
+                        <Route path={ROUTES.workspaceQuizShare} element={<QuizSharePage />} />
+                        <Route path={ROUTES.workspaceQuizEpicBattle} element={<EpicBattlePage />} />
+                        <Route path={ROUTES.workspaceQuizDryRun} element={<QuizWelcomePage isDryRun={true} />} />
+                        <Route path={ROUTES.workspaceQuizDryRunTake} element={<QuizTakePage isDryRun={true} />} />
 
-                    {/* Quiz taking (public) */}
-                    <Route path={ROUTES.quizWelcome} element={<QuizWelcomePage isDryRun={false} />} />
-                    <Route path={ROUTES.quizWelcomeWithCohort} element={<QuizWelcomePage isDryRun={false} />} />
-                    <Route path={ROUTES.quizTake} element={<QuizTakePage isDryRun={false} />} />
-                    <Route path={ROUTES.quizNickname} element={<QuizNicknamePage isDryRun={false} />} />
-                    <Route path={ROUTES.quizNicknameWithCohort} element={<QuizNicknamePage isDryRun={false} />} />
-                    <Route path={ROUTES.quizBuzzerLobby} element={<QuizBuzzerLobbyPage />} />
-                </Routes>
-            </div>
-            <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />
-            <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
-            <AppThemeFab />
-            <XpTaskbar />
-            <LcarsBar />
-        </BrowserRouter>
+                        {/* Quiz taking (public) */}
+                        <Route path={ROUTES.quizWelcome} element={<QuizWelcomePage isDryRun={false} />} />
+                        <Route path={ROUTES.quizWelcomeWithCohort} element={<QuizWelcomePage isDryRun={false} />} />
+                        <Route path={ROUTES.quizTake} element={<QuizTakePage isDryRun={false} />} />
+                        <Route path={ROUTES.quizNickname} element={<QuizNicknamePage isDryRun={false} />} />
+                        <Route path={ROUTES.quizNicknameWithCohort} element={<QuizNicknamePage isDryRun={false} />} />
+                        <Route path={ROUTES.quizBuzzerLobby} element={<QuizBuzzerLobbyPage />} />
+                    </Routes>
+                </div>
+                <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />
+                <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
+                <AppThemeFab />
+                <LanguageFab />
+                <XpTaskbar />
+                <LcarsBar />
+            </BrowserRouter>
+        </LanguageProvider>
     )
 }
