@@ -875,6 +875,66 @@ html[data-app-theme='windows-xp'] .question-used-wrapper .in-quiz-list li {
     border-color: #d3e5fa;
 }
 
+// ── Windows XP: quiz/question taking flow ─────────────────────────────────────
+
+html[data-app-theme='windows-xp'] .take-card {
+    @include xp-window-titlebar('Quizmaster');
+}
+
+html[data-app-theme='windows-xp'] .quiz-play .question-fieldset {
+    @include xp-window-titlebar('Question');
+}
+
+html[data-app-theme='windows-xp'] .quiz-score .question-fieldset {
+    @include xp-window-titlebar('Review', #ece9df);
+}
+
+html[data-app-theme='windows-xp'] .score-summary {
+    position: relative;
+    @include xp-window-titlebar('Score');
+}
+
+html[data-app-theme='windows-xp'] .quiz-welcome-card .leaderboard-panel {
+    @include xp-window-titlebar('Leaderboard');
+
+    &::after {
+        content: none;
+    }
+}
+
+html[data-app-theme='windows-xp'] .bookmark-list,
+html[data-app-theme='windows-xp'] .countdown,
+html[data-app-theme='windows-xp'] .quiz-progress progress {
+    border-radius: 2px;
+}
+
+html[data-app-theme='windows-xp'] .dry-run-indicator {
+    background: linear-gradient(180deg, #fff2cf 0%, #ffcc66 100%);
+    color: #5a3d00;
+}
+
+html[data-app-theme='windows-xp'] .submit-btn {
+    @include xp-button-face;
+}
+
+html[data-app-theme='windows-xp'] ul.answers li {
+    input[type='checkbox'],
+    input[type='radio'] {
+        border-color: #7f9db9;
+        background-color: #ffffff;
+    }
+
+    input[type='checkbox']:checked,
+    input[type='radio']:checked {
+        border-color: #0a246a;
+    }
+
+    input[type='checkbox']:checked::after,
+    input[type='radio']:checked::after {
+        color: #1a5fd0;
+    }
+}
+
 // ── Star Trek (LCARS) reskin ──────────────────────────────────────────────────
 // LCARS is black panels + bright flat color blocks with one heavily rounded
 // "elbow" corner, condensed bold uppercase labels, and pill-shaped controls.
@@ -1280,6 +1340,65 @@ html[data-app-theme='star-trek'] .question-used-wrapper .in-quiz-list {
 html[data-app-theme='star-trek'] .question-used-wrapper .in-quiz-list li {
     border-color: #333333;
     color: #fff;
+}
+
+// ── Star Trek: quiz/question taking flow ──────────────────────────────────────
+
+html[data-app-theme='star-trek'] .quiz-play .question-fieldset {
+    @include lcars-panel('Question', #ffcc66);
+}
+
+html[data-app-theme='star-trek'] .quiz-score .question-fieldset {
+    @include lcars-panel('Review', #cc99cc);
+}
+
+html[data-app-theme='star-trek'] .score-summary {
+    @include lcars-panel('Score', #ff9900);
+}
+
+html[data-app-theme='star-trek'] .quiz-welcome-card .leaderboard-panel {
+    @include lcars-panel('Leaderboard', #cc6666);
+}
+
+html[data-app-theme='star-trek'] .bookmark-list,
+html[data-app-theme='star-trek'] .countdown {
+    background: #111111;
+    border: 1px solid #333333;
+    box-shadow: none;
+}
+
+html[data-app-theme='star-trek'] .quiz-progress progress,
+html[data-app-theme='star-trek'] .quiz-progress progress::-webkit-progress-bar {
+    background: #111111;
+}
+
+html[data-app-theme='star-trek'] .dry-run-indicator {
+    background: #000000;
+    border-bottom: 2px solid #ff9900;
+    color: #ff9900;
+    box-shadow: none;
+}
+
+html[data-app-theme='star-trek'] .submit-btn {
+    @include lcars-button-face(#ff9900);
+}
+
+html[data-app-theme='star-trek'] ul.answers li {
+    input[type='checkbox'],
+    input[type='radio'] {
+        border-color: #9999cc;
+        background-color: #111111;
+    }
+
+    input[type='checkbox']:checked,
+    input[type='radio']:checked {
+        border-color: #ff9900;
+    }
+
+    input[type='checkbox']:checked::after,
+    input[type='radio']:checked::after {
+        color: #ff9900;
+    }
 }
 
 // ── LCARS status bar (decorative) ─────────────────────────────────────────────
