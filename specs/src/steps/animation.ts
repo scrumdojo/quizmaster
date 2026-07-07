@@ -20,6 +20,30 @@ When('I switch the animation to Angels & Devils', async function () {
     await this.appPage.switchToAngels()
 })
 
+When('I switch the animation to the photo theme', async function () {
+    await this.appPage.switchToPhoto()
+})
+
+Then('a background photo is shown', async function () {
+    await this.appPage.expectPhotoVisible()
+})
+
+Then('the background photo category is {string}', async function (category: string) {
+    await this.appPage.expectPhotoCategory(category)
+})
+
+Then('the background photo category is one of the fun categories', async function () {
+    await this.appPage.expectPhotoCategoryIsOneOfTheFunCategories()
+})
+
+Then('I remember the background photo category', async function () {
+    await this.appPage.capturePhotoCategory()
+})
+
+Then('the background photo category is unchanged', async function () {
+    await this.appPage.expectPhotoCategoryUnchangedSinceCaptured()
+})
+
 Then('the Angels scoreboard is on the {word} side', async function (side: string) {
     await this.appPage.expectAngelScoreboardSide(side)
 })

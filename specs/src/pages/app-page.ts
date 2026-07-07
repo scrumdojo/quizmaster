@@ -1,10 +1,15 @@
 import { expect, type Page } from '@playwright/test'
 
+const PHOTO_CATEGORIES = ['landscape', 'water', 'space', 'people']
+
 export class AppPage {
     constructor(private page: Page) {}
 
+    private lastPhotoCategory: string | null = null
+
     private settingsPanel = () => this.page.locator('[data-testid="animation-settings"]')
     private canvas = () => this.page.locator('#crazy-bg')
+    private photoImage = () => this.page.locator('#crazy-bg-photo')
     private tooltipLocator = () => this.page.getByRole('tooltip')
 
     // Opens the dropdown by clicking the FAB trigger button
@@ -35,8 +40,29 @@ export class AppPage {
         await this.page.getByRole('button', { name: 'Angels & Devils' }).click()
     }
 
+    switchToPhoto = async () => {
+        await this.openAnimationSettings()
+        await this.page.getByRole('button', { name: 'Photo' }).click()
+    }
+
     expectAnimationHidden = () => expect(this.canvas()).toBeHidden()
     expectAnimationTheme = (theme: string) => expect(this.canvas()).toHaveAttribute('data-theme', theme)
+    expectPhotoVisible = () => expect(this.photoImage()).toBeVisible()
+    expectPhotoCategory = (category: string) => expect(this.canvas()).toHaveAttribute('data-photo-category', category)
+
+    expectPhotoCategoryIsOneOfTheFunCategories = async () => {
+        const category = await this.canvas().getAttribute('data-photo-category')
+        expect(PHOTO_CATEGORIES).toContain(category)
+    }
+
+    capturePhotoCategory = async () => {
+        this.lastPhotoCategory = await this.canvas().getAttribute('data-photo-category')
+    }
+
+    expectPhotoCategoryUnchangedSinceCaptured = async () => {
+        expect(this.lastPhotoCategory).not.toBeNull()
+        await expect(this.canvas()).toHaveAttribute('data-photo-category', this.lastPhotoCategory ?? '')
+    }
     expectAngelScoreboardSide = (side: string) =>
         expect(this.canvas()).toHaveAttribute('data-angel-scoreboard-side', side)
     expectSatanScoreboardSide = (side: string) =>
@@ -55,6 +81,7 @@ export class AppPage {
         await expect(this.page.getByRole('button', { name: 'Mammoths' })).toBeVisible()
         await expect(this.page.getByRole('button', { name: 'Angels & Devils' })).toBeVisible()
         await expect(this.page.getByRole('button', { name: 'Turn off' })).toBeVisible()
+        await expect(this.page.getByRole('button', { name: 'Photo' })).toBeVisible()
     }
 
     expectGiantMammothEnabled = () => expect(this.canvas()).toHaveAttribute('data-giant-mammoth-lives', '100')

@@ -18,7 +18,7 @@ import { QuizTakePage } from '#fe/take/quiz-take/quiz-take-page.tsx'
 import { QuizWelcomePage } from '#fe/take/quiz-take/quiz-welcome/quiz-welcome-page.tsx'
 import { ROUTES } from '#fe/urls.ts'
 
-type AnimationTheme = 'angels' | 'mammoths' | 'off'
+type AnimationTheme = 'angels' | 'mammoths' | 'photo' | 'off'
 
 const SPEAR_CURSOR = `url("data:image/svg+xml;base64,${btoa(
     '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">' +
@@ -45,6 +45,7 @@ const THEME_OPTIONS: { value: AnimationTheme; label: string; cursor: string }[] 
     { value: 'off', label: 'Turn off', cursor: 'pointer' },
     { value: 'angels', label: 'Angels & Devils', cursor: 'pointer' },
     { value: 'mammoths', label: 'Mammoths', cursor: SPEAR_CURSOR },
+    { value: 'photo', label: 'Photo', cursor: 'pointer' },
 ]
 
 const ICONS = ['🦣', '😇'] as const
@@ -57,7 +58,7 @@ interface BackgroundGameFabProps {
 const BackgroundGameFab = ({ battleOnly, onBattleOnlyChange }: BackgroundGameFabProps) => {
     const [theme, setTheme] = useState<AnimationTheme>(() => {
         const v = localStorage.getItem('animation-theme')
-        return v === 'mammoths' || v === 'off' ? v : 'angels'
+        return v === 'mammoths' || v === 'off' || v === 'photo' ? v : 'angels'
     })
     const [open, setOpen] = useState(false)
     const [iconIdx, setIconIdx] = useState(0)
