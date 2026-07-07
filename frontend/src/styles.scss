@@ -685,6 +685,49 @@ html[data-app-theme='windows-xp'] .inline-question-modal__close {
     }
 }
 
+// ── Windows XP: Robin AI chatsheet ────────────────────────────────────────────
+
+html[data-app-theme='windows-xp'] .robin-sheet {
+    background: #ece9df;
+    border: 2px solid #0a246a;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.28);
+
+    .title {
+        color: #0a246a;
+    }
+
+    .close-button {
+        color: #0a246a;
+    }
+}
+
+html[data-app-theme='windows-xp'] .robin-sheet--chat .robin-sheet__composer {
+    background: #ece9df;
+    border-top: 1px solid #7f9db9;
+}
+
+html[data-app-theme='windows-xp'] .robin-chat-message--user {
+    background: linear-gradient(180deg, #3a8ef0 0%, #0a3fa0 100%);
+    color: #fff;
+}
+
+html[data-app-theme='windows-xp'] .robin-chat-message--assistant {
+    background: #ffffff;
+    color: #10233f;
+    border: 1px solid #7f9db9;
+}
+
+html[data-app-theme='windows-xp'] .generated-question {
+    background: #ffffff;
+    border: 1px solid #7f9db9;
+}
+
+html[data-app-theme='windows-xp'] .generated-question__number {
+    color: #0a246a;
+}
+
 // ── Windows XP taskbar (decorative) ───────────────────────────────────────────
 
 .xp-taskbar {
@@ -1189,6 +1232,49 @@ html[data-app-theme='star-trek'] .inline-question-modal__close {
         color: #ffcc66;
         background: #000;
     }
+}
+
+// ── Star Trek: Robin AI chatsheet ─────────────────────────────────────────────
+
+html[data-app-theme='star-trek'] .robin-sheet {
+    background: #050505;
+    border-top: 2px solid #ff9900;
+    border-radius: 26px 26px 0 0;
+    box-shadow: none;
+    color: #f5f5f5;
+
+    .title {
+        color: #ff9900;
+    }
+
+    .close-button {
+        color: #ff9900;
+    }
+}
+
+html[data-app-theme='star-trek'] .robin-sheet--chat .robin-sheet__composer {
+    background: #050505;
+    border-top: 1px solid #333333;
+}
+
+html[data-app-theme='star-trek'] .robin-chat-message--user {
+    background: #ff9900;
+    color: #000;
+}
+
+html[data-app-theme='star-trek'] .robin-chat-message--assistant {
+    background: #111111;
+    color: #ffffff;
+    border: 1px solid #333333;
+}
+
+html[data-app-theme='star-trek'] .generated-question {
+    background: #111111;
+    border: 1px solid #333333;
+}
+
+html[data-app-theme='star-trek'] .generated-question__number {
+    color: #ff9900;
 }
 
 html[data-app-theme='star-trek'] .corner-fabs,
