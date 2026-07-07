@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster.config;
 
+import cz.scrumdojo.quizmaster.common.CodedResponseStatusException;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,9 @@ public class GlobalExceptionHandler {
         error.put("status", ex.getStatusCode().value());
         error.put("error", ex.getStatusCode().toString());
         error.put("message", ex.getReason() != null ? ex.getReason() : ex.getMessage());
+        if (ex instanceof CodedResponseStatusException coded) {
+            error.put("code", coded.getCode());
+        }
         return ResponseEntity.status(ex.getStatusCode()).body(error);
     }
 

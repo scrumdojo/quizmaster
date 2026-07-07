@@ -324,5 +324,9 @@ export interface Translations {
         readonly thinking: string
         readonly savedOneQuestion: string
         readonly savedManyQuestions: (n: number) => string
+        readonly errorRequestFailed: string
+        readonly errorAiTokenNotConfigured: string
+        readonly errorEmptyChatMessages: string
+        readonly errorInvalidLastMessage: string
     }
 }

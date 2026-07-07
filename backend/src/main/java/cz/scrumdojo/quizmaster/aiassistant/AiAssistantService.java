@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.scrumdojo.quizmaster.aiassistant.RobinChatRequest.RobinChatMessage;
+import cz.scrumdojo.quizmaster.common.CodedResponseStatusException;
 import cz.scrumdojo.quizmaster.question.QuestionType;
 import java.io.IOException;
 import java.net.URI;
@@ -105,19 +106,28 @@ public class AiAssistantService {
 
     private void validateToken() {
         if (apiToken == null || apiToken.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI token is not configured.");
+            throw new CodedResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "AI token is not configured.",
+                "ai-token-not-configured"
+            );
         }
     }
 
     private void validateChatRequest(List<RobinChatMessage> messages) {
         if (messages == null || messages.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Messages must not be empty.");
+            throw new CodedResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Messages must not be empty.",
+                "empty-chat-messages"
+            );
         }
         RobinChatMessage last = messages.get(messages.size() - 1);
         if (!"user".equals(last.role()) || last.content() == null || last.content().isBlank()) {
-            throw new ResponseStatusException(
+            throw new CodedResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "Last message must be a user message with non-empty content."
+                "Last message must be a user message with non-empty content.",
+                "invalid-last-message"
             );
         }
         validateToken();

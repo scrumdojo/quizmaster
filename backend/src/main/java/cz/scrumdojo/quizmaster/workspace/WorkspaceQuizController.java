@@ -1,6 +1,7 @@
 package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.attempt.AttemptService;
+import cz.scrumdojo.quizmaster.common.CodedResponseStatusException;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
@@ -294,14 +295,22 @@ public class WorkspaceQuizController {
         if (questionWeights == null) return;
         for (int w : questionWeights) {
             if (w < 1 || w > 5) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question weights must be between 1 and 5.");
+                throw new CodedResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Question weights must be between 1 and 5.",
+                    "invalid-question-weight"
+                );
             }
         }
     }
 
     private void validateQuestionsBelongToWorkspace(int[] questionIds, String workspaceGuid) {
         if (questionIds == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz questions must belong to the workspace.");
+            throw new CodedResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Quiz questions must belong to the workspace.",
+                "questions-not-in-workspace"
+            );
         }
         if (questionIds.length == 0) {
             return;
@@ -310,7 +319,11 @@ public class WorkspaceQuizController {
         Set<Integer> uniqueIds = Arrays.stream(questionIds).boxed().collect(Collectors.toSet());
         long matched = questionRepository.countByIdInAndWorkspaceGuid(uniqueIds, workspaceGuid);
         if (matched != uniqueIds.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz questions must belong to the workspace.");
+            throw new CodedResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Quiz questions must belong to the workspace.",
+                "questions-not-in-workspace"
+            );
         }
     }
 }

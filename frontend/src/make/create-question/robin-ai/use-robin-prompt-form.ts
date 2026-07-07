@@ -1,7 +1,10 @@
 import { useState } from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
+import type { Translations } from '#fe/i18n/types.ts'
 import { postAiAssistantChat } from '#fe/make/api/ai-assistant.ts'
 import type { AiChatMessage } from '#fe/make/api/ai-assistant.ts'
+import { ApiError } from '#fe/shared/api/helpers.ts'
 import type { QuestionDraft } from '#fe/shared/model/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'
@@ -37,6 +40,22 @@ const seedTranscript = (initialDraft: QuestionDraft | undefined): readonly AiCha
           ]
         : []
 
+// Backend validation failures carry a stable code (see CodedResponseStatusException);
+// translate those, and fall back to the raw (English) message for anything else —
+// e.g. network errors or backend messages that don't have a code yet.
+const errorMessageFor = (e: unknown, t: Translations): string => {
+    if (e instanceof ApiError && e.code) {
+        const knownMessages: Record<string, string> = {
+            'ai-token-not-configured': t.robin.errorAiTokenNotConfigured,
+            'empty-chat-messages': t.robin.errorEmptyChatMessages,
+            'invalid-last-message': t.robin.errorInvalidLastMessage,
+        }
+        const known = knownMessages[e.code]
+        if (known) return known
+    }
+    return e instanceof Error && e.message ? e.message : t.robin.errorRequestFailed
+}
+
 export const useRobinPromptForm = ({
     saveDraft,
     saveDrafts,
@@ -44,6 +63,7 @@ export const useRobinPromptForm = ({
     excludedQuestionId,
     initialDraft,
 }: UseRobinPromptFormArgs) => {
+    const { t } = useLanguage()
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [saving, setSaving] = useState(false)
@@ -75,8 +95,7 @@ export const useRobinPromptForm = ({
                 ...(response.notice ? [{ role: 'assistant' as const, text: response.notice, notice: true }] : []),
             ])
         } catch (e) {
-            const message = e instanceof Error ? e.message : 'AI assistant request failed.'
-            setError(message || 'AI assistant request failed.')
+            setError(errorMessageFor(e, t))
         } finally {
             setLoading(false)
         }
@@ -90,8 +109,7 @@ export const useRobinPromptForm = ({
             const assistantMessage = await saveDraft(draft)
             setChatMessages(previous => [...previous, { role: 'assistant', text: assistantMessage }])
         } catch (e) {
-            const message = e instanceof Error ? e.message : 'AI assistant request failed.'
-            setError(message || 'AI assistant request failed.')
+            setError(errorMessageFor(e, t))
         } finally {
             setSaving(false)
         }
@@ -107,8 +125,7 @@ export const useRobinPromptForm = ({
             setTranscript([])
             setChatMessages(previous => [...previous, { role: 'assistant', text: assistantMessage }])
         } catch (e) {
-            const message = e instanceof Error ? e.message : 'AI assistant request failed.'
-            setError(message || 'AI assistant request failed.')
+            setError(errorMessageFor(e, t))
         } finally {
             setSaving(false)
         }

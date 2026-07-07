@@ -1,6 +1,7 @@
 package cz.scrumdojo.quizmaster.quiz;
 
 import cz.scrumdojo.quizmaster.attempt.*;
+import cz.scrumdojo.quizmaster.common.CodedResponseStatusException;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.*;
 import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardResponse;
@@ -145,9 +146,10 @@ public class QuizTakeController {
     private Quiz requireAvailableQuiz(Integer quizId) {
         var quiz = requireQuiz(quizId);
 
-        if (!quiz.isAvailable(now())) throw new ResponseStatusException(
+        if (!quiz.isAvailable(now())) throw new CodedResponseStatusException(
             HttpStatus.FORBIDDEN,
-            "Quiz is not currently available."
+            "Quiz is not currently available.",
+            "quiz-not-available"
         );
 
         return quiz;
@@ -179,14 +181,16 @@ public class QuizTakeController {
     private Attempt requireAttemptNotFinished(Integer quizId, Integer attemptId) {
         var attempt = attemptService.findAttempt(quizId, attemptId);
 
-        if (attempt.isEmpty()) throw new ResponseStatusException(
+        if (attempt.isEmpty()) throw new CodedResponseStatusException(
             HttpStatus.NOT_FOUND,
-            "Attempt not found with id: " + attemptId + " for quiz id: " + quizId
+            "Attempt not found with id: " + attemptId + " for quiz id: " + quizId,
+            "attempt-not-found"
         );
 
-        if (attempt.get().isFinished()) throw new ResponseStatusException(
+        if (attempt.get().isFinished()) throw new CodedResponseStatusException(
             HttpStatus.CONFLICT,
-            "Attempt with id " + attemptId + " is already finished."
+            "Attempt with id " + attemptId + " is already finished.",
+            "attempt-already-finished"
         );
 
         return attempt.get();
