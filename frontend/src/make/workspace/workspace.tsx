@@ -2,6 +2,7 @@ import './workspace.scss'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { deletePoll } from '#fe/make/api/poll.ts'
 import { deleteQuestion } from '#fe/make/api/question.ts'
 import { deleteQuiz } from '#fe/make/api/quiz.ts'
@@ -25,6 +26,7 @@ import { QuizItem } from './quiz-item.tsx'
 import { WorkspaceRobinAiHelper } from './workspace-robin-ai-helper.tsx'
 
 export function WorkspacePage() {
+    const { t } = useLanguage()
     const workspaceId = useWorkspaceId()
     const [searchParams] = useSearchParams()
     const initialTab = useMemo(
@@ -183,23 +185,23 @@ export function WorkspacePage() {
             <WorkspaceRobinAiHelper workspaceId={workspaceId} onQuestionsSaved={refreshQuestions} />
             <section className="workspace-header">
                 <div className="workspace-header__content">
-                    <div className="workspace-header__eyebrow">Welcome to your workspace!</div>
+                    <div className="workspace-header__eyebrow">{t.workspace.eyebrow}</div>
                     {workspace.title && <h1 data-testid="workspace-title">{workspace.title}</h1>}
-                    <p className="workspace-header__copy">Build your question bank here, then assemble quizzes!</p>
+                    <p className="workspace-header__copy">{t.workspace.copy}</p>
                 </div>
-                <div className="workspace-header__stats" aria-label="Workspace summary">
+                <div className="workspace-header__stats" aria-label={t.workspace.summaryAriaLabel}>
                     <div className="workspace-header__stat">
                         <strong>{questionTotalElements}</strong>
-                        <span>{questionTotalElements === 1 ? 'question' : 'questions'}</span>
+                        <span>{t.workspace.questionCount(questionTotalElements)}</span>
                     </div>
                     <div className="workspace-header__stat">
                         <strong>{quizzes.length}</strong>
-                        <span>{quizzes.length === 1 ? 'quiz' : 'quizzes'}</span>
+                        <span>{t.workspace.quizCount(quizzes.length)}</span>
                     </div>
                 </div>
             </section>
 
-            <div className="workspace-tabs" role="tablist" aria-label="Workspace sections">
+            <div className="workspace-tabs" role="tablist" aria-label={t.workspace.sectionsAriaLabel}>
                 <button
                     type="button"
                     className="workspace-tab"
@@ -207,7 +209,7 @@ export function WorkspacePage() {
                     aria-selected={activeTab === 'quizzes'}
                     onClick={() => setActiveTab('quizzes')}
                 >
-                    Quizzes
+                    {t.workspace.tabQuizzes}
                 </button>
                 <button
                     type="button"
@@ -216,7 +218,7 @@ export function WorkspacePage() {
                     aria-selected={activeTab === 'questions'}
                     onClick={() => setActiveTab('questions')}
                 >
-                    Questions
+                    {t.workspace.tabQuestions}
                 </button>
                 <button
                     type="button"
@@ -225,17 +227,17 @@ export function WorkspacePage() {
                     aria-selected={activeTab === 'polls'}
                     onClick={() => setActiveTab('polls')}
                 >
-                    Polls
+                    {t.workspace.tabPolls}
                 </button>
             </div>
 
             {activeTab === 'polls' && (
                 <section className="workspace-section workspace-section--polls">
                     <ItemList
-                        title="My Polls"
+                        title={t.workspace.pollsTitle}
                         action={
                             <LinkButton
-                                label="Create"
+                                label={t.common.create}
                                 icon="+"
                                 id="create-poll"
                                 to={urls.workspacePollNew(workspace.guid)}
@@ -248,8 +250,8 @@ export function WorkspacePage() {
                             ))
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--polls">
-                                <h3>No polls yet</h3>
-                                <p>Create your first poll and start collecting votes.</p>
+                                <h3>{t.workspace.noPollsTitle}</h3>
+                                <p>{t.workspace.noPollsBody}</p>
                             </div>
                         )}
                     </ItemList>
@@ -259,10 +261,10 @@ export function WorkspacePage() {
             {activeTab === 'questions' && (
                 <section className="workspace-section workspace-section--questions">
                     <ItemList
-                        title="My Questions"
+                        title={t.workspace.questionsTitle}
                         action={
                             <LinkButton
-                                label="Create"
+                                label={t.common.create}
                                 icon="+"
                                 id="create-question"
                                 to={`${urls.workspaceQuestionNew(workspace.guid)}?tab=questions`}
@@ -274,19 +276,21 @@ export function WorkspacePage() {
                             role="search"
                             onSubmit={event => event.preventDefault()}
                         >
-                            <label htmlFor="workspace-question-filter-input">Filter questions or tags</label>
+                            <label htmlFor="workspace-question-filter-input">{t.workspace.questionFilterLabel}</label>
                             <input
                                 id="workspace-question-filter-input"
                                 type="search"
                                 value={questionFilter}
-                                placeholder="Type question text or tag"
+                                placeholder={t.workspace.questionFilterPlaceholder}
                                 onChange={event => setQuestionFilter(event.target.value)}
                             />
                         </form>
 
                         {availableQuestionTags.length > 0 && (
                             <div className="workspace-question-tag-filter" data-testid="workspace-question-tag-filter">
-                                <span className="workspace-question-tag-filter__label">Tags</span>
+                                <span className="workspace-question-tag-filter__label">
+                                    {t.workspace.tagFilterLabel}
+                                </span>
                                 <div className="workspace-question-tag-filter__list">
                                     {availableQuestionTags.map(tag => {
                                         const isSelected = selectedQuestionTags.includes(tag)
@@ -317,28 +321,28 @@ export function WorkspacePage() {
                             ))
                         ) : hasActiveQuestionFilters ? (
                             <div className="workspace-empty-state workspace-empty-state--questions">
-                                <h3>No matching questions</h3>
-                                <p>Try a different filter phrase.</p>
+                                <h3>{t.workspace.noMatchingQuestionsTitle}</h3>
+                                <p>{t.workspace.noMatchingBody}</p>
                             </div>
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--questions">
-                                <h3>Create your first question</h3>
-                                <p>
-                                    Every quiz starts with a solid question bank. AI will help you to prepare perfect
-                                    drafts!
-                                </p>
+                                <h3>{t.workspace.createFirstQuestionTitle}</h3>
+                                <p>{t.workspace.createFirstQuestionBody}</p>
                             </div>
                         )}
                     </ItemList>
 
                     {questionTotalPages > 1 && (
-                        <nav className="workspace-pagination question-pagination" aria-label="Question pages">
+                        <nav
+                            className="workspace-pagination question-pagination"
+                            aria-label={t.workspace.questionPagesAriaLabel}
+                        >
                             {Array.from({ length: questionTotalPages }, (_, i) => (
                                 <button
                                     key={i}
                                     type="button"
                                     className={`workspace-pagination__page${i === questionPage ? ' workspace-pagination__page--active' : ''}`}
-                                    aria-label={`Page ${i + 1}`}
+                                    aria-label={t.workspace.pageAriaLabel(i + 1)}
                                     aria-current={i === questionPage ? 'page' : undefined}
                                     onClick={() =>
                                         void loadQuestionPage(i, debouncedQuestionFilter, selectedQuestionTags)
@@ -355,10 +359,10 @@ export function WorkspacePage() {
             {activeTab === 'quizzes' && (
                 <section className="workspace-section workspace-section--quizzes">
                     <ItemList
-                        title="My Quizzes"
+                        title={t.workspace.quizzesTitle}
                         action={
                             <LinkButton
-                                label="Create"
+                                label={t.common.create}
                                 icon="+"
                                 id="create-quiz"
                                 to={`${urls.workspaceQuizNew(workspace.guid)}?tab=quizzes`}
@@ -370,12 +374,12 @@ export function WorkspacePage() {
                             role="search"
                             onSubmit={event => event.preventDefault()}
                         >
-                            <label htmlFor="workspace-quiz-filter-input">Filter quizzes</label>
+                            <label htmlFor="workspace-quiz-filter-input">{t.workspace.quizFilterLabel}</label>
                             <input
                                 id="workspace-quiz-filter-input"
                                 type="search"
                                 value={quizFilter}
-                                placeholder="Type to filter quizzes"
+                                placeholder={t.workspace.quizFilterPlaceholder}
                                 onChange={event => setQuizFilter(event.target.value)}
                             />
                         </form>
@@ -391,25 +395,28 @@ export function WorkspacePage() {
                             ))
                         ) : debouncedQuizFilter.length > 0 ? (
                             <div className="workspace-empty-state workspace-empty-state--quizzes">
-                                <h3>No matching quizzes</h3>
-                                <p>Try a different filter phrase.</p>
+                                <h3>{t.workspace.noMatchingQuizzesTitle}</h3>
+                                <p>{t.workspace.noMatchingBody}</p>
                             </div>
                         ) : (
                             <div className="workspace-empty-state workspace-empty-state--quizzes">
-                                <h3>Turn questions into a quiz</h3>
-                                <p>Select questions and package them into a quiz!</p>
+                                <h3>{t.workspace.turnQuestionsIntoQuizTitle}</h3>
+                                <p>{t.workspace.turnQuestionsIntoQuizBody}</p>
                             </div>
                         )}
                     </ItemList>
 
                     {quizTotalPages > 1 && (
-                        <nav className="workspace-pagination quiz-pagination" aria-label="Quiz pages">
+                        <nav
+                            className="workspace-pagination quiz-pagination"
+                            aria-label={t.workspace.quizPagesAriaLabel}
+                        >
                             {Array.from({ length: quizTotalPages }, (_, i) => (
                                 <button
                                     key={i}
                                     type="button"
                                     className={`workspace-pagination__page${i === quizPage ? ' workspace-pagination__page--active' : ''}`}
-                                    aria-label={`Page ${i + 1}`}
+                                    aria-label={t.workspace.pageAriaLabel(i + 1)}
                                     aria-current={i === quizPage ? 'page' : undefined}
                                     onClick={() => void loadQuizPage(i, debouncedQuizFilter)}
                                 >
@@ -422,23 +429,23 @@ export function WorkspacePage() {
             )}
             {quizToDelete && (
                 <dialog open>
-                    <p>Delete quiz &quot;{quizToDelete.title}&quot;?</p>
+                    <p>{t.workspace.deleteQuizConfirm(quizToDelete.title)}</p>
                     <button type="button" onClick={onConfirmDeleteQuiz}>
-                        Confirm
+                        {t.common.confirm}
                     </button>
                     <button type="button" onClick={() => setQuizToDelete(null)}>
-                        Cancel
+                        {t.common.cancel}
                     </button>
                 </dialog>
             )}
             {pollToDelete && (
                 <dialog open>
-                    <p>Delete poll &quot;{pollToDelete.question}&quot;?</p>
+                    <p>{t.workspace.deletePollConfirm(pollToDelete.question)}</p>
                     <button type="button" onClick={onConfirmDeletePoll}>
-                        Confirm
+                        {t.common.confirm}
                     </button>
                     <button type="button" onClick={() => setPollToDelete(null)}>
-                        Cancel
+                        {t.common.cancel}
                     </button>
                 </dialog>
             )}

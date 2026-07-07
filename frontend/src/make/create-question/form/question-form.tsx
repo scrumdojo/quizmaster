@@ -1,3 +1,4 @@
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import type { QuestionRequest } from '#fe/make/api/question.ts'
 import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#fe/make/create-question/form'
 import { RobinAiHelper } from '#fe/make/create-question/robin-ai'
@@ -16,7 +17,7 @@ import { ErrorMessage, createValidator } from '#fe/shared/forms/validations.tsx'
 import type { Question } from '#fe/shared/model/question.ts'
 
 import { useQuestionFormState } from './question-form-state.ts'
-import { validateQuestionFormState, errorMessage } from './validators.ts'
+import { validateQuestionFormState, type ErrorCode } from './validators.ts'
 
 interface QuestionEditProps {
     readonly workspaceId: string
@@ -25,7 +26,18 @@ interface QuestionEditProps {
 }
 
 export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEditProps) => {
+    const { t } = useLanguage()
     const state = useQuestionFormState(question)
+
+    const errorMessage: Record<ErrorCode, string> = {
+        'empty-question': t.question.errorEmptyQuestion,
+        'empty-answer': t.question.errorEmptyAnswer,
+        'no-correct-answer': t.question.errorNoCorrectAnswer,
+        'empty-answer-explanation': t.question.errorEmptyAnswerExplanation,
+        'few-correct-answers': t.question.errorFewCorrectAnswers,
+        'empty-numerical-answer': t.question.errorEmptyNumericalAnswer,
+        'invalid-numerical-answer': t.question.errorInvalidNumericalAnswer,
+    }
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
 
@@ -40,14 +52,11 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
                 currentQuestionId={question?.id}
             />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
-                <Field label="Question" required>
+                <Field label={t.question.questionFieldLabel} required>
                     <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
                     <ErrorMessage errorCode="empty-question" />
                 </Field>
-                <Field
-                    label="Image URL"
-                    tooltip="Use a direct image URL. A preview appears when the image can be loaded."
-                >
+                <Field label={t.question.imageUrlFieldLabel} tooltip={t.question.imageUrlTooltip}>
                     <TextInput id="image-url" value={state.imageUrl} onChange={state.setImageUrl} />
                     {state.imageUrl.trim() !== '' && (
                         <img src={state.imageUrl} alt="preview" className="image-preview" />
@@ -55,14 +64,9 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
                 </Field>
                 <Row>
                     <Field
-                        label="Question type"
+                        label={t.question.questionTypeFieldLabel}
                         required
-                        note={
-                            <span id="question-type-note">
-                                Single choice requires one correct answer. Multiple choice requires at least two correct
-                                answers. Numerical questions require a numeric answer.
-                            </span>
-                        }
+                        note={<span id="question-type-note">{t.question.questionTypeNote}</span>}
                     >
                         <QuestionTypeRadioSet
                             name="question-type"
@@ -72,10 +76,13 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
                     </Field>
                     {state.isMultipleChoice && (
                         <span className="check-with-help">
-                            <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
-                            <HelpTooltip label="Easy">
-                                Show the number of correct answers to takers unless quiz difficulty overrides it.
-                            </HelpTooltip>
+                            <CheckField
+                                id="is-easy"
+                                label={t.question.easyLabel}
+                                checked={state.isEasy}
+                                onToggle={state.setIsEasy}
+                            />
+                            <HelpTooltip label={t.question.easyLabel}>{t.question.easyTooltip}</HelpTooltip>
                         </span>
                     )}
                 </Row>
@@ -96,14 +103,14 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
                         removeAnswer={state.removeAnswer}
                     />
                 )}
-                <Field label="Question explanation" tooltip="This explanation is shown when feedback is available.">
+                <Field label={t.question.explanationFieldLabel} tooltip={t.question.explanationTooltip}>
                     <TextArea
                         id="question-explanation"
                         value={state.questionExplanation}
                         onChange={state.setQuestionExplanation}
                     />
                 </Field>
-                <Field label="Tag" tooltip="Tags help you find questions in the workspace and quiz form.">
+                <Field label={t.question.tagFieldLabel} tooltip={t.question.tagTooltip}>
                     <TextInput id="question-tag" value={state.tagText} onChange={state.setTagText} />
                 </Field>
                 <SubmitButton />

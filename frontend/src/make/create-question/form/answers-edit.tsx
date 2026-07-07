@@ -1,3 +1,4 @@
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { Button, Field, TextInput, Row, CheckField, HelpTooltip, TrashButton } from '#fe/shared'
 import { ErrorMessage } from '#fe/shared/forms/validations.tsx'
 
@@ -11,27 +12,35 @@ interface AnswerRowProps {
     deleteDisabled: boolean
 }
 
-export const AnswerRow = ({ state, isMultipleChoice, onDelete, deleteDisabled, showExplanations }: AnswerRowProps) => (
-    <div className="answer-row">
-        <input
-            type={isMultipleChoice ? 'checkbox' : 'radio'}
-            checked={state.isCorrect}
-            onChange={state.toggleCorrect}
-        />
-        <div>
-            <TextInput placeholder="answer" className="text" value={state.answer} onChange={state.setAnswer} />
-            {showExplanations && (
+export const AnswerRow = ({ state, isMultipleChoice, onDelete, deleteDisabled, showExplanations }: AnswerRowProps) => {
+    const { t } = useLanguage()
+    return (
+        <div className="answer-row">
+            <input
+                type={isMultipleChoice ? 'checkbox' : 'radio'}
+                checked={state.isCorrect}
+                onChange={state.toggleCorrect}
+            />
+            <div>
                 <TextInput
-                    placeholder="explanation"
-                    className="explanation"
-                    value={state.explanation}
-                    onChange={state.setExplanation}
+                    placeholder={t.question.answerPlaceholder}
+                    className="text"
+                    value={state.answer}
+                    onChange={state.setAnswer}
                 />
-            )}
+                {showExplanations && (
+                    <TextInput
+                        placeholder={t.question.explanationPlaceholder}
+                        className="explanation"
+                        value={state.explanation}
+                        onChange={state.setExplanation}
+                    />
+                )}
+            </div>
+            <TrashButton onClick={onDelete} disabled={deleteDisabled} />
         </div>
-        <TrashButton onClick={onDelete} disabled={deleteDisabled} />
-    </div>
-)
+    )
+}
 
 interface AnswersProps {
     readonly answerStates: readonly AnswerState[]
@@ -50,24 +59,23 @@ export const AnswersEdit = ({
     setShowExplanations,
     removeAnswer,
 }: AnswersProps) => {
+    const { t } = useLanguage()
     const handleToggleExplanations = () => setShowExplanations(showExplanations => !showExplanations)
 
     return (
         <Field
-            label="Enter your answers"
+            label={t.question.answersFieldLabel}
             required
-            note={<span id="correct-answer-note">Use the radio buttons or checkboxes to mark correct answers.</span>}
+            note={<span id="correct-answer-note">{t.question.answersNote}</span>}
         >
             <div className="answer-controls">
                 <CheckField
                     id="show-explanation"
-                    label="Show explanations"
+                    label={t.question.showExplanationsLabel}
                     onToggle={handleToggleExplanations}
                     checked={showExplanations}
                 />
-                <HelpTooltip label="Show explanations">
-                    Explanations are shown with answer feedback. Fill all answer explanations or leave them all empty.
-                </HelpTooltip>
+                <HelpTooltip label={t.question.showExplanationsLabel}>{t.question.showExplanationsTooltip}</HelpTooltip>
             </div>
             {answerStates.map((state, idx) => (
                 <AnswerRow
@@ -81,7 +89,7 @@ export const AnswersEdit = ({
             ))}
             <Row>
                 <Button onClick={addAnswer} className="secondary button" id="add-answer">
-                    Add Answer
+                    {t.question.addAnswer}
                 </Button>
             </Row>
             <ErrorMessage errorCode="no-correct-answer" />

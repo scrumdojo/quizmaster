@@ -1,16 +1,13 @@
 import type { QuestionFormState } from './question-form-state.ts'
 
-export const errorMessage = {
-    'empty-question': 'Question must not be empty.',
-    'empty-answer': 'Answers must not be empty.',
-    'no-correct-answer': 'At least one correct answer must be selected.',
-    'empty-answer-explanation': 'All or none answer explanations must be filled in.',
-    'few-correct-answers': 'Multiple choice questions must have at least two correct answers.',
-    'empty-numerical-answer': 'Correct numerical answer must not be empty.',
-    'invalid-numerical-answer': 'Correct numerical answer must be a number.',
-}
-
-type ErrorCode = keyof typeof errorMessage
+export type ErrorCode =
+    | 'empty-question'
+    | 'empty-answer'
+    | 'no-correct-answer'
+    | 'empty-answer-explanation'
+    | 'few-correct-answers'
+    | 'empty-numerical-answer'
+    | 'invalid-numerical-answer'
 
 export function validateQuestionFormState(state: QuestionFormState): Set<ErrorCode> {
     const errors = new Set<ErrorCode>()

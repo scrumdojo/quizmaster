@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from 'react'
 
+import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { Alert, Button, TextArea } from '#fe/shared'
 import type { QuestionDraft } from '#fe/shared/model/question.ts'
 
@@ -24,6 +25,7 @@ export const RobinSheet = ({
     excludedQuestionId,
     initialDraft,
 }: RobinSheetProps) => {
+    const { t } = useLanguage()
     const {
         promptText,
         setPromptText,
@@ -58,7 +60,7 @@ export const RobinSheet = ({
     return (
         <div className="robin-sheet robin-sheet--chat" data-testid="robin-sheet">
             <div className="header">
-                <span className="title">Ask Robin AI</span>
+                <span className="title">{t.robin.chatTitle}</span>
                 <button type="button" className="close-button" onClick={onClose}>
                     ✕
                 </button>
@@ -132,7 +134,7 @@ export const RobinSheet = ({
                                                         <span>{answer}</span>
                                                         {correct && (
                                                             <strong data-testid="robin-generated-answer-correct">
-                                                                Correct
+                                                                {t.robin.correct}
                                                             </strong>
                                                         )}
                                                         {draft.explanations[answerIndex] && (
@@ -164,7 +166,7 @@ export const RobinSheet = ({
                                             className="secondary button"
                                             onClick={() => onUseDraft(draft)}
                                         >
-                                            Use this question
+                                            {t.robin.useThisQuestion}
                                         </Button>
                                     )}
 
@@ -175,7 +177,7 @@ export const RobinSheet = ({
                                             onClick={() => void saveOne(draft)}
                                             disabled={saving || loading}
                                         >
-                                            Save
+                                            {t.common.save}
                                         </Button>
                                     )}
                                 </article>
@@ -190,20 +192,20 @@ export const RobinSheet = ({
                         onClick={() => void save()}
                         disabled={saving || loading}
                     >
-                        {saving ? 'Saving...' : 'Save all'}
+                        {saving ? t.robin.saving : t.robin.saveAll}
                     </Button>
                 )}
             </div>
             <div className="robin-sheet__composer" data-testid="robin-composer">
                 <TextArea
                     id="robin-prompt-text"
-                    placeholder="What do you want to ask?"
+                    placeholder={t.robin.promptPlaceholder}
                     value={promptText}
                     onChange={setPromptText}
                     onKeyDown={onPromptKeyDown}
                 />
-                <span className="example">Press Enter to send. Use Shift+Enter for a new line.</span>
-                {loading && <span className="example">Robin is thinking...</span>}
+                <span className="example">{t.robin.sendHint}</span>
+                {loading && <span className="example">{t.robin.thinking}</span>}
             </div>
         </div>
     )
