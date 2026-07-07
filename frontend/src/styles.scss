@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&display=swap');
+
 :root {
     color-scheme: light;
     --page-bg: #eef4ff;
@@ -769,4 +771,430 @@ html[data-app-theme='windows-xp'] .question-used-wrapper .in-quiz-list {
 
 html[data-app-theme='windows-xp'] .question-used-wrapper .in-quiz-list li {
     border-color: #d3e5fa;
+}
+
+// ── Star Trek (LCARS) reskin ──────────────────────────────────────────────────
+// LCARS is black panels + bright flat color blocks with one heavily rounded
+// "elbow" corner, condensed bold uppercase labels, and pill-shaped controls.
+// Same strategy as the XP theme: recolor broadly via variables, then add
+// LCARS panel/bar chrome to the highest-visibility surfaces.
+
+html[data-app-theme='star-trek'] {
+    color-scheme: dark;
+
+    --page-bg: #000000;
+    --surface-strong: #050505;
+    --surface-soft: #111111;
+    --surface-accent: #1a1a2a;
+    --border-subtle: #333333;
+    --border-strong: #ff9900;
+    --text-strong: #ffffff;
+    --text-soft: #cccccc;
+    --text-muted: #888888;
+    --accent: #ff9900;
+    --accent-strong: #cc6600;
+    --accent-soft: #ffcc66;
+    --accent-warm: #cc6666;
+    --accent-warm-soft: #e69999;
+    --accent-mint: #9999cc;
+    --accent-mint-soft: #ccccff;
+    --shadow-lg: none;
+    --shadow-md: none;
+    --shadow-sm: none;
+    --radius-xl: 999px;
+    --radius-lg: 999px;
+    --radius-md: 40px;
+
+    background:
+        radial-gradient(circle at 20% 10%, rgba(153, 153, 204, 0.14), transparent 32%),
+        radial-gradient(circle at 85% 75%, rgba(204, 102, 102, 0.12), transparent 32%),
+        #000000 fixed;
+
+    &::-webkit-scrollbar {
+        width: 16px;
+        height: 16px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #000000;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #ff9900;
+        border-radius: 999px;
+        border: 3px solid #000000;
+    }
+
+    &::-webkit-scrollbar-button {
+        display: none;
+    }
+}
+
+html[data-app-theme='star-trek'] body {
+    font-family: 'Antonio', 'Arial Narrow', Helvetica, Arial, sans-serif;
+    background: transparent;
+    color: #fff;
+    padding-bottom: 34px;
+}
+
+html[data-app-theme='star-trek'] h1,
+html[data-app-theme='star-trek'] h2,
+html[data-app-theme='star-trek'] h3 {
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+html[data-app-theme='star-trek'] input:not([type='checkbox']):not([type='radio']),
+html[data-app-theme='star-trek'] select,
+html[data-app-theme='star-trek'] textarea {
+    font-family: 'Antonio', 'Arial Narrow', sans-serif;
+    background: #000000;
+    color: #fff;
+    border: none;
+    border-bottom: 3px solid #ff9900;
+    border-radius: 4px;
+    box-shadow: none;
+
+    &:focus {
+        outline: none;
+        border-bottom-color: #ffcc66;
+    }
+}
+
+// Flat, solid-color pill button — no gradients, no shadows, black bold caps text.
+@mixin lcars-button-face($color: #ff9900) {
+    font-family: 'Antonio', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #000;
+    background: $color;
+    border: none;
+    border-radius: 999px;
+    box-shadow: none;
+    text-shadow: none;
+
+    &:hover {
+        transform: none;
+        filter: brightness(1.15);
+        box-shadow: none;
+        color: #000;
+    }
+
+    &:active {
+        transform: translateY(1px);
+        filter: brightness(0.88);
+    }
+}
+
+html[data-app-theme='star-trek'] .button {
+    @include lcars-button-face(#ff9900);
+
+    &.secondary {
+        @include lcars-button-face(#9999cc);
+    }
+
+    &:disabled {
+        background: #333333;
+        color: #777777;
+        filter: none;
+    }
+}
+
+html[data-app-theme='star-trek'] .link-button {
+    @include lcars-button-face(#ff9900);
+}
+
+html[data-app-theme='star-trek'] .link-button--secondary {
+    @include lcars-button-face(#9999cc);
+}
+
+// Reused "LCARS panel" chrome: black content area with a colored header bar,
+// square on the left and rounded on the right — the classic LCARS "elbow".
+@mixin lcars-panel($title, $bar-color: #ff9900) {
+    position: relative;
+    overflow: hidden;
+    background: #050505;
+    border: none;
+    border-radius: 0 26px 26px 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding-top: 3.3rem;
+    color: #f5f5f5;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: auto;
+        width: auto;
+        height: 2.6rem;
+        background: $bar-color;
+        border-radius: 0 26px 0 0;
+        filter: none;
+        pointer-events: none;
+    }
+
+    &::after {
+        content: $title;
+        position: absolute;
+        top: 0;
+        left: auto;
+        right: 1.5rem;
+        bottom: auto;
+        width: auto;
+        height: 2.6rem;
+        display: flex;
+        align-items: center;
+        background: none;
+        border-radius: 0;
+        filter: none;
+        color: #000;
+        font-family: 'Antonio', 'Arial Narrow', sans-serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        pointer-events: none;
+    }
+}
+
+html[data-app-theme='star-trek'] .page {
+    @include lcars-panel('Quizmaster', #ff9900);
+}
+
+html[data-app-theme='star-trek'] .home-hero__content {
+    @include lcars-panel('Quizmaster', #ffcc66);
+}
+
+html[data-app-theme='star-trek'] .home-hero__panel {
+    @include lcars-panel('Workflow', #cc99cc);
+}
+
+html[data-app-theme='star-trek'] .home-highlight-card {
+    @include lcars-panel('Tip', #cc6666);
+}
+
+html[data-app-theme='star-trek'] .home-hero__panel-item {
+    background: #111111;
+}
+
+html[data-app-theme='star-trek'] #inline-question-modal {
+    @include lcars-panel('New Question', #cc6666);
+
+    &::backdrop {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}
+
+html[data-app-theme='star-trek'] .inline-question-modal__close {
+    top: 0.5rem;
+    right: 0.6rem;
+    width: 1.5rem;
+    height: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    border: none;
+    border-radius: 999px;
+    color: #ff9900;
+    font-weight: 700;
+    z-index: 2;
+
+    &:hover {
+        color: #ffcc66;
+        background: #000;
+    }
+}
+
+html[data-app-theme='star-trek'] .bg-game-fab,
+html[data-app-theme='star-trek'] .theme-fab {
+    bottom: 54px;
+}
+
+// ── LCARS: workspace page ─────────────────────────────────────────────────────
+
+html[data-app-theme='star-trek'] .workspace-page {
+    @include lcars-panel('Quizmaster - Workspace', #ff9900);
+}
+
+html[data-app-theme='star-trek'] .workspace-header {
+    border-radius: 4px 20px 20px 4px;
+    border: none;
+    background: #0a0a0a;
+}
+
+html[data-app-theme='star-trek'] .workspace-header__stat {
+    border-radius: 4px 16px 16px 4px;
+    border: 1px solid #ff9900;
+    background: #111111;
+}
+
+html[data-app-theme='star-trek'] .workspace-tabs {
+    gap: 6px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+}
+
+html[data-app-theme='star-trek'] .workspace-tab {
+    font-family: 'Antonio', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+    border-radius: 999px;
+    background: #4d2e66;
+    color: #ffffff;
+
+    &:hover {
+        background: #cc99cc;
+        color: #000;
+    }
+
+    &[aria-selected='true'] {
+        background: #ff9900;
+        border-color: transparent;
+        color: #000;
+    }
+}
+
+html[data-app-theme='star-trek'] .workspace-pagination__page {
+    border-radius: 999px;
+    background: #4d2e66;
+    border: none;
+    color: #fff;
+
+    &:hover {
+        color: #000;
+        background: #cc99cc;
+    }
+
+    &--active {
+        background: #ff9900;
+        color: #000;
+
+        &:hover {
+            color: #000;
+        }
+    }
+}
+
+html[data-app-theme='star-trek'] .workspace-question-tag-filter__button {
+    border-radius: 999px;
+    background: #4d2e66;
+    border: none;
+    color: #fff;
+
+    &:hover {
+        color: #000;
+        background: #cc99cc;
+    }
+
+    &--selected,
+    &[aria-pressed='true'] {
+        border-color: transparent;
+        background: #ff9900;
+        color: #000;
+    }
+}
+
+html[data-app-theme='star-trek'] .workspace-empty-state,
+html[data-app-theme='star-trek'] .workspace-empty-state--questions,
+html[data-app-theme='star-trek'] .workspace-empty-state--quizzes {
+    border-radius: 4px 24px 24px 4px;
+    border: 2px dashed #9999cc;
+    background: #111111;
+}
+
+html[data-app-theme='star-trek'] .workspace-empty-state__badge {
+    border-radius: 999px;
+    background: #ffcc66;
+    color: #000;
+}
+
+html[data-app-theme='star-trek'] .question-item,
+html[data-app-theme='star-trek'] .quiz-item {
+    border-radius: 4px 20px 20px 4px;
+    border: none;
+    border-left: 6px solid #ff9900;
+    background: #111111;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+html[data-app-theme='star-trek'] .question-item .question-content .question-index {
+    color: #ffcc66;
+}
+
+html[data-app-theme='star-trek'] .question-item .question-content .question-tag-row .question-tag-badge {
+    border-radius: 999px;
+}
+
+html[data-app-theme='star-trek'] .quiz-item__dropdown-menu,
+html[data-app-theme='star-trek'] .question-used-wrapper .in-quiz-list {
+    border-radius: 4px 16px 16px 4px;
+    border: 1px solid #9999cc;
+    background: #111111;
+}
+
+html[data-app-theme='star-trek'] .question-used-wrapper .in-quiz-list li {
+    border-color: #333333;
+    color: #fff;
+}
+
+// ── LCARS status bar (decorative) ─────────────────────────────────────────────
+
+.lcars-bar {
+    display: none;
+}
+
+html[data-app-theme='star-trek'] .lcars-bar {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0 0;
+    height: 34px;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: #000000;
+    border-top: 2px solid #ff9900;
+    z-index: 9000;
+    font-family: 'Antonio', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    color: #fff;
+}
+
+.lcars-bar__chip {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 12px;
+    border-radius: 999px;
+    color: #000;
+}
+
+.lcars-bar__chip--orange {
+    background: #ff9900;
+}
+
+.lcars-bar__chip--gold {
+    background: #ffcc66;
+}
+
+.lcars-bar__chip--lavender {
+    background: #cc99cc;
+}
+
+.lcars-bar__stardate {
+    margin-left: auto;
+    color: #99ccff;
 }
