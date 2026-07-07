@@ -356,3 +356,243 @@ body {
         color: #fff;
     }
 }
+
+// ── Windows XP reskin ─────────────────────────────────────────────────────────
+// Everything below is scoped to html[data-app-theme='windows-xp'], set by the
+// theme selector FAB. Most components already read the --page-bg/--surface-*/
+// --accent-*/--shadow-*/--radius-* variables, so overriding them here recolors
+// the app broadly; the rules after that add Luna-blue window chrome to the
+// highest-visibility surfaces (buttons, .page panels, the home hero, the
+// inline question modal) plus a decorative taskbar.
+
+html[data-app-theme='windows-xp'] {
+    --page-bg: #ece9d8;
+    --surface-strong: #ffffff;
+    --surface-soft: #ece9d8;
+    --surface-accent: #d3e5fa;
+    --border-subtle: #7f9db9;
+    --border-strong: #0a246a;
+    --text-strong: #000000;
+    --text-soft: #333333;
+    --text-muted: #5a5a5a;
+    --accent: #1a5fd0;
+    --accent-strong: #0a246a;
+    --accent-soft: #d3e5fa;
+    --accent-warm: #ff8c00;
+    --accent-warm-soft: #ffe1b0;
+    --accent-mint: #3a9d23;
+    --accent-mint-soft: #dcf3d0;
+    --shadow-lg: 3px 3px 0 rgba(0, 0, 0, 0.28);
+    --shadow-md: 2px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-sm: 1px 1px 0 rgba(0, 0, 0, 0.35);
+    --radius-xl: 8px;
+    --radius-lg: 6px;
+    --radius-md: 4px;
+
+    background: linear-gradient(180deg, #3a6ea5 0%, #6fa8d8 30%, #a8d4a0 70%, #4f9c3a 100%) fixed;
+
+    &::-webkit-scrollbar {
+        width: 17px;
+        height: 17px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #d4d0c8;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #f5f4ee 0%, #ece9d8 50%, #d4d0c8 100%);
+        border: 1px solid #7f9db9;
+    }
+
+    &::-webkit-scrollbar-button {
+        display: none;
+    }
+}
+
+html[data-app-theme='windows-xp'] body {
+    font-family: Tahoma, Verdana, sans-serif;
+    background: transparent;
+    padding-bottom: 34px;
+}
+
+html[data-app-theme='windows-xp'] input:not([type='checkbox']):not([type='radio']),
+html[data-app-theme='windows-xp'] select,
+html[data-app-theme='windows-xp'] textarea {
+    font-family: Tahoma, Verdana, sans-serif;
+    border: 1px solid #7f9db9;
+    border-radius: 2px;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.15);
+    background: #ffffff;
+
+    &:focus {
+        outline: 1px dotted #0a246a;
+        border-color: #0a246a;
+    }
+}
+
+html[data-app-theme='windows-xp'] .button {
+    font-family: Tahoma, Verdana, sans-serif;
+    font-weight: normal;
+    border-radius: 3px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        1px 1px 0 rgba(0, 0, 0, 0.25);
+    border: 1px solid #2a5db0;
+
+    &:hover {
+        transform: none;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.8),
+            2px 2px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    &:active {
+        transform: translateY(1px);
+    }
+
+    &.primary {
+        background: linear-gradient(180deg, #5c9ff2 0%, #1a5fd0 50%, #0d47b8 100%);
+    }
+
+    &.secondary {
+        background: linear-gradient(180deg, #ffffff 0%, #ece9d8 100%);
+        color: #0a246a;
+        border-color: #7f9db9;
+    }
+}
+
+// Reused "XP window" chrome: a Luna-blue title bar strip along the top of a panel.
+@mixin xp-window-titlebar($title) {
+    background: #ece9d8;
+    border: 2px solid #0a246a;
+    border-radius: 8px;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.28);
+    backdrop-filter: none;
+    padding-top: 2.4rem;
+
+    &::before {
+        content: $title;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: auto;
+        height: 1.8rem;
+        display: flex;
+        align-items: center;
+        padding: 0 0.7rem;
+        background: linear-gradient(180deg, #3a8ef0 0%, #0d47b8 60%, #0a3fa0 100%);
+        color: #fff;
+        font-family: Tahoma, Verdana, sans-serif;
+        font-weight: 700;
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+        border-radius: 6px 6px 0 0;
+        filter: none;
+    }
+}
+
+html[data-app-theme='windows-xp'] .page {
+    @include xp-window-titlebar('Quizmaster');
+
+    &::after {
+        content: none;
+    }
+}
+
+html[data-app-theme='windows-xp'] .home-hero__content {
+    @include xp-window-titlebar('Quizmaster');
+}
+
+html[data-app-theme='windows-xp'] .home-hero__panel {
+    @include xp-window-titlebar('Workflow');
+}
+
+html[data-app-theme='windows-xp'] .home-highlight-card {
+    @include xp-window-titlebar('Tip');
+}
+
+html[data-app-theme='windows-xp'] #inline-question-modal {
+    @include xp-window-titlebar('New Question');
+    padding-top: 2.6rem;
+
+    &::backdrop {
+        background: rgba(0, 0, 50, 0.55);
+    }
+}
+
+html[data-app-theme='windows-xp'] .inline-question-modal__close {
+    top: 0.4rem;
+    right: 0.55rem;
+    width: 1.3rem;
+    height: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #f28b82 0%, #c0392b 100%);
+    border: 1px solid #7a1f1f;
+    border-radius: 3px;
+    color: #fff;
+    font-weight: 700;
+    z-index: 2;
+
+    &:hover {
+        color: #fff;
+        background: linear-gradient(180deg, #f6a89f 0%, #d0453a 100%);
+    }
+}
+
+// ── Windows XP taskbar (decorative) ───────────────────────────────────────────
+
+.xp-taskbar {
+    display: none;
+}
+
+html[data-app-theme='windows-xp'] .xp-taskbar {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0 0;
+    height: 34px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    background: linear-gradient(180deg, #2a8ce8 0%, #1560d8 12%, #0d47b8 100%);
+    border-top: 1px solid #6fb0f5;
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+    z-index: 9000;
+    font-family: Tahoma, Verdana, sans-serif;
+    color: #fff;
+    font-size: 0.82rem;
+}
+
+.xp-taskbar__start {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 14px 0 8px;
+    border-radius: 4px 10px 10px 4px;
+    background: linear-gradient(180deg, #6fd257 0%, #3a9d23 50%, #2e7d1c 100%);
+    border: 1px solid #1e5c10;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    text-transform: lowercase;
+}
+
+.xp-taskbar__start-icon {
+    font-size: 1rem;
+}
+
+.xp-taskbar__clock {
+    padding: 4px 10px;
+    border: 1px solid #0a3fa0;
+    border-radius: 3px;
+    background: rgba(10, 40, 110, 0.4);
+}
+
+html[data-app-theme='windows-xp'] .bg-game-fab,
+html[data-app-theme='windows-xp'] .theme-fab {
+    bottom: 54px;
+}

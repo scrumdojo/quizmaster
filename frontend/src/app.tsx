@@ -123,6 +123,30 @@ const AppThemeFab = () => {
     )
 }
 
+// Decorative Windows XP taskbar — always mounted, only shown via CSS when
+// data-app-theme="windows-xp" (see .xp-taskbar in styles.scss). Not
+// interactive, so it stays out of the accessibility tree and out of the way
+// of role-based queries in tests.
+const XpTaskbar = () => {
+    const [now, setNow] = useState<Date>(() => new Date())
+
+    useEffect(() => {
+        const id = window.setInterval(() => setNow(new Date()), 30_000)
+        return () => window.clearInterval(id)
+    }, [])
+
+    const clock = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+    return (
+        <div className="xp-taskbar" aria-hidden="true">
+            <div className="xp-taskbar__start">
+                <span className="xp-taskbar__start-icon">⊞</span> start
+            </div>
+            <div className="xp-taskbar__clock">{clock}</div>
+        </div>
+    )
+}
+
 interface BackgroundGameFabProps {
     readonly battleOnly: boolean
     readonly onBattleOnlyChange: (value: boolean) => void
@@ -318,6 +342,7 @@ export const App = () => {
             <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />
             <BackgroundGameFab battleOnly={animationOnly} onBattleOnlyChange={setAnimationOnly} />
             <AppThemeFab />
+            <XpTaskbar />
         </BrowserRouter>
     )
 }
