@@ -23,7 +23,7 @@ const LIVE_STATS_POLL_MS = 2000
 const quizQrKey = 'quiz-take'
 
 type CohortErrorTarget = 'add' | `edit:${string}`
-type AnimationTheme = 'angels' | 'mammoths' | 'off'
+type AnimationTheme = 'angels' | 'mammoths' | 'photo' | 'off'
 type QrThemeImage = 'angel' | 'mammoth'
 
 const cohortErrorMessages: Record<CohortCreateError, string> = {
@@ -62,7 +62,7 @@ const SHARE_FLOCK_OFFSETS = [
 
 const currentAnimationTheme = (): AnimationTheme => {
     const theme = localStorage.getItem('animation-theme')
-    return theme === 'mammoths' || theme === 'off' ? theme : 'angels'
+    return theme === 'mammoths' || theme === 'off' || theme === 'photo' ? theme : 'angels'
 }
 
 const currentQrThemeImage = (): QrThemeImage | null => {

@@ -24,7 +24,9 @@ interface Window {
     /** Test-only countdown clock advance function injected by the E2E harness. */
     __advanceQuizClock?: (ms: number) => void
     /** Live-switch the background animation theme and persist to localStorage. */
-    __setAnimationTheme?: (theme: 'angels' | 'mammoths' | 'off') => void
+    __setAnimationTheme?: (theme: 'angels' | 'mammoths' | 'photo' | 'off') => void
+    /** Tell the 'photo' background theme which question is currently on screen (null when none). */
+    __setPhotoQuestion?: (questionId: number | null) => void
     /** Set by E2E to skip the decorative PixiJS Epic Battle scene (WebGL/assets). */
     __noEpicBattleScene?: boolean
 }

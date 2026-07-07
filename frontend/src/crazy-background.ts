@@ -1818,9 +1818,66 @@ function startMammoths(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D)
 
 // ─── theme control ───────────────────────────────────────────────────────────
 
-type AnimationTheme = 'angels' | 'mammoths' | 'off'
+type AnimationTheme = 'angels' | 'mammoths' | 'photo' | 'off'
 
 let cancelCurrent: (() => void) | null = null
+
+// ─── photo theme ─────────────────────────────────────────────────────────────
+// Replaces the battle canvas with a full-screen photo matching one of a
+// handful of "fun" categories, picked deterministically from the id of the
+// question currently on screen (so the same question always shows the same
+// photo, and it changes as the taker moves through a quiz).
+
+const PHOTO_CATEGORIES = ['landscape', 'water', 'space', 'people'] as const
+
+let currentPhotoQuestionId: number | null = null
+
+function photoCategoryFor(questionId: number): (typeof PHOTO_CATEGORIES)[number] {
+    return PHOTO_CATEGORIES[Math.abs(questionId) % PHOTO_CATEGORIES.length]
+}
+
+function photoUrlFor(questionId: number, category: string): string {
+    return `https://loremflickr.com/1920/1080/${category}?lock=${Math.abs(questionId)}`
+}
+
+function photoImageEl(): HTMLImageElement {
+    let img = document.querySelector<HTMLImageElement>('#crazy-bg-photo')
+    if (!img) {
+        img = document.createElement('img')
+        img.id = 'crazy-bg-photo'
+        img.alt = ''
+        img.setAttribute('aria-hidden', 'true')
+        img.style.position = 'fixed'
+        img.style.inset = '0'
+        img.style.width = '100%'
+        img.style.height = '100%'
+        img.style.objectFit = 'cover'
+        img.style.pointerEvents = 'none'
+        img.style.zIndex = '0'
+        img.style.display = 'none'
+        document.body.insertBefore(img, document.body.firstChild)
+    }
+    return img
+}
+
+function updatePhotoImage() {
+    const canvas = document.querySelector<HTMLCanvasElement>('#crazy-bg')
+    if (canvas?.dataset.theme !== 'photo') return
+
+    const id = currentPhotoQuestionId ?? 0
+    const category = photoCategoryFor(id)
+    canvas.dataset.photoCategory = category
+
+    const img = photoImageEl()
+    // In test mode (E2E), skip the network fetch — only the data-theme/data-photo-category attributes matter.
+    if (!window.__noCrazyBackground) img.src = photoUrlFor(id, category)
+}
+
+// Always register so React can call it even in test mode.
+window.__setPhotoQuestion = (questionId: number | null) => {
+    currentPhotoQuestionId = questionId
+    updatePhotoImage()
+}
 
 function applyTheme(theme: AnimationTheme) {
     const canvas = document.querySelector<HTMLCanvasElement>('#crazy-bg')
@@ -1830,6 +1887,10 @@ function applyTheme(theme: AnimationTheme) {
     cancelCurrent = null
 
     canvas.dataset.theme = theme
+
+    const photoImg = document.querySelector<HTMLImageElement>('#crazy-bg-photo')
+    if (photoImg) photoImg.style.display = 'none'
+    delete canvas.dataset.photoCategory
 
     if (theme === 'angels') {
         canvas.dataset.angelScoreboardSide = 'left'
@@ -1886,6 +1947,15 @@ function applyTheme(theme: AnimationTheme) {
         return
     }
 
+    if (theme === 'photo') {
+        canvas.style.display = 'none'
+        const ctx2d = canvas.getContext('2d')
+        if (ctx2d) ctx2d.clearRect(0, 0, canvas.width, canvas.height)
+        photoImageEl().style.display = ''
+        updatePhotoImage()
+        return
+    }
+
     canvas.style.display = ''
 
     // In test mode (E2E), skip the animation loop — only the data-theme attribute matters.
@@ -1907,7 +1977,7 @@ window.__setAnimationTheme = (theme: AnimationTheme) => {
 
 {
     const saved = localStorage.getItem('animation-theme') as AnimationTheme | null
-    const initial: AnimationTheme = saved === 'mammoths' || saved === 'off' ? saved : 'angels'
+    const initial: AnimationTheme = saved === 'mammoths' || saved === 'off' || saved === 'photo' ? saved : 'angels'
     applyTheme(initial)
 }
 

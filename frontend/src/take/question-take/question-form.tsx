@@ -1,4 +1,6 @@
 import './question-form.scss'
+import { useEffect } from 'react'
+
 import { Form } from '#fe/shared'
 import type { Question, QuestionTake } from '#fe/take/model/question.ts'
 import { countDecimalDigits } from '#fe/take/model/question.ts'
@@ -18,6 +20,11 @@ interface QuestionFormProps {
 }
 
 export const QuestionForm = ({ question }: QuestionFormProps) => {
+    useEffect(() => {
+        window.__setPhotoQuestion?.(question.id)
+        return () => window.__setPhotoQuestion?.(null)
+    }, [question.id])
+
     const state = useQuestionTakeState(question)
     const displayQuestion = state.feedbackQuestion ?? question
     const answers = displayQuestion.answers

@@ -109,3 +109,24 @@ Feature: Background animation preferences
     Given I am on the home page
     When I switch the animation to the mammoths theme
     Then cave throat singing audio plays during the battle
+
+
+  Scenario: Switch the background animation to a fun photo
+    Given I am on the home page
+    When I switch the animation to the photo theme
+    Then the background animation is not visible
+    And a background photo is shown
+    And the background photo category is one of the fun categories
+
+
+  Scenario: The same question always shows the same fun photo
+    Given question "Which animal is on the picture?"
+    * with answers:
+      | Cat | * |
+      | Dog |   |
+    * saved and bookmarked as "Animals"
+    When I take question "Animals"
+    And I switch the animation to the photo theme
+    Then I remember the background photo category
+    When I refresh the page
+    Then the background photo category is unchanged
