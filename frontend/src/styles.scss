@@ -391,7 +391,7 @@ html[data-app-theme='windows-xp'] {
     --radius-lg: 6px;
     --radius-md: 4px;
 
-    background: linear-gradient(180deg, #3a6ea5 0%, #6fa8d8 30%, #a8d4a0 70%, #4f9c3a 100%) fixed;
+    background: url('/windows-xp.jpg') center center / cover no-repeat fixed;
 
     &::-webkit-scrollbar {
         width: 17px;
@@ -804,10 +804,7 @@ html[data-app-theme='star-trek'] {
     --radius-lg: 999px;
     --radius-md: 40px;
 
-    background:
-        radial-gradient(circle at 20% 10%, rgba(153, 153, 204, 0.14), transparent 32%),
-        radial-gradient(circle at 85% 75%, rgba(204, 102, 102, 0.12), transparent 32%),
-        #000000 fixed;
+    background: url('/star-trek.jpg') center center / cover no-repeat fixed;
 
     &::-webkit-scrollbar {
         width: 16px;
