@@ -164,13 +164,24 @@ body {
     }
 }
 
-// ── Background game FAB ───────────────────────────────────────────────────────
+// ── Corner FABs (background game, theme, language) ────────────────────────────
+// Shared row so the three circular triggers stay evenly spaced no matter how
+// wide an individual label (e.g. "Background game") is — each column gets the
+// same fixed width and centers its own label/button within it.
 
-.bg-game-fab {
+.corner-fabs {
     position: fixed;
     bottom: 20px;
     left: 20px;
     z-index: 9999;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.bg-game-fab {
+    position: relative;
+    width: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -271,10 +282,8 @@ body {
 // ── App theme FAB ─────────────────────────────────────────────────────────────
 
 .theme-fab {
-    position: fixed;
-    bottom: 20px;
-    left: 210px;
-    z-index: 9999;
+    position: relative;
+    width: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -362,10 +371,8 @@ body {
 // ── Language FAB ──────────────────────────────────────────────────────────────
 
 .language-fab {
-    position: fixed;
-    bottom: 20px;
-    left: 300px;
-    z-index: 9999;
+    position: relative;
+    width: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -726,9 +733,8 @@ html[data-app-theme='windows-xp'] .xp-taskbar {
     background: rgba(10, 40, 110, 0.4);
 }
 
-html[data-app-theme='windows-xp'] .bg-game-fab,
-html[data-app-theme='windows-xp'] .theme-fab,
-html[data-app-theme='windows-xp'] .language-fab {
+html[data-app-theme='windows-xp'] .corner-fabs,
+html[data-app-theme='windows-xp'] .robin-fab {
     bottom: 54px;
 }
 
@@ -1125,9 +1131,8 @@ html[data-app-theme='star-trek'] .inline-question-modal__close {
     }
 }
 
-html[data-app-theme='star-trek'] .bg-game-fab,
-html[data-app-theme='star-trek'] .theme-fab,
-html[data-app-theme='star-trek'] .language-fab {
+html[data-app-theme='star-trek'] .corner-fabs,
+html[data-app-theme='star-trek'] .robin-fab {
     bottom: 54px;
 }
 
