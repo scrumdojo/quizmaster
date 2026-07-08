@@ -24,8 +24,6 @@ export interface Translations {
         readonly createWorkspace: string
         readonly existingWorkspacesTitle: string
         readonly workspaceFilterQueryLabel: string
-        readonly workspaceFilterFromLabel: string
-        readonly workspaceFilterToLabel: string
         readonly workspaceFilterSubmitLabel: string
         readonly workspaceFilterEmptyResult: string
         readonly workflowBadge: string

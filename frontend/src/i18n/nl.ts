@@ -24,8 +24,6 @@ export const nl: Translations = {
         createWorkspace: 'Nieuwe workspace aanmaken',
         existingWorkspacesTitle: 'Ga verder met een workspace',
         workspaceFilterQueryLabel: 'Titel',
-        workspaceFilterFromLabel: 'Van',
-        workspaceFilterToLabel: 'Tot',
         workspaceFilterSubmitLabel: 'Workspaces zoeken',
         workspaceFilterEmptyResult: 'Geen workspaces gevonden.',
         workflowBadge: 'Werkwijze',
