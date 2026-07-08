@@ -4,20 +4,25 @@ import { Link } from 'react-router'
 import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { fetchWorkspaces } from '#fe/make/api/workspace.ts'
 import type { Workspace } from '#fe/make/model/workspace.ts'
-import { DateInput, Field, Form, LinkButton, TextInput } from '#fe/shared'
+import { Field, Form, LinkButton, TextInput } from '#fe/shared'
 import { urls } from '#fe/urls.ts'
 import './home.scss'
 
 export const HomePage = () => {
     const { t } = useLanguage()
     const [query, setQuery] = useState('')
-    const [from, setFrom] = useState('')
-    const [to, setTo] = useState('')
+    const [allWorkspaces, setAllWorkspaces] = useState<readonly Workspace[] | null>(null)
     const [workspaces, setWorkspaces] = useState<readonly Workspace[] | null>(null)
 
     const searchWorkspaces = async () => {
+        const loadedWorkspaces = allWorkspaces ?? (await fetchWorkspaces())
+        if (allWorkspaces === null) setAllWorkspaces(loadedWorkspaces)
+
+        const normalizedQuery = query.trim().toLowerCase()
         setWorkspaces(
-            await fetchWorkspaces({ query: query || undefined, from: from || undefined, to: to || undefined }),
+            normalizedQuery
+                ? loadedWorkspaces.filter(workspace => workspace.title.toLowerCase().includes(normalizedQuery))
+                : loadedWorkspaces,
         )
     }
 
@@ -80,12 +85,6 @@ export const HomePage = () => {
                                 value={query}
                                 onChange={setQuery}
                             />
-                        </Field>
-                        <Field label={t.home.workspaceFilterFromLabel}>
-                            <DateInput id="workspace-filter-from" value={from} onChange={setFrom} />
-                        </Field>
-                        <Field label={t.home.workspaceFilterToLabel}>
-                            <DateInput id="workspace-filter-to" value={to} onChange={setTo} />
                         </Field>
                         <button type="submit" className="primary button">
                             {t.home.workspaceFilterSubmitLabel}

@@ -24,8 +24,6 @@ export const en: Translations = {
         createWorkspace: 'Create new workspace',
         existingWorkspacesTitle: 'Jump back into a workspace',
         workspaceFilterQueryLabel: 'Title',
-        workspaceFilterFromLabel: 'From',
-        workspaceFilterToLabel: 'To',
         workspaceFilterSubmitLabel: 'Search workspaces',
         workspaceFilterEmptyResult: 'No workspaces found.',
         workflowBadge: 'Workflow',
