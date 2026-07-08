@@ -109,9 +109,13 @@ Endpoints live under `/api/`. Two flavors:
   `GET /api/workspaces/{guid}/polls` for poll list,
   `GET /api/workspaces/{guid}/polls/{id}` for poll detail,
   `GET /api/workspaces/{guid}/polls/{id}/results` for poll results,
-  `POST /api/workspaces/{guid}/polls` for poll creation,
+  `POST /api/workspaces/{guid}/polls` for poll creation (an optional
+  `answerImages` array, parallel to `answers`, sets each answer's image URL —
+  each answer needs text, an image, or both),
   `PUT /api/workspaces/{guid}/polls/{id}` for poll update (answers carrying
-  their id keep collected votes; answers without an id are added),
+  their id keep collected votes and each carries its own optional `imageUrl`;
+  answers without an id are added; each answer still needs text, an image, or
+  both),
   `DELETE /api/workspaces/{guid}/polls/{id}` for poll deletion (votes
   included), and
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.

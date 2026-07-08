@@ -2,6 +2,7 @@ package cz.scrumdojo.quizmaster.poll;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -274,6 +275,131 @@ public class PollControllerTest {
                             "answers": ["Weekly", "   "]
                         }
                         """
+                    )
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void createPollWithAnswerImagesStoresImageUrlPerAnswer() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        Integer pollId = JsonPath.read(
+            mockMvc
+                .perform(
+                    post("/api/workspaces/{guid}/polls", workspace.getGuid())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            """
+                            {
+                                "question": "Which retro format do you prefer?",
+                                "answers": ["Starfish", "4Ls"],
+                                "answerImages": ["https://example.com/starfish.png", null]
+                            }
+                            """
+                        )
+                )
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            "$.id"
+        );
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}", workspace.getGuid(), pollId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.answers[0].text").value("Starfish"))
+            .andExpect(jsonPath("$.answers[0].imageUrl").value("https://example.com/starfish.png"))
+            .andExpect(jsonPath("$.answers[1].text").value("4Ls"))
+            .andExpect(jsonPath("$.answers[1].imageUrl").doesNotExist());
+    }
+
+    @Test
+    public void createPollWithoutAnswerImagesLeavesImageUrlAbsent() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Integer pollId = createPoll(workspace.getGuid());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}", workspace.getGuid(), pollId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.answers[0].imageUrl").doesNotExist());
+    }
+
+    @Test
+    public void createPollAnswerWithOnlyImageAndNoTextIsValid() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/polls", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "question": "Which retro format do you prefer?",
+                            "answers": ["", "4Ls"],
+                            "answerImages": ["https://example.com/starfish.png", null]
+                        }
+                        """
+                    )
+            )
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void updatePollAnswerWithOnlyImageAndNoTextIsValid() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Integer pollId = createPoll(workspace.getGuid());
+        Integer firstAnswerId = getAnswerId(workspace.getGuid(), pollId, 0);
+        Integer secondAnswerId = getAnswerId(workspace.getGuid(), pollId, 1);
+
+        mockMvc
+            .perform(
+                put("/api/workspaces/{guid}/polls/{id}", workspace.getGuid(), pollId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "question": "How often do you run retrospectives?",
+                            "answers": [
+                                {"id": %d, "text": "", "imageUrl": "https://example.com/weekly.png"},
+                                {"id": %d, "text": "Bi-weekly", "imageUrl": null}
+                            ]
+                        }
+                        """.formatted(firstAnswerId, secondAnswerId)
+                    )
+            )
+            .andExpect(status().isOk());
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/polls/{id}", workspace.getGuid(), pollId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.answers[0].text").value(""))
+            .andExpect(jsonPath("$.answers[0].imageUrl").value("https://example.com/weekly.png"));
+    }
+
+    @Test
+    public void updatePollAnswerWithNeitherTextNorImageReturnsBadRequest() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Integer pollId = createPoll(workspace.getGuid());
+        Integer firstAnswerId = getAnswerId(workspace.getGuid(), pollId, 0);
+        Integer secondAnswerId = getAnswerId(workspace.getGuid(), pollId, 1);
+
+        mockMvc
+            .perform(
+                put("/api/workspaces/{guid}/polls/{id}", workspace.getGuid(), pollId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "question": "How often do you run retrospectives?",
+                            "answers": [
+                                {"id": %d, "text": "", "imageUrl": null},
+                                {"id": %d, "text": "Bi-weekly", "imageUrl": null}
+                            ]
+                        }
+                        """.formatted(firstAnswerId, secondAnswerId)
                     )
             )
             .andExpect(status().isBadRequest());

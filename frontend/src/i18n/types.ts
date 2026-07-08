@@ -246,6 +246,7 @@ export interface Translations {
         readonly questionFieldLabel: string
         readonly questionPlaceholder: string
         readonly answersFieldLabel: string
+        readonly answerImagePlaceholder: string
         readonly addAnswer: string
         readonly resultsTitle: string
         readonly resultsSubtitle: (question: string) => string

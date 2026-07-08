@@ -8,7 +8,7 @@ import {
 import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
 import type { Difficulty, QuestionType, QuizMode } from '#shared/types/enums.ts'
 import type { IdResponse } from '#shared/types/id-response.ts'
-import type { PollTake, PollVoteRequest } from '#shared/types/poll.ts'
+import type { PollTake, PollUpdateRequest, PollVoteRequest } from '#shared/types/poll.ts'
 import type { QuestionRequest } from '#shared/types/question.ts'
 import type { Quiz, QuizRequest } from '#shared/types/quiz.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
@@ -120,6 +120,19 @@ export const fetchWorkspacePollViaRest = async (world: QuizmasterWorld, pollBook
         throw new Error(`GET ${url} failed: ${response.status()} ${await response.text()}`)
     }
     return (await response.json()) as PollTake
+}
+
+export const updatePollViaRest = async (
+    world: QuizmasterWorld,
+    workspaceGuid: string,
+    pollId: number,
+    body: PollUpdateRequest,
+): Promise<void> => {
+    const url = `/api/workspaces/${workspaceGuid}/polls/${pollId}`
+    const response = await world.page.request.put(url, { data: body })
+    if (!response.ok()) {
+        throw new Error(`PUT ${url} failed: ${response.status()} ${await response.text()}`)
+    }
 }
 
 export const submitPollVoteViaRest = async (

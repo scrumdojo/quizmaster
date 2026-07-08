@@ -259,6 +259,7 @@ export const en: Translations = {
         questionFieldLabel: 'Poll question',
         questionPlaceholder: 'question',
         answersFieldLabel: 'Answers',
+        answerImagePlaceholder: 'image URL (optional)',
         addAnswer: '+ Add answer',
         resultsTitle: 'Poll results',
         resultsSubtitle: question => `See how respondents voted on "${question}".`,

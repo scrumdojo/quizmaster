@@ -1,11 +1,13 @@
 export interface PollRequest {
     readonly question: string
     readonly answers: readonly string[]
+    readonly answerImages?: readonly (string | null)[]
 }
 
 export interface PollUpdateAnswer {
     readonly id: number | null
     readonly text: string
+    readonly imageUrl: string | null
 }
 
 export interface PollUpdateRequest {
@@ -16,6 +18,7 @@ export interface PollUpdateRequest {
 export interface PollAnswer {
     readonly id: number
     readonly text: string
+    readonly imageUrl: string | null
 }
 
 export interface PollListItem {

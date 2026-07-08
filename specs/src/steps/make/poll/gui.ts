@@ -30,6 +30,14 @@ When('I enter poll answer {int} text {string}', async function (answerNumber: nu
     await this.pollFormPage.enterAnswer(answerNumber - 1, text)
 })
 
+When('I attach image {string} to poll answer {int}', async function (url: string, answerNumber: number) {
+    await this.pollFormPage.attachAnswerImage(answerNumber - 1, url)
+})
+
+When('I remove poll answer {int} image', async function (answerNumber: number) {
+    await this.pollFormPage.removeAnswerImage(answerNumber - 1)
+})
+
 When('I add poll answer {string}', async function (text: string) {
     await this.pollFormPage.addAnswer(text)
 })
@@ -70,4 +78,8 @@ Then('I see poll form question {string}', async function (question: string) {
 
 Then('I see poll form answers', async function (answerTable: DataTable) {
     await this.pollFormPage.expectAnswerValues(answerTable.raw().map(row => `${row[0]}`))
+})
+
+Then('I see poll form answer {int} image {string}', async function (answerNumber: number, url: string) {
+    await this.pollFormPage.expectAnswerImageValue(answerNumber - 1, url)
 })

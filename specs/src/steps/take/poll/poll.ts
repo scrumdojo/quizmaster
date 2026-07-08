@@ -62,3 +62,11 @@ Then('only poll answer {string} is selected', async function (answer: string) {
 Then('I see thank you for voting', async function () {
     await this.takePollPage.expectThankYouVisible()
 })
+
+Then('I see an image for poll answer {string}', async function (answer: string) {
+    await this.takePollPage.expectAnswerImageVisible(answer)
+})
+
+Then('I do not see an image for poll answer {string}', async function (answer: string) {
+    await this.takePollPage.expectNoAnswerImage(answer)
+})

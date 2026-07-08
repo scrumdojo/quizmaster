@@ -31,6 +31,9 @@ export class TakePollPage {
 
     private selectedAnswersLocator = () => this.page.locator('input[type="radio"]:checked')
 
+    private pollAnswerImageLocator = (answer: string) =>
+        this.page.locator('.poll-answer', { hasText: answer }).locator('img')
+
     expectQuestionText = (text: string) => expect(this.pollQuestionLocator()).toHaveText(text)
     expectAnswerCount = (count: number) => expect(this.pollAnswerInputsLocator()).toHaveCount(count)
     expectAnswerVisible = (answer: string) => expect(this.page.getByText(answer, { exact: true }).first()).toBeVisible()
@@ -40,4 +43,6 @@ export class TakePollPage {
         await expect(this.pollAnswerInputLocator(answer)).toBeChecked()
     }
     expectThankYouVisible = () => expect(this.thankYouLocator()).toBeVisible()
+    expectAnswerImageVisible = (answer: string) => expect(this.pollAnswerImageLocator(answer)).toBeVisible()
+    expectNoAnswerImage = (answer: string) => expect(this.pollAnswerImageLocator(answer)).toHaveCount(0)
 }

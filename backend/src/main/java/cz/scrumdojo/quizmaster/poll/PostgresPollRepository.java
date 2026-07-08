@@ -35,7 +35,7 @@ public class PostgresPollRepository implements PollRepository {
 
         List<PollAnswer> answers = poll.getAnswers() == null ? List.of() : List.copyOf(poll.getAnswers());
         for (PollAnswer answer : answers) {
-            insertAnswer(id, answer.id(), answer.text());
+            insertAnswer(id, answer.id(), answer.text(), answer.imageUrl());
         }
 
         return poll.toBuilder().id(id).answers(answers).build();
@@ -58,15 +58,18 @@ public class PostgresPollRepository implements PollRepository {
         for (PollAnswer answer : answers) {
             if (answer.id() != null) {
                 jdbc
-                    .sql("UPDATE poll_answer SET text = :text WHERE poll_id = :pollId AND answer_id = :answerId")
+                    .sql(
+                        "UPDATE poll_answer SET text = :text, image_url = :imageUrl WHERE poll_id = :pollId AND answer_id = :answerId"
+                    )
                     .param("text", answer.text())
+                    .param("imageUrl", answer.imageUrl())
                     .param("pollId", poll.getId())
                     .param("answerId", answer.id())
                     .update();
                 saved.add(answer);
             } else {
-                insertAnswer(poll.getId(), nextAnswerId, answer.text());
-                saved.add(new PollAnswer(nextAnswerId, answer.text()));
+                insertAnswer(poll.getId(), nextAnswerId, answer.text(), answer.imageUrl());
+                saved.add(new PollAnswer(nextAnswerId, answer.text(), answer.imageUrl()));
                 nextAnswerId++;
             }
         }
@@ -74,12 +77,15 @@ public class PostgresPollRepository implements PollRepository {
         return poll.toBuilder().answers(List.copyOf(saved)).build();
     }
 
-    private void insertAnswer(Integer pollId, Integer answerId, String text) {
+    private void insertAnswer(Integer pollId, Integer answerId, String text, String imageUrl) {
         jdbc
-            .sql("INSERT INTO poll_answer (poll_id, answer_id, text) VALUES (:pollId, :answerId, :text)")
+            .sql(
+                "INSERT INTO poll_answer (poll_id, answer_id, text, image_url) VALUES (:pollId, :answerId, :text, :imageUrl)"
+            )
             .param("pollId", pollId)
             .param("answerId", answerId)
             .param("text", text)
+            .param("imageUrl", imageUrl)
             .update();
     }
 
@@ -177,9 +183,11 @@ public class PostgresPollRepository implements PollRepository {
 
     private Poll withAnswers(Poll poll) {
         List<PollAnswer> answers = jdbc
-            .sql("SELECT answer_id, text FROM poll_answer WHERE poll_id = :pollId ORDER BY answer_id")
+            .sql("SELECT answer_id, text, image_url FROM poll_answer WHERE poll_id = :pollId ORDER BY answer_id")
             .param("pollId", poll.getId())
-            .query((rs, rowNum) -> new PollAnswer(rs.getInt("answer_id"), rs.getString("text")))
+            .query((rs, rowNum) ->
+                new PollAnswer(rs.getInt("answer_id"), rs.getString("text"), rs.getString("image_url"))
+            )
             .list();
         return poll.toBuilder().answers(answers).build();
     }

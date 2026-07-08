@@ -103,7 +103,8 @@ A poll contains:
 
 - One **question** text.
 - A list of **answers** from which a learner selects exactly one option. Each
-  answer has its own backend-generated id plus the answer text.
+  answer has its own backend-generated id and an image URL, an answer text,
+  or both — at least one of the two is required.
 
 The backend supports creating, editing, deleting, and listing polls through
 workspace-scoped authoring API. Editing keeps collected votes for answers

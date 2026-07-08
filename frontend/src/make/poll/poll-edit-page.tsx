@@ -15,11 +15,12 @@ interface AnswerDraft {
     readonly key: number
     readonly id: number | null
     readonly text: string
+    readonly imageUrl: string
 }
 
 const emptyAnswers: readonly AnswerDraft[] = [
-    { key: 1, id: null, text: '' },
-    { key: 2, id: null, text: '' },
+    { key: 1, id: null, text: '', imageUrl: '' },
+    { key: 2, id: null, text: '', imageUrl: '' },
 ]
 
 type ErrorCode = 'empty-question' | 'empty-answer'
@@ -38,7 +39,14 @@ export const PollEditPage = () => {
 
     const applyPoll = (poll: PollTake) => {
         setQuestion(poll.question)
-        setAnswers(poll.answers.map((answer, idx) => ({ key: idx + 1, id: answer.id, text: answer.text })))
+        setAnswers(
+            poll.answers.map((answer, idx) => ({
+                key: idx + 1,
+                id: answer.id,
+                text: answer.text,
+                imageUrl: answer.imageUrl ?? '',
+            })),
+        )
         setPollLoaded(true)
     }
 
@@ -47,15 +55,20 @@ export const PollEditPage = () => {
     const setAnswerText = (key: number, text: string) =>
         setAnswers(answers.map(answer => (answer.key === key ? { ...answer, text } : answer)))
 
+    const setAnswerImage = (key: number, imageUrl: string) =>
+        setAnswers(answers.map(answer => (answer.key === key ? { ...answer, imageUrl } : answer)))
+
     const addAnswer = () =>
-        setAnswers([...answers, { key: Math.max(...answers.map(a => a.key)) + 1, id: null, text: '' }])
+        setAnswers([...answers, { key: Math.max(...answers.map(a => a.key)) + 1, id: null, text: '', imageUrl: '' }])
 
     const removeAnswer = (key: number) => setAnswers(answers.filter(answer => answer.key !== key))
 
     const validate = () => {
         const errors = new Set<ErrorCode>()
         if (question.trim() === '') errors.add('empty-question')
-        if (answers.some(answer => answer.text.trim() === '')) errors.add('empty-answer')
+        if (answers.some(answer => answer.text.trim() === '' && answer.imageUrl.trim() === '')) {
+            errors.add('empty-answer')
+        }
         return errors
     }
 
@@ -68,8 +81,19 @@ export const PollEditPage = () => {
 
     const submit = () => {
         const save = isEdit
-            ? putPoll(workspaceId, pollId, { question, answers: answers.map(({ id, text }) => ({ id, text })) })
-            : postPoll(workspaceId, { question, answers: answers.map(answer => answer.text) })
+            ? putPoll(workspaceId, pollId, {
+                  question,
+                  answers: answers.map(({ id, text, imageUrl }) => ({
+                      id,
+                      text,
+                      imageUrl: imageUrl.trim() === '' ? null : imageUrl,
+                  })),
+              })
+            : postPoll(workspaceId, {
+                  question,
+                  answers: answers.map(answer => answer.text),
+                  answerImages: answers.map(answer => (answer.imageUrl.trim() === '' ? null : answer.imageUrl)),
+              })
         void save.then(() => navigate(workspaceUrl))
     }
 
@@ -94,12 +118,23 @@ export const PollEditPage = () => {
                     <Field label={t.poll.answersFieldLabel} required>
                         {answers.map(answer => (
                             <div key={answer.key} className="poll-answer-row">
-                                <TextInput
-                                    className="poll-answer"
-                                    placeholder={t.question.answerPlaceholder}
-                                    value={answer.text}
-                                    onChange={text => setAnswerText(answer.key, text)}
-                                />
+                                <div className="poll-answer-fields">
+                                    {answer.imageUrl.trim() !== '' && (
+                                        <img src={answer.imageUrl} alt="preview" className="image-preview" />
+                                    )}
+                                    <TextInput
+                                        className="poll-answer"
+                                        placeholder={t.question.answerPlaceholder}
+                                        value={answer.text}
+                                        onChange={text => setAnswerText(answer.key, text)}
+                                    />
+                                    <TextInput
+                                        className="poll-answer-image"
+                                        placeholder={t.poll.answerImagePlaceholder}
+                                        value={answer.imageUrl}
+                                        onChange={imageUrl => setAnswerImage(answer.key, imageUrl)}
+                                    />
+                                </div>
                                 <TrashButton onClick={() => removeAnswer(answer.key)} disabled={answers.length < 3} />
                             </div>
                         ))}

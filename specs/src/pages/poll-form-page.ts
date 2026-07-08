@@ -11,11 +11,16 @@ export class PollFormPage {
 
     private questionInput = () => this.page.locator('#poll-question')
     private answerInputs = () => this.page.locator('input.poll-answer')
+    private answerImageInputs = () => this.page.locator('input.poll-answer-image')
     private addAnswerButton = () => this.page.locator('#add-poll-answer')
 
     enterQuestion = (question: string) => this.questionInput().fill(question)
 
     enterAnswer = (index: number, text: string) => this.answerInputs().nth(index).fill(text)
+
+    attachAnswerImage = (index: number, url: string) => this.answerImageInputs().nth(index).fill(url)
+
+    removeAnswerImage = (index: number) => this.answerImageInputs().nth(index).fill('')
 
     addAnswer = async (text: string) => {
         await this.addAnswerButton().click()
@@ -41,6 +46,9 @@ export class PollFormPage {
             await expect(this.answerInputs().nth(idx)).toHaveValue(answer)
         }
     }
+
+    expectAnswerImageValue = (index: number, url: string) =>
+        expect(this.answerImageInputs().nth(index)).toHaveValue(url)
 
     submit = async () => {
         const pendingResponse = this.page.waitForResponse(

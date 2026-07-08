@@ -19,7 +19,7 @@ public class PollRepositoryTest {
         return Poll.builder()
             .workspaceGuid(workspaceGuid)
             .question(question)
-            .answers(List.of(new PollAnswer(1, "Weekly"), new PollAnswer(2, "Monthly")))
+            .answers(List.of(new PollAnswer(1, "Weekly", null), new PollAnswer(2, "Monthly", null)))
             .build();
     }
 
@@ -33,7 +33,10 @@ public class PollRepositoryTest {
         assertThat(found).isPresent();
         assertThat(found.get().getWorkspaceGuid()).isEqualTo(workspaceGuid);
         assertThat(found.get().getQuestion()).isEqualTo("How often do you run retrospectives?");
-        assertThat(found.get().getAnswers()).containsExactly(new PollAnswer(1, "Weekly"), new PollAnswer(2, "Monthly"));
+        assertThat(found.get().getAnswers()).containsExactly(
+            new PollAnswer(1, "Weekly", null),
+            new PollAnswer(2, "Monthly", null)
+        );
     }
 
     @Test
@@ -83,7 +86,7 @@ public class PollRepositoryTest {
             saved
                 .toBuilder()
                 .question("Updated question")
-                .answers(List.of(new PollAnswer(1, "Every week"), new PollAnswer(2, "Monthly")))
+                .answers(List.of(new PollAnswer(1, "Every week", null), new PollAnswer(2, "Monthly", null)))
                 .build()
         );
 
@@ -91,10 +94,108 @@ public class PollRepositoryTest {
         assertThat(found).isPresent();
         assertThat(found.get().getQuestion()).isEqualTo("Updated question");
         assertThat(found.get().getAnswers()).containsExactly(
-            new PollAnswer(1, "Every week"),
-            new PollAnswer(2, "Monthly")
+            new PollAnswer(1, "Every week", null),
+            new PollAnswer(2, "Monthly", null)
         );
         assertThat(pollRepository.getVoteCounts(saved.getId())).isEqualTo(Map.of(1, 1, 2, 0));
+    }
+
+    @Test
+    public void savedAnswerWithBlankTextAndImageIsPersisted() {
+        Poll saved = pollRepository.save(
+            poll(UUID.randomUUID().toString(), "Which retro format do you prefer?")
+                .toBuilder()
+                .answers(
+                    List.of(new PollAnswer(1, "", "https://example.com/starfish.png"), new PollAnswer(2, "4Ls", null))
+                )
+                .build()
+        );
+
+        var found = pollRepository.findById(saved.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getAnswers()).containsExactly(
+            new PollAnswer(1, "", "https://example.com/starfish.png"),
+            new PollAnswer(2, "4Ls", null)
+        );
+    }
+
+    @Test
+    public void savedAnswerImageUrlIsPersisted() {
+        Poll saved = pollRepository.save(
+            poll(UUID.randomUUID().toString(), "Which retro format do you prefer?")
+                .toBuilder()
+                .answers(
+                    List.of(
+                        new PollAnswer(1, "Starfish", "https://example.com/starfish.png"),
+                        new PollAnswer(2, "4Ls", null)
+                    )
+                )
+                .build()
+        );
+
+        var found = pollRepository.findById(saved.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getAnswers()).containsExactly(
+            new PollAnswer(1, "Starfish", "https://example.com/starfish.png"),
+            new PollAnswer(2, "4Ls", null)
+        );
+    }
+
+    @Test
+    public void updatingAnswerImageUrlPersistsAndKeepsVotes() {
+        Poll saved = pollRepository.save(poll(UUID.randomUUID().toString(), "Image update poll"));
+        pollRepository.saveVote(saved.getId(), 1);
+
+        pollRepository.update(
+            saved
+                .toBuilder()
+                .answers(
+                    List.of(
+                        new PollAnswer(1, "Weekly", "https://example.com/weekly.png"),
+                        new PollAnswer(2, "Monthly", null)
+                    )
+                )
+                .build()
+        );
+
+        var found = pollRepository.findById(saved.getId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getAnswers()).containsExactly(
+            new PollAnswer(1, "Weekly", "https://example.com/weekly.png"),
+            new PollAnswer(2, "Monthly", null)
+        );
+        assertThat(pollRepository.getVoteCounts(saved.getId())).isEqualTo(Map.of(1, 1, 2, 0));
+    }
+
+    @Test
+    public void removingAnswerImageUrlClearsIt() {
+        Poll saved = pollRepository.save(
+            poll(UUID.randomUUID().toString(), "Image removal poll")
+                .toBuilder()
+                .answers(
+                    List.of(
+                        new PollAnswer(1, "Weekly", "https://example.com/weekly.png"),
+                        new PollAnswer(2, "Monthly", null)
+                    )
+                )
+                .build()
+        );
+
+        pollRepository.update(
+            saved
+                .toBuilder()
+                .answers(List.of(new PollAnswer(1, "Weekly", null), new PollAnswer(2, "Monthly", null)))
+                .build()
+        );
+
+        var found = pollRepository.findById(saved.getId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getAnswers()).containsExactly(
+            new PollAnswer(1, "Weekly", null),
+            new PollAnswer(2, "Monthly", null)
+        );
     }
 
     @Test
@@ -104,10 +205,16 @@ public class PollRepositoryTest {
         pollRepository.saveVote(saved.getId(), 2);
 
         Poll updated = pollRepository.update(
-            saved.toBuilder().answers(List.of(new PollAnswer(2, "Monthly"), new PollAnswer(null, "Yearly"))).build()
+            saved
+                .toBuilder()
+                .answers(List.of(new PollAnswer(2, "Monthly", null), new PollAnswer(null, "Yearly", null)))
+                .build()
         );
 
-        assertThat(updated.getAnswers()).containsExactly(new PollAnswer(2, "Monthly"), new PollAnswer(3, "Yearly"));
+        assertThat(updated.getAnswers()).containsExactly(
+            new PollAnswer(2, "Monthly", null),
+            new PollAnswer(3, "Yearly", null)
+        );
         assertThat(pollRepository.getVoteCounts(saved.getId())).isEqualTo(Map.of(2, 1, 3, 0));
     }
 

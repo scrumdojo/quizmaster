@@ -2,7 +2,13 @@ import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
 import { Given, Then, When } from '#steps/fixture.ts'
-import { createWorkspacePoll, openPollResults, seedPollVotes, type PollVoteSeed } from '#steps/make/poll/ops.ts'
+import {
+    createWorkspacePoll,
+    openPollResults,
+    seedPollVotes,
+    setPollAnswerImage,
+    type PollVoteSeed,
+} from '#steps/make/poll/ops.ts'
 import { createWorkspace } from '#steps/make/workspace/ops.ts'
 
 const parseVoteSeed = (data: DataTable): PollVoteSeed[] =>
@@ -34,6 +40,13 @@ Given('workspace {string} with polls', async function (name: string, data: DataT
 Given('poll {string} has votes', async function (pollBookmark: string, data: DataTable) {
     await seedPollVotes(this, pollBookmark, parseVoteSeed(data))
 })
+
+Given(
+    'poll {string} answer {int} has image {string}',
+    async function (pollBookmark: string, answerNumber: number, imageUrl: string) {
+        await setPollAnswerImage(this, pollBookmark, answerNumber - 1, imageUrl)
+    },
+)
 
 When('poll {string} receives votes', async function (pollBookmark: string, data: DataTable) {
     await seedPollVotes(this, pollBookmark, parseVoteSeed(data))

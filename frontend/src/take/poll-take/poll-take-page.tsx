@@ -53,14 +53,17 @@ export const PollTakePage = () => {
                     {poll.answers.map(answer => (
                         <li key={answer.id}>
                             <label className="poll-answer">
-                                <input
-                                    type="radio"
-                                    name="poll-answer"
-                                    value={answer.text}
-                                    checked={selectedAnswerId === answer.id}
-                                    onChange={() => setSelectedAnswerId(answer.id)}
-                                />
-                                <span>{answer.text}</span>
+                                {answer.imageUrl && <img src={answer.imageUrl} alt="" className="poll-answer-image" />}
+                                <span className="poll-answer-choice">
+                                    <input
+                                        type="radio"
+                                        name="poll-answer"
+                                        value={answer.text}
+                                        checked={selectedAnswerId === answer.id}
+                                        onChange={() => setSelectedAnswerId(answer.id)}
+                                    />
+                                    <span>{answer.text}</span>
+                                </span>
                             </label>
                         </li>
                     ))}

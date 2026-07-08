@@ -261,6 +261,7 @@ export const nl: Translations = {
         questionFieldLabel: 'Pollvraag',
         questionPlaceholder: 'vraag',
         answersFieldLabel: 'Antwoorden',
+        answerImagePlaceholder: 'afbeelding-URL (optioneel)',
         addAnswer: '+ Antwoord toevoegen',
         resultsTitle: 'Pollresultaten',
         resultsSubtitle: question => `Bekijk hoe respondenten hebben gestemd op "${question}".`,
