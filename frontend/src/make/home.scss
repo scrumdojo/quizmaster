@@ -146,6 +146,10 @@
     align-items: flex-end;
     gap: 0.85rem;
     margin-bottom: 1.1rem;
+
+    .field:first-child {
+        flex: 1 1 200px;
+    }
 }
 
 .home-workspaces__empty {
