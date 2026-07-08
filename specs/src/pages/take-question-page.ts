@@ -50,7 +50,8 @@ export class TakeQuestionPage {
 
     private explanationChatToggleLocator = () => this.page.getByTestId('explanation-chat').locator('button')
     private explanationChatComposerLocator = () => this.page.getByTestId('explanation-chat-composer')
-    private explanationChatPromptLocator = () => this.explanationChatComposerLocator().locator('#explanation-chat-prompt')
+    private explanationChatPromptLocator = () =>
+        this.explanationChatComposerLocator().locator('#explanation-chat-prompt')
     private explanationChatSendLocator = () => this.explanationChatComposerLocator().locator('.explanation-chat__send')
     private explanationChatReplyLocator = () => this.page.locator('.explanation-chat__message--assistant')
 
