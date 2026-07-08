@@ -2,7 +2,7 @@ import type { QuizAttemptStartResponse } from '#shared/types/quiz.ts'
 import { fetchWorkspaceQuizViaRest } from '#steps/shared/api.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
-const resolveQuizId = (world: QuizmasterWorld, quizName: string): number => {
+export const resolveQuizId = (world: QuizmasterWorld, quizName: string): number => {
     const bookmark = world.quizBookmarks[quizName]
     if (!bookmark) throw new Error(`No quiz bookmark for "${quizName}"`)
     const id = bookmark.split('/').pop()
@@ -19,7 +19,7 @@ const resolveCohortGuid = async (world: QuizmasterWorld, quizName: string, cohor
     return cohort.guid
 }
 
-const startCohortAttemptViaRest = async (
+export const startCohortAttemptViaRest = async (
     world: QuizmasterWorld,
     quizName: string,
     cohortName: string,
@@ -37,20 +37,28 @@ const startCohortAttemptViaRest = async (
     return (await response.json()) as QuizAttemptStartResponse
 }
 
-const submitCorrectChoiceViaRest = async (
+export const submitChoiceViaRest = async (
     world: QuizmasterWorld,
     quizId: number,
     attemptId: number,
     questionId: number,
+    selectedIdxs: readonly number[],
 ) => {
     const url = `/api/quiz/${quizId}/attempts/${attemptId}/questions/${questionId}/submit`
     const response = await world.page.request.post(url, {
-        data: { type: 'choice', selectedIdxs: [0] },
+        data: { type: 'choice', selectedIdxs },
     })
     if (!response.ok()) {
         throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)
     }
 }
+
+const submitCorrectChoiceViaRest = async (
+    world: QuizmasterWorld,
+    quizId: number,
+    attemptId: number,
+    questionId: number,
+) => submitChoiceViaRest(world, quizId, attemptId, questionId, [0])
 
 export const seedInProgressCohortAttempt = async (
     world: QuizmasterWorld,

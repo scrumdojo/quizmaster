@@ -8,6 +8,7 @@ import { HomePage } from '#fe/make/home.tsx'
 import { PollResultsPage } from '#fe/make/poll-results/poll-results-page.tsx'
 import { PollEditPage } from '#fe/make/poll/poll-edit-page.tsx'
 import { QuizStatsPage } from '#fe/make/quiz-stats/quiz-stats-page.tsx'
+import { EpicBattlePage } from '#fe/make/quiz/epic-battle/epic-battle-page.tsx'
 import { QuizEditPage } from '#fe/make/quiz/quiz-edit-page.tsx'
 import { QuizSharePage } from '#fe/make/quiz/share/quiz-share-page.tsx'
 import { WorkspacePage } from '#fe/make/workspace/workspace.tsx'
@@ -230,6 +231,7 @@ export const App = () => {
                     <Route path={ROUTES.workspaceQuizEdit} element={<QuizEditPage />} />
                     <Route path={ROUTES.workspaceQuizStats} element={<QuizStatsPage />} />
                     <Route path={ROUTES.workspaceQuizShare} element={<QuizSharePage />} />
+                    <Route path={ROUTES.workspaceQuizEpicBattle} element={<EpicBattlePage />} />
                     <Route path={ROUTES.workspaceQuizDryRun} element={<QuizWelcomePage isDryRun={true} />} />
                     <Route path={ROUTES.workspaceQuizDryRunTake} element={<QuizTakePage isDryRun={true} />} />
 

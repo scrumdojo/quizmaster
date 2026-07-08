@@ -112,6 +112,9 @@ Endpoints live under `/api/`. Two flavors:
   included), and
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.
   `GET /api/workspaces/{guid}/quizzes/{id}/live-stats` for cohort live stats on the share screen.
+  `GET /api/workspaces/{guid}/quizzes/{id}/epic-battle` for per-cohort weighted
+  points and hit counts driving the Epic Battle screen (quizzes with exactly
+  two cohorts).
   Question and quiz listing support optional server-side filtering via
   `GET /api/workspaces/{guid}/questions?query=...&tag=...`, where `query`
   matches question text and tags and repeated `tag` parameters filter to
@@ -140,6 +143,8 @@ The router lives in `frontend/src/`. Path families:
 
 - `/` — home.
 - `/workspace/...` — maker views (workspace, question, quiz CRUD, poll CRUD and results, stats).
+  Includes `/workspace/:workspaceId/quiz/:id/epic-battle`, the full-page animated
+  battle view linked from a two-cohort quiz's Share screen.
 - `/quiz/:id`, `/quiz/:id/questions/:questionId?` — taker views for quizzes.
 - `/question/:id` — taker view for a standalone question.
 - `/poll/:id` — taker view for a standalone poll.

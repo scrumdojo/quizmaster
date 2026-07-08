@@ -92,6 +92,16 @@ export interface QuizLiveStatsResponse {
     readonly cohorts: readonly QuizLiveStatsCohort[]
 }
 
+export interface EpicBattleCohort {
+    readonly cohort: string
+    readonly points: number
+    readonly hits: number
+}
+
+export interface EpicBattleResponse {
+    readonly cohorts: readonly EpicBattleCohort[]
+}
+
 export type QuizSubmittedAnswer =
     | { readonly questionId: number; readonly type: 'choice'; readonly selectedIdxs: readonly number[] }
     | { readonly questionId: number; readonly type: 'numerical'; readonly value: number }

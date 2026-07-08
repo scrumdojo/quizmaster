@@ -18,6 +18,7 @@ import {
     PollResultsPage,
     TakeQuestionPage,
     TakePollPage,
+    EpicBattlePage,
 } from '#pages/index.ts'
 import { QuizNicknamePage } from '#pages/quiz-nickname-page'
 import type { AnswerSpec, PollSpec, QuestionSpec } from '#steps/shared/specs.ts'
@@ -43,6 +44,7 @@ export class QuizmasterWorld {
         this.quizWelcomePage = new QuizWelcomePage(this.page)
         this.quizSharePage = new QuizSharePage(this.page)
         this.quizStatsPage = new QuizStatsPage(this.page)
+        this.epicBattlePage = new EpicBattlePage(this.page)
         this.pollResultsPage = new PollResultsPage(this.page)
         this.pollFormPage = new PollFormPage(this.page)
         this.quizScorePage = new QuizScorePage(this.page)
@@ -63,6 +65,7 @@ export class QuizmasterWorld {
     readonly quizWelcomePage: QuizWelcomePage
     readonly quizSharePage: QuizSharePage
     readonly quizStatsPage: QuizStatsPage
+    readonly epicBattlePage: EpicBattlePage
     readonly pollResultsPage: PollResultsPage
     readonly pollFormPage: PollFormPage
     readonly quizScorePage: QuizScorePage
