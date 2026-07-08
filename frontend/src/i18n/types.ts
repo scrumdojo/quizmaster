@@ -23,6 +23,7 @@ export interface Translations {
         readonly intro: string
         readonly createWorkspace: string
         readonly existingWorkspacesTitle: string
+        readonly workspaceFilterQueryLabel: string
         readonly workspaceFilterFromLabel: string
         readonly workspaceFilterToLabel: string
         readonly workspaceFilterSubmitLabel: string

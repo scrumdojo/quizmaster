@@ -32,15 +32,23 @@ public class WorkspaceController {
     @GetMapping
     public List<WorkspaceResponse> getAllWorkspaces(
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+        @RequestParam(required = false) String query
     ) {
         LocalDateTime fromDateTime = from == null ? null : from.atStartOfDay();
         LocalDateTime toDateTime = to == null ? null : to.atTime(LocalTime.MAX);
+        String normalizedQuery = query == null ? null : query.trim().toLowerCase();
         return workspaceRepository
             .findAllWithQuestionsOrderByCreatedAtDesc()
             .stream()
             .filter(w -> fromDateTime == null || !w.getCreatedAt().isBefore(fromDateTime))
             .filter(w -> toDateTime == null || !w.getCreatedAt().isAfter(toDateTime))
+            .filter(
+                w ->
+                    normalizedQuery == null ||
+                    normalizedQuery.isEmpty() ||
+                    w.getTitle().toLowerCase().contains(normalizedQuery)
+            )
             .map(WorkspaceResponse::from)
             .toList();
     }

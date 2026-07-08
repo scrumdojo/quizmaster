@@ -4,18 +4,21 @@ import { Link } from 'react-router'
 import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { fetchWorkspaces } from '#fe/make/api/workspace.ts'
 import type { Workspace } from '#fe/make/model/workspace.ts'
-import { DateInput, Field, Form, LinkButton } from '#fe/shared'
+import { DateInput, Field, Form, LinkButton, TextInput } from '#fe/shared'
 import { urls } from '#fe/urls.ts'
 import './home.scss'
 
 export const HomePage = () => {
     const { t } = useLanguage()
+    const [query, setQuery] = useState('')
     const [from, setFrom] = useState('')
     const [to, setTo] = useState('')
     const [workspaces, setWorkspaces] = useState<readonly Workspace[] | null>(null)
 
     const searchWorkspaces = async () => {
-        setWorkspaces(await fetchWorkspaces({ from: from || undefined, to: to || undefined }))
+        setWorkspaces(
+            await fetchWorkspaces({ query: query || undefined, from: from || undefined, to: to || undefined }),
+        )
     }
 
     const highlights = [
@@ -70,6 +73,14 @@ export const HomePage = () => {
                 <h2 className="home-workspaces__title">{t.home.existingWorkspacesTitle}</h2>
                 <Form id="workspace-filter-form" onSubmit={searchWorkspaces}>
                     <div className="home-workspaces__filters">
+                        <Field label={t.home.workspaceFilterQueryLabel}>
+                            <TextInput
+                                id="workspace-filter-query"
+                                placeholder={t.home.workspaceFilterQueryLabel}
+                                value={query}
+                                onChange={setQuery}
+                            />
+                        </Field>
                         <Field label={t.home.workspaceFilterFromLabel}>
                             <DateInput id="workspace-filter-from" value={from} onChange={setFrom} />
                         </Field>

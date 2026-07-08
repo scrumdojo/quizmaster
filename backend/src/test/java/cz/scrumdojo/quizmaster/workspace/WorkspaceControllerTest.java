@@ -110,6 +110,22 @@ public class WorkspaceControllerTest {
     }
 
     @Test
+    public void listWorkspacesFiltersByTitleQuery() throws Exception {
+        var workspace = fixtures.save(fixtures.workspace().title("Astronomy Basics"));
+        fixtures.save(fixtures.questionIn(workspace));
+
+        mockMvc
+            .perform(get("/api/workspaces").param("query", "astro"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[?(@.guid == '%s')].title".formatted(workspace.getGuid())).value("Astronomy Basics"));
+
+        mockMvc
+            .perform(get("/api/workspaces").param("query", "geography"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[?(@.guid == '%s')]".formatted(workspace.getGuid())).isEmpty());
+    }
+
+    @Test
     public void listWorkspacesExcludesEmptyWorkspaces() throws Exception {
         var filledWorkspace = fixtures.save(fixtures.workspace().title("Filled Workspace"));
         fixtures.save(fixtures.questionIn(filledWorkspace));
