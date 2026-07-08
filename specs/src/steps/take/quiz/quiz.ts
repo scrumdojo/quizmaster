@@ -3,7 +3,7 @@ import { expectTextToBe } from '#steps/common.ts'
 import { Given, When, Then } from '#steps/fixture.ts'
 import { expectQuestion } from '#steps/question/expects.ts'
 import { expectNavigationButtons } from '#steps/quiz/expects.ts'
-import { continueQuizStart, openQuiz, startQuiz } from '#steps/quiz/ops.ts'
+import { cohortParticipantNickname, continueQuizStart, openQuiz, startQuiz } from '#steps/quiz/ops.ts'
 
 const parseTimerTextToSeconds = (timer: string) => {
     const [minutes = '0', seconds = '0'] = timer.split(':')
@@ -26,6 +26,15 @@ Given('I open quiz {string} for cohort {string}', async function (quizBookmark: 
     const cohortHref = await this.quizSharePage.cohortLink(cohortName)
     await this.page.goto(cohortHref)
     this.activeQuizBookmark = quizBookmark
+})
+
+Given('I start quiz {string} for cohort {string} again', async function (quizBookmark: string, cohortName: string) {
+    await this.workspacePage.goto(this.workspaceGuid)
+    await this.workspacePage.shareQuiz(quizBookmark)
+    const cohortHref = await this.quizSharePage.cohortLink(cohortName)
+    await this.page.goto(cohortHref)
+    this.activeQuizBookmark = quizBookmark
+    await continueQuizStart(this, cohortParticipantNickname(cohortName))
 })
 
 Given('I open quiz questions for {string}', async function (quizBookmark: string) {

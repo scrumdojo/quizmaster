@@ -15,8 +15,10 @@ Origin: workshop story-mapping session, 2026-07-08 (flip chart, persona "quiz ta
 
 This note captures the four slices of that flow that are **not yet buildable as a clean
 Gherkin spec** without further design decisions. Slice 1 — a mistakes summary within a
-single completed attempt — is already spec'd:
-`specs/features/take/quiz/Quiz.ScorePage.Mistakes.feature`.
+single completed attempt — is shipped:
+`specs/features/take/quiz/Quiz.ScorePage.Mistakes.feature`. Slice 2 — cross-attempt
+mistake awareness — is now shipped too:
+`specs/features/take/quiz/Quiz.ScorePage.MistakesHistory.feature`.
 
 ## 2. What already exists
 
@@ -49,18 +51,33 @@ building real accounts first.
 
 ## 4. Slices
 
-### Slice 2 — Cross-attempt mistake awareness ("you've missed this before")
+### Slice 2 — Cross-attempt mistake awareness ("you've missed this before") — shipped
 
 Inline note on the score page when a question the taker just got wrong (or partially
 wrong) was also missed in an earlier attempt by the same `nickname` + `cohortGuid`.
 
-- New repository query: `AttemptQuestion` by `nickname` + `cohortGuid` + `questionId`
-  across attempts.
-- No new entity — "learning point" is derived at query time from existing attempt data,
-  not persisted separately.
-- Open questions: how far back to look (all attempts in the cohort, or only attempts on
-  the same quiz?); does a question asked in two different quizzes count as "the same"
-  mistake?
+**Shipped (2026-07-08):** `specs/features/take/quiz/Quiz.ScorePage.MistakesHistory.feature`
+(3 scenarios, all passing). Scope was narrowed to make it buildable now: same quiz only,
+comparing the taker's own prior attempt(s) of that same quiz — not the broader "any
+attempt in the cohort" or "same question across different quizzes" cases below, which
+remain open.
+
+- `AttemptRepository.findEarlierFinishedAttempts` — a null-safe JPQL query matching
+  `quizId` + `nickname` + `cohortGuid`, excluding the current attempt, finished attempts
+  only.
+- `AttemptService.questionIdsMissedInEarlierAttempts` derives the "missed before" set at
+  request time from existing `AttemptQuestion` rows — no new entity, nothing persisted
+  separately.
+- `QuizEvaluationResponse` / `QuestionEvaluationResponse` gained a `missedBefore` boolean
+  per question, threaded through from `QuizTakeController.evaluateQuiz`.
+- New E2E step in `specs/src/steps/take/quiz/quiz.ts`: `Given I start quiz "X" for cohort
+  "Y" again` — reuses the `Cohort ${cohortName}` nickname convention (now a shared
+  `cohortParticipantNickname` helper in `specs/src/steps/quiz/ops.ts`) so a repeat cohort
+  visit resolves to the same taker identity as the attempt seeded via
+  `seedFinishedCohortAttemptViaUI`.
+- Open questions (still unresolved, out of scope for this slice): how far back to look
+  when attempts span multiple quizzes (all attempts in the cohort, or only attempts on the
+  same quiz?); does a question asked in two different quizzes count as "the same" mistake?
 
 ### Slice 3 — Persistent view of accumulated mistakes across attempts
 
@@ -97,14 +114,16 @@ mistake.
 
 ## 5. Sequencing
 
-Slice 1 (done) → 2 → 3 → 4 → 5, each building on the previous. Slice 2 alone already
-delivers taker value (awareness of recurring mistakes) without committing to the bigger
-review-quiz or scheduling work.
+Slice 1 (done) → 2 (done) → 3 → 4 → 5, each building on the previous. Slice 2 alone
+already delivers taker value (awareness of recurring mistakes) without committing to the
+bigger review-quiz or scheduling work.
 
 ## 6. Notes
 
-- Related: `specs/features/take/quiz/Quiz.ScorePage.Mistakes.feature` (slice 1).
-- Update `docs/product-overview.md`'s "no spaced repetition" line once any slice here
-  ships — it currently documents this as a known absence.
+- Related: `specs/features/take/quiz/Quiz.ScorePage.Mistakes.feature` (slice 1),
+  `specs/features/take/quiz/Quiz.ScorePage.MistakesHistory.feature` (slice 2, shipped).
+- `docs/product-overview.md`'s "no spaced repetition" line still holds — slices 1–2 are a
+  same-attempt/same-quiz mistakes summary, not spaced repetition proper (no scheduling, no
+  cross-quiz learning points yet). Revisit that line once slice 5 ships.
 - The nickname + cohort identity proxy (§3) is a deliberate, scoped compromise — flag it
   for re-evaluation if real taker accounts are ever introduced.

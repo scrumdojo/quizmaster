@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +69,25 @@ public class AttemptService {
 
     public List<AttemptQuestion> answeredQuestions(Integer attemptId) {
         return attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId);
+    }
+
+    public Set<Integer> questionIdsMissedInEarlierAttempts(Attempt attempt) {
+        List<Attempt> earlierAttempts = attemptRepository.findEarlierFinishedAttempts(
+            attempt.getQuizId(),
+            attempt.getNickname(),
+            attempt.getCohortGuid(),
+            attempt.getId()
+        );
+        if (earlierAttempts.isEmpty()) {
+            return Set.of();
+        }
+        List<Integer> earlierAttemptIds = earlierAttempts.stream().map(Attempt::getId).toList();
+        return attemptQuestionRepository
+            .findByAttemptIdInOrderByPosition(earlierAttemptIds)
+            .stream()
+            .filter(row -> row.getStatus() != AnswerStatus.CORRECT)
+            .map(AttemptQuestion::getQuestionId)
+            .collect(Collectors.toSet());
     }
 
     @Transactional

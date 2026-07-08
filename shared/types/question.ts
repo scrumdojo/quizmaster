@@ -46,6 +46,7 @@ export interface QuestionEvaluation {
     readonly status: AnswerStatus
     readonly score: number
     readonly question?: Question
+    readonly missedBefore: boolean
 }
 
 // Robin chat drafts carry isEasy/tags only when the model actually produced them.

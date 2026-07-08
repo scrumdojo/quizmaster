@@ -16,8 +16,9 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
     const outcome = passed ? 'passed' : 'failed'
     const mistakes = (result.questions ?? [])
         .filter(evaluation => evaluation.status !== 'CORRECT')
-        .map(evaluation => evaluation.question)
-        .filter((question): question is NonNullable<typeof question> => question != null)
+        .flatMap(evaluation =>
+            evaluation.question ? [{ question: evaluation.question, missedBefore: evaluation.missedBefore }] : [],
+        )
 
     return (
         <div className="page quiz-score" id="quiz-score">
@@ -65,8 +66,11 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
                 <section className="mistakes-summary" id="mistakes-summary">
                     <h2>Questions to review</h2>
                     <ul>
-                        {mistakes.map(question => (
-                            <li key={question.id}>{question.question}</li>
+                        {mistakes.map(({ question, missedBefore }) => (
+                            <li key={question.id}>
+                                <span className="mistake-question">{question.question}</span>
+                                {missedBefore && <span className="missed-before-note">You've missed this before</span>}
+                            </li>
                         ))}
                     </ul>
                 </section>

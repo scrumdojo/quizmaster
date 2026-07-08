@@ -5,6 +5,7 @@ import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionEvaluationResponse;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 public record QuizEvaluationResponse(
@@ -17,13 +18,15 @@ public record QuizEvaluationResponse(
     public static QuizEvaluationResponse from(
         List<AttemptQuestion> rows,
         List<Question> orderedQuestions,
-        int[] weights
+        int[] weights,
+        Set<Integer> questionIdsMissedBefore
     ) {
         QuestionEvaluationResponse[] perQuestion = IntStream.range(0, orderedQuestions.size())
             .mapToObj(i ->
                 QuestionEvaluationResponse.from(
                     rows.get(i).getStatus(),
-                    QuestionResponse.feedbackFrom(orderedQuestions.get(i))
+                    QuestionResponse.feedbackFrom(orderedQuestions.get(i)),
+                    questionIdsMissedBefore.contains(orderedQuestions.get(i).getId())
                 )
             )
             .toArray(QuestionEvaluationResponse[]::new);

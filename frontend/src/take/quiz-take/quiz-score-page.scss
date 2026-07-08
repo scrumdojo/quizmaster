@@ -131,6 +131,12 @@
             padding: 0 0 0 1.2rem;
             color: var(--feedback-incorrect-fg);
         }
+
+        .missed-before-note {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
     }
 
     @media (max-width: 720px) {

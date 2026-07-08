@@ -109,8 +109,14 @@ public class QuizTakeController {
         attemptService.finish(attempt, now());
         var rows = attemptService.answeredQuestions(attempt.getId());
         int[] weights = weightsFor(quiz, rows);
+        var questionIdsMissedBefore = attemptService.questionIdsMissedInEarlierAttempts(attempt);
         return ResponseEntity.ok(
-            QuizEvaluationResponse.from(rows, quizService.loadQuestions(AttemptQuestion.questionIdsOf(rows)), weights)
+            QuizEvaluationResponse.from(
+                rows,
+                quizService.loadQuestions(AttemptQuestion.questionIdsOf(rows)),
+                weights,
+                questionIdsMissedBefore
+            )
         );
     }
 

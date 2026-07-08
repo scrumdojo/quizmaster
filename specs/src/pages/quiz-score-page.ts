@@ -94,9 +94,26 @@ export class QuizScorePage {
     private totalWeightLocator = () => this.page.locator('#total-weight')
 
     private mistakesSummaryLocator = () => this.page.locator('#mistakes-summary')
+    private mistakesSummaryQuestionsLocator = () => this.mistakesSummaryLocator().locator('li .mistake-question')
     mistakesSummaryQuestions = async () => {
         await this.expectResultTableVisible()
-        return this.mistakesSummaryLocator().locator('li').allTextContents()
+        await expect(this.mistakesSummaryQuestionsLocator().first()).toBeVisible()
+        return this.mistakesSummaryQuestionsLocator().allTextContents()
+    }
+
+    private mistakesSummaryItemLocator = (question: string) =>
+        this.mistakesSummaryLocator()
+            .locator('li')
+            .filter({ has: this.page.locator('.mistake-question', { hasText: question }) })
+    private missedBeforeNoteLocator = (question: string) =>
+        this.mistakesSummaryItemLocator(question).locator('.missed-before-note')
+    expectMissedBeforeNote = async (question: string) => {
+        await this.expectResultTableVisible()
+        await expect(this.missedBeforeNoteLocator(question)).toBeVisible()
+    }
+    expectNoMissedBeforeNote = async (question: string) => {
+        await this.expectResultTableVisible()
+        await expect(this.missedBeforeNoteLocator(question)).toHaveCount(0)
     }
 
     // Retrying assertions

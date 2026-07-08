@@ -66,3 +66,11 @@ Then('I do not see question {string} in the mistakes summary', async function (q
 Then('I do not see a mistakes summary', async function () {
     await this.quizScorePage.expectNoMistakesSummary()
 })
+
+Then('I see a note that I missed {string} before', async function (question: string) {
+    await this.quizScorePage.expectMissedBeforeNote(question)
+})
+
+Then('I do not see a note that I missed {string} before', async function (question: string) {
+    await this.quizScorePage.expectNoMissedBeforeNote(question)
+})

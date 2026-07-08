@@ -10,6 +10,10 @@ export const openQuiz = async (world: QuizmasterWorld, quizBookmark: string) => 
 
 const DEFAULT_NICKNAME = 'Spec Runner'
 
+// Fixed nickname per cohort so repeated visits (e.g. seeding a finished attempt,
+// then taking the quiz again as the same cohort) resolve to the same taker identity.
+export const cohortParticipantNickname = (cohortName: string) => `Cohort ${cohortName}`
+
 const waitForQuizStartTransition = async (world: QuizmasterWorld) => {
     await world.page.waitForURL(url => {
         const path = url.pathname

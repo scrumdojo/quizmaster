@@ -123,11 +123,14 @@ Endpoints live under `/api/`. Two flavors:
   Quiz create/update (`POST`/`PUT /api/workspaces/{guid}/quizzes/{id}`) accept
   an optional `questionWeights` array (parallel to `questionIds`; each weight
   1–5, default 1) that controls per-question point contribution to the score.
-  The evaluation response (`POST /api/attempt/{id}/evaluate`) includes
-  `weightedScore` and `totalWeight` alongside `score` and `totalQuestions`.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/quiz/{id}/leaderboard`,
   `/api/question/{id}`, `/api/poll/{id}`, `/api/poll/{id}/submit`, `/api/attempt/...`.
+  The evaluation response (`POST /api/quiz/{quizId}/attempts/{attemptId}/evaluate`)
+  includes `weightedScore` and `totalWeight` alongside `score` and
+  `totalQuestions`; each per-question entry also carries `missedBefore` — true
+  when the same taker (`nickname` + `cohortGuid`) got that question wrong on an
+  earlier finished attempt of the same quiz.
 - Plus `GET /api/feature-flag`.
 
 Controllers are the source of truth: workspace authoring lives in

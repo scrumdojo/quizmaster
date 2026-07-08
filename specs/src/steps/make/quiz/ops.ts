@@ -1,5 +1,5 @@
 import { ensureWorkspaceGuid } from '#steps/make/workspace/ops.ts'
-import { answerNth, continueQuizStart } from '#steps/quiz/ops.ts'
+import { answerNth, cohortParticipantNickname, continueQuizStart } from '#steps/quiz/ops.ts'
 import { createQuizViaRest } from '#steps/shared/api.ts'
 import type { QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
@@ -33,7 +33,7 @@ export const seedFinishedCohortAttemptViaUI = async (
     await world.workspacePage.shareQuiz(quizBookmark)
     const cohortHref = await world.quizSharePage.cohortLink(cohortName)
     await world.page.goto(cohortHref)
-    await continueQuizStart(world, `Cohort ${cohortName}`)
+    await continueQuizStart(world, cohortParticipantNickname(cohortName))
     const totalQuestions = await world.questionPage.progressMax()
     for (let i = 0; i < totalQuestions; i++) {
         await answerNth(world, i < correctAnswers ? 0 : 1)
