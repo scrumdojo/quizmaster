@@ -5,9 +5,9 @@ Feature: Quiz score page cross-attempt mistake awareness
 
   Scenario: A question missed on both attempts is flagged as missed before
     Given workspace "Mistake History" with questions
-      | bookmark | question                                     | answers                |
-      | Capital  | What is the capital of Italy?                | Rome (*), Naples       |
-      | Boiling  | What state does water reach at 100 degrees?  | Boiling (*), Freezing  |
+      | bookmark | question                                    | answers               |
+      | Capital  | What is the capital of Italy?               | Rome (*), Naples      |
+      | Boiling  | What state does water reach at 100 degrees? | Boiling (*), Freezing |
     And quiz "Recall Quiz" with all questions
       | pass score | 50 |
     And quiz "Recall Quiz" has cohorts
@@ -26,9 +26,9 @@ Feature: Quiz score page cross-attempt mistake awareness
 
   Scenario: A question missed for the first time is not flagged as missed before
     Given workspace "Mistake History Clean" with questions
-      | bookmark | question                                     | answers                |
-      | Capital  | What is the capital of Italy?                | Rome (*), Naples       |
-      | Boiling  | What state does water reach at 100 degrees?  | Boiling (*), Freezing  |
+      | bookmark | question                                    | answers               |
+      | Capital  | What is the capital of Italy?               | Rome (*), Naples      |
+      | Boiling  | What state does water reach at 100 degrees? | Boiling (*), Freezing |
     And quiz "Repeat Quiz" with all questions
       | pass score | 50 |
     And quiz "Repeat Quiz" has cohorts
