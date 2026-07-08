@@ -11,6 +11,7 @@ public record QuizResponse(
     LocalDateTime endAt,
     QuestionResponse[] questions,
     int[] questionWeights,
+    boolean[] questionReleased,
     QuizMode mode,
     Difficulty difficulty,
     int passScore,

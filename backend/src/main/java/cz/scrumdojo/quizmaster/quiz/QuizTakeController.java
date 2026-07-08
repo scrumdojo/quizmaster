@@ -62,7 +62,8 @@ public class QuizTakeController {
         }
         return ResponseEntity.ok(
             QuizAttemptStartResponse.from(
-                attemptService.start(quiz, cohort.orElse(null), normalizedNickname(request), false, now())
+                attemptService.start(quiz, cohort.orElse(null), normalizedNickname(request), false, now()),
+                quiz
             )
         );
     }

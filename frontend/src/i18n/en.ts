@@ -146,6 +146,7 @@ export const en: Translations = {
         modeExam: 'Exam',
         modeLearn: 'Learning',
         modeBuzzer: 'Buzzer',
+        modePresentation: 'Presentation',
         difficultyFieldLabel: 'Difficulty',
         difficultyNote:
             'Keep Question respects each question setting. Easy reveals correct answer counts. Hard hides correct answer counts.',

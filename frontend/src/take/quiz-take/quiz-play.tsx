@@ -84,6 +84,16 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const currentAnswer = quizAnswers.finalAnswers[nav.currentQuestionIdx]
     const isAnswered = currentAnswer !== undefined
     const hasSelectedAnswer = selectedAnswerIdxs !== undefined && selectedAnswerIdxs.length > 0
+    const isCurrentQuestionWaiting =
+        props.quiz.mode === 'presentation' && !(props.quiz.questionReleased?.[nav.currentQuestionIdx] ?? false)
+
+    if (isCurrentQuestionWaiting) {
+        return (
+            <div className="page quiz-play" id="quiz-play">
+                <p data-testid="waiting-for-presenter">Waiting for the presenter to release this question.</p>
+            </div>
+        )
+    }
 
     const handleNextButton = async () => {
         if (!hasSelectedAnswer) {

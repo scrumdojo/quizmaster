@@ -18,6 +18,7 @@ export class QuizSharePage {
     private shareFlockBirdLocator = () => this.page.locator('[data-testid="share-bird"][data-flock="true"]')
     private liveStatsButtonLocator = () => this.page.getByTestId('live-stats-button')
     private epicBattleButtonLocator = () => this.page.getByTestId('epic-battle-button')
+    private releasedQuestionsCountLocator = () => this.page.getByTestId('released-questions-count')
     private liveStatsPanelLocator = () => this.page.getByTestId('live-stats-panel')
     private cohortLiveStatsTableLocator = () => this.page.getByTestId('cohort-live-stats-table')
 
@@ -285,6 +286,9 @@ export class QuizSharePage {
     expectEpicBattleButtonHidden = () => expect(this.epicBattleButtonLocator()).toHaveCount(0)
 
     openEpicBattle = () => this.epicBattleButtonLocator().click()
+
+    expectReleasedQuestionsCount = (releasedCount: number, totalCount: number) =>
+        expectTextToBe(this.releasedQuestionsCountLocator(), `${releasedCount} of ${totalCount} questions released`)
 
     expectShareScreenForQuiz = async (quizName: string) => {
         await expect(this.page.locator('#share-page')).toBeVisible()

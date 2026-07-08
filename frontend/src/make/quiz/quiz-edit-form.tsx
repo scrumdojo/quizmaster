@@ -105,7 +105,12 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                     name="mode"
                     value={state.feedbackMode}
                     onChange={state.setFeedbackMode}
-                    options={{ exam: t.quiz.modeExam, learn: t.quiz.modeLearn, buzzer: t.quiz.modeBuzzer }}
+                    options={{
+                        exam: t.quiz.modeExam,
+                        learn: t.quiz.modeLearn,
+                        buzzer: t.quiz.modeBuzzer,
+                        presentation: t.quiz.modePresentation,
+                    }}
                 />
             </Field>
             <Field

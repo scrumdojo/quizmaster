@@ -10,7 +10,7 @@ export class TakeQuestionPage {
 
     waitForLoaded = async () => {
         await this.page
-            .locator('h1#question, input[type="submit"], p.question-feedback')
+            .locator('h1#question, input[type="submit"], p.question-feedback, [data-testid="waiting-for-presenter"]')
             .first()
             .waitFor({ state: 'visible' })
     }

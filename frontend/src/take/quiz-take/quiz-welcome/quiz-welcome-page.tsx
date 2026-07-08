@@ -42,10 +42,10 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
         storeQuizAnswers(null)
 
         try {
-            const { attemptId, questions } = isDryRun
+            const { attemptId, questions, questionReleased } = isDryRun
                 ? await createDryRun(workspaceId, quiz.id)
                 : await createAttempt(quiz.id, { cohortGuid })
-            const playableQuiz: QuizTake = { ...quiz, questions }
+            const playableQuiz: QuizTake = { ...quiz, questions, questionReleased }
             setQuizRun(attemptId, quiz.id)
             const target = isDryRun ? urls.workspaceQuizDryRunTake(workspaceId, quiz.id) : urls.quizTake(quiz.id)
             navigate(target, { state: { quiz: playableQuiz } })

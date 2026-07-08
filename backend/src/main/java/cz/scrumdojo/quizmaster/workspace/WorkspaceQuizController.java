@@ -290,7 +290,8 @@ public class WorkspaceQuizController {
             .map(quiz ->
                 ResponseEntity.ok(
                     QuizAttemptStartResponse.from(
-                        attemptService.start(quiz, null, null, true, LocalDateTime.now(clock))
+                        attemptService.start(quiz, null, null, true, LocalDateTime.now(clock)),
+                        quiz
                     )
                 )
             )

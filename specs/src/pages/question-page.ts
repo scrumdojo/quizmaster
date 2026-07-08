@@ -76,6 +76,7 @@ export class QuestionPage {
 
     private progressBarLocator = () => this.page.locator('#progress-bar')
     private questionFormLocator = () => this.page.locator('#question-form')
+    private waitingForPresenterLocator = () => this.page.getByTestId('waiting-for-presenter')
     private progressBarAttribute = async (name: 'value' | 'max') => {
         await this.progressBarLocator().waitFor({ state: 'visible' })
         return this.progressBarLocator().getAttribute(name)
@@ -119,4 +120,5 @@ export class QuestionPage {
     expectFlagged = () => expect(this.flagQuestionButtonLocator()).toHaveAttribute('data-flagged', 'true')
     expectNotFlagged = () => expect(this.flagQuestionButtonLocator()).toHaveAttribute('data-flagged', 'false')
     expectBookmarked = () => expect(this.bookmarkQuestionButtonLocator()).toHaveAttribute('data-bookmarked', 'true')
+    expectWaitingForPresenter = () => expect(this.waitingForPresenterLocator()).toBeVisible()
 }

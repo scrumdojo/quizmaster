@@ -29,6 +29,7 @@ export interface Quiz {
     readonly endAt: string | null
     readonly questions: readonly Question[]
     readonly questionWeights?: readonly number[]
+    readonly questionReleased?: readonly boolean[]
     readonly mode: QuizMode
     readonly difficulty: Difficulty
     readonly passScore: number
@@ -44,6 +45,7 @@ export interface QuizTake {
     readonly startAt: string | null
     readonly endAt: string | null
     readonly questions: readonly QuestionTake[]
+    readonly questionReleased?: readonly boolean[]
     readonly mode: QuizMode
     readonly difficulty: Difficulty
     readonly passScore: number
@@ -117,6 +119,7 @@ export interface QuizEvaluationResponse {
 export interface QuizAttemptStartResponse {
     readonly attemptId: number
     readonly questions: readonly QuestionTake[]
+    readonly questionReleased?: readonly boolean[]
 }
 
 export interface QuizAttemptStartRequest {

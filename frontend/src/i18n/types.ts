@@ -138,6 +138,7 @@ export interface Translations {
         readonly modeExam: string
         readonly modeLearn: string
         readonly modeBuzzer: string
+        readonly modePresentation: string
         readonly difficultyFieldLabel: string
         readonly difficultyNote: string
         readonly difficultyHard: string

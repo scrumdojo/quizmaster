@@ -147,6 +147,7 @@ export const nl: Translations = {
         modeExam: 'Examen',
         modeLearn: 'Leren',
         modeBuzzer: 'Buzzer',
+        modePresentation: 'Presentatie',
         difficultyFieldLabel: 'Moeilijkheidsgraad',
         difficultyNote:
             'Vraaginstelling volgt de instelling per vraag. Makkelijk toont het aantal goede antwoorden. Moeilijk verbergt het aantal goede antwoorden.',

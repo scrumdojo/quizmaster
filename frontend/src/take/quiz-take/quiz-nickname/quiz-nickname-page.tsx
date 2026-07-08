@@ -38,11 +38,11 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
         storeQuizAnswers(null)
 
         try {
-            const { attemptId, questions } = await createAttempt(quiz.id, {
+            const { attemptId, questions, questionReleased } = await createAttempt(quiz.id, {
                 cohortGuid,
                 nickname: trimmedNickname,
             })
-            const playableQuiz: QuizTake = { ...quiz, questions }
+            const playableQuiz: QuizTake = { ...quiz, questions, questionReleased }
             setQuizRun(attemptId, quiz.id, trimmedNickname)
             const target = quiz.mode === 'buzzer' ? urls.quizBuzzerLobby(quiz.id) : urls.quizTake(quiz.id)
             navigate(target, { state: { quiz: playableQuiz } })

@@ -49,6 +49,20 @@ public class Quiz {
         return 1;
     }
 
+    @Column(name = "question_released", columnDefinition = "boolean[]")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    private boolean[] questionReleased;
+
+    public boolean isReleased(int questionId) {
+        if (questionIds == null || questionReleased == null) return false;
+        for (int i = 0; i < questionIds.length; i++) {
+            if (questionIds[i] == questionId) {
+                return i < questionReleased.length && questionReleased[i];
+            }
+        }
+        return false;
+    }
+
     @Enumerated(EnumType.STRING)
     private QuizMode mode;
 

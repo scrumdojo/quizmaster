@@ -166,6 +166,8 @@ export const QuizSharePage = () => {
 
     if (!quiz) return null
 
+    const releasedQuestionCount = (quiz.questionReleased ?? []).filter(Boolean).length
+
     const takeUrl = `${window.location.origin}${urls.quizWelcome(quiz.id)}`
     const editErrorTarget = (guid: string): CohortErrorTarget => `edit:${guid}`
 
@@ -489,6 +491,14 @@ export const QuizSharePage = () => {
                     showEpicBattle: cohorts.length === 2,
                 })}
             </section>
+            {quiz.mode === 'presentation' && (
+                <section>
+                    <h2>Presentation</h2>
+                    <p data-testid="released-questions-count">
+                        {releasedQuestionCount} of {quiz.questions.length} questions released
+                    </p>
+                </section>
+            )}
             <section>
                 <h2>{t.quiz.cohortsTitle}</h2>
                 <FieldNote id="cohort-take-link-note">{t.quiz.cohortsNote}</FieldNote>
