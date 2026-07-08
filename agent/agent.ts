@@ -193,8 +193,8 @@ export async function runTour(userPrompt: string): Promise<ReportDraft> {
     cwd: here, // for relative paths in the charter tools
     
     // Stop rules so an unreachable mission can't run forever.
-    maxTurns: 30, // A “turn” is roughly: Claude thinks, call a tool, tool result comes back, Claude continues.
-    maxBudgetUsd: 7, //USD
+    maxTurns: 100, // A “turn” is roughly: Claude thinks, call a tool, tool result comes back, Claude continues.
+    maxBudgetUsd: 10, //USD
 
     // The two MCP servers the agent can use.
     mcpServers: {
