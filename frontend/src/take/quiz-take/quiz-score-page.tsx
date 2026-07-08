@@ -14,6 +14,10 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
     const percentage = result.totalWeight > 0 ? (result.weightedScore / result.totalWeight) * 100 : 0
     const passed = percentage >= quiz.passScore
     const outcome = passed ? 'passed' : 'failed'
+    const mistakes = (result.questions ?? [])
+        .filter(evaluation => evaluation.status !== 'CORRECT')
+        .map(evaluation => evaluation.question)
+        .filter((question): question is NonNullable<typeof question> => question != null)
 
     return (
         <div className="page quiz-score" id="quiz-score">
@@ -56,6 +60,17 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
                     </div>
                 </dl>
             </section>
+
+            {mistakes.length > 0 && (
+                <section className="mistakes-summary" id="mistakes-summary">
+                    <h2>Questions to review</h2>
+                    <ul>
+                        {mistakes.map(question => (
+                            <li key={question.id}>{question.question}</li>
+                        ))}
+                    </ul>
+                </section>
+            )}
 
             {result.questions && (
                 <>

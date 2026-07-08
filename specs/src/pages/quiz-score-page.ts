@@ -93,6 +93,12 @@ export class QuizScorePage {
     private weightedPointsLocator = () => this.page.locator('#weighted-points')
     private totalWeightLocator = () => this.page.locator('#total-weight')
 
+    private mistakesSummaryLocator = () => this.page.locator('#mistakes-summary')
+    mistakesSummaryQuestions = async () => {
+        await this.expectResultTableVisible()
+        return this.mistakesSummaryLocator().locator('li').allTextContents()
+    }
+
     // Retrying assertions
     expectResultTableVisible = () => expect(this.resultTableLocator()).toBeVisible()
     expectCorrectAnswers = (text: string) => expect(this.correctAnswerLocator()).toHaveText(text)
@@ -105,4 +111,8 @@ export class QuizScorePage {
             expect(this.weightedPointsLocator()).toHaveText(String(points)),
             expect(this.totalWeightLocator()).toHaveText(String(total)),
         ])
+    expectNoMistakesSummary = async () => {
+        await this.expectResultTableVisible()
+        await expect(this.mistakesSummaryLocator()).toHaveCount(0)
+    }
 }

@@ -114,6 +114,25 @@
         }
     }
 
+    .mistakes-summary {
+        margin: 1.1rem 0 0;
+        padding: 0.9rem 1.2rem 1.05rem;
+        border: 1px solid var(--feedback-incorrect-border);
+        border-radius: var(--radius-xl);
+        background: var(--feedback-incorrect-bg);
+
+        h2 {
+            margin: 0 0 0.5rem;
+            color: var(--feedback-incorrect-fg);
+        }
+
+        ul {
+            margin: 0;
+            padding: 0 0 0 1.2rem;
+            color: var(--feedback-incorrect-fg);
+        }
+    }
+
     @media (max-width: 720px) {
         .score-summary {
             > header {

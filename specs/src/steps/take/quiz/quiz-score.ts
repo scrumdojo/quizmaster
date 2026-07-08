@@ -52,3 +52,17 @@ Then('I see user select {string} for question {string}', async function (userSel
     const answerLabel = await this.quizScorePage.checkedAnswerLabel(question)
     expect(answerLabel).toBe(userSelect)
 })
+
+Then('I see question {string} in the mistakes summary', async function (question: string) {
+    const questions = await this.quizScorePage.mistakesSummaryQuestions()
+    expect(questions).toContain(question)
+})
+
+Then('I do not see question {string} in the mistakes summary', async function (question: string) {
+    const questions = await this.quizScorePage.mistakesSummaryQuestions()
+    expect(questions).not.toContain(question)
+})
+
+Then('I do not see a mistakes summary', async function () {
+    await this.quizScorePage.expectNoMistakesSummary()
+})

@@ -62,7 +62,8 @@ Desktop.
 - **Per-answer feedback** with color coding and explanations; partial
   credit for multi-choice; tolerance-aware grading for numerical.
 - **Final score page** with the user's selections, correct answers,
-  and explanations for review.
+  and explanations for review, plus a mistakes summary listing the
+  questions not answered fully correctly.
 - **Standalone question taking** — open a single question outside any
   quiz, useful for quick checks.
 
