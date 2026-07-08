@@ -50,7 +50,7 @@ into `docs/` and delete or trim the backlog entry.
 ## Tech Stack
 
 - **Backend:** Java 21, Spring Boot 3, Gradle (Kotlin DSL), Lombok
-- **Frontend:** TypeScript, React 19, Vite, oxlint (linting), oxfmt (formatting)
+- **Frontend:** TypeScript, React 19, Vite, oxlint (linting), oxfmt (formatting). The Epic Battle screen renders its animated battlefield with PixiJS (lazy-loaded); its CC0 sprites live in `frontend/public/epic-battle/`.
 - **E2E Testing:** Cucumber + Playwright (separate `specs/` package)
 - **Database:** PostgreSQL
 - **MCP Server:** TypeScript package at `mcp/` exposing Quizmaster as Model Context Protocol tools/resources/prompts. See `docs/mcp/overview.md`.

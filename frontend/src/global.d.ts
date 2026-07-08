@@ -25,4 +25,6 @@ interface Window {
     __advanceQuizClock?: (ms: number) => void
     /** Live-switch the background animation theme and persist to localStorage. */
     __setAnimationTheme?: (theme: 'angels' | 'mammoths' | 'off') => void
+    /** Set by E2E to skip the decorative PixiJS Epic Battle scene (WebGL/assets). */
+    __noEpicBattleScene?: boolean
 }

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 24" width="40" height="24">
+  <!-- Horsehair helmet crest. Grayscale so Pixi `tint` gives each legion its
+       colour. Authored in-repo (CC0). -->
+  <defs>
+    <linearGradient id="plume" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c9c9c9"/>
+    </linearGradient>
+  </defs>
+  <path d="M6 22 q2 -20 14 -20 q12 0 14 20 q-4 -8 -14 -8 q-10 0 -14 8 z" fill="url(#plume)"/>
+  <g stroke="#b4b4b4" stroke-width="1" opacity="0.6">
+    <path d="M11 18 q3 -12 9 -14"/>
+    <path d="M20 4 q6 2 9 14"/>
+  </g>
+</svg>

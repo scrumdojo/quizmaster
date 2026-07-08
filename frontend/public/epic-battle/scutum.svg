@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 72" width="48" height="72">
+  <!-- Curved legionary scutum. Grayscale so Pixi `tint` recolours it per team
+       (a wall of red shields vs a wall of blue shields). Authored in-repo (CC0). -->
+  <defs>
+    <linearGradient id="face" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c4cad1"/>
+      <stop offset="0.5" stop-color="#eef1f4"/>
+      <stop offset="1" stop-color="#aeb5bd"/>
+    </linearGradient>
+  </defs>
+  <!-- board -->
+  <rect x="4" y="3" width="40" height="66" rx="10" fill="url(#face)" stroke="#7f8790" stroke-width="2"/>
+  <!-- winged thunderbolt motif -->
+  <g fill="none" stroke="#8c939b" stroke-width="2.4" stroke-linecap="round" opacity="0.85">
+    <path d="M24 12 v48"/>
+    <path d="M12 26 q12 6 24 0"/>
+    <path d="M12 46 q12 -6 24 0"/>
+    <path d="M16 20 l6 6 M32 20 l-6 6"/>
+    <path d="M16 52 l6 -6 M32 52 l-6 -6"/>
+  </g>
+  <!-- central boss (umbo) -->
+  <circle cx="24" cy="36" r="8" fill="#9aa2ab" stroke="#6f7882" stroke-width="2"/>
+  <circle cx="24" cy="36" r="3.2" fill="#e9edf1"/>
+</svg>

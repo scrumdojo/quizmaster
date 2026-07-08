@@ -6,6 +6,8 @@ Quizmaster follows a traditional client-server architecture.
 
 Frontend is a Single-Page Application (SPA) in [React 19](https://react.dev/). It uses [react-router](https://reactrouter.com/) for routing.
 
+The Epic Battle screen (`/workspace/:workspaceId/quiz/:id/epic-battle`) renders an animated cohort battlefield with [PixiJS](https://pixijs.com/), lazy-loaded so it stays out of the main bundle. Its scene (`make/quiz/epic-battle/battle-scene.ts`) is purely decorative — all test-visible DOM (army cards, waving standards) lives in React — and degrades to a static gradient if WebGL/assets are unavailable. Sprites are CC0 and committed under `frontend/public/epic-battle/`.
+
 ## Backend
 
 Backend is a Spring Boot application, serving both frontend as a SPA (Single-Page Application) at URL `\`, and REST APIs for the frontend at URLs starting with `\api\`.

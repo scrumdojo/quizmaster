@@ -71,57 +71,52 @@
     min-height: 20rem;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(135, 175, 214, 0.35) 0%, rgba(94, 130, 92, 0.45) 100%);
+    // Fallback shown if the Pixi scene never starts (no WebGL / assets fail).
+    background: linear-gradient(180deg, #1c2b44 0%, #50617a 55%, #5a4a33 100%);
 }
 
-.epic-battle-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
+// Pixi mounts its <canvas> in here, filling the arena behind the standards.
+.epic-battle-arena__scene {
+    position: absolute;
+    inset: 0;
+
+    canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
 }
 
-.epic-battle-soldier {
+.epic-battle-standard {
     position: absolute;
     bottom: 1.5rem;
-    width: 0.75rem;
-    height: 2rem;
-    border-radius: 0.2rem;
-    background: #e0c589;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: bottom center;
     pointer-events: none;
+    filter: drop-shadow(0 0.4rem 0.6rem rgba(0, 0, 0, 0.55));
 }
 
-.epic-battle-soldier--left {
-    left: 30%;
+.epic-battle-standard--left {
+    left: 22%;
 }
 
-.epic-battle-soldier--right {
-    right: 30%;
+.epic-battle-standard--right {
+    right: 22%;
 }
 
-.epic-battle-spark {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    width: 3rem;
-    height: 3rem;
-    transform: translate(-50%, -50%) scale(0);
-    border-radius: 50%;
-    background: radial-gradient(circle, #fff6d8 0%, rgba(255, 246, 216, 0) 70%);
-    pointer-events: none;
+.epic-battle-standard--losing {
+    opacity: 0.7;
 }
 
-.epic-battle-spark--active {
-    animation: epic-battle-spark-pulse 0.5s ease-out;
-}
-
-@keyframes epic-battle-spark-pulse {
-    0% {
-        transform: translate(-50%, -50%) scale(0.2);
-        opacity: 1;
-    }
-
-    100% {
-        transform: translate(-50%, -50%) scale(2.4);
-        opacity: 0;
-    }
+.epic-battle-standard__label {
+    margin-top: 0.25rem;
+    padding: 0.1rem 0.6rem;
+    border-radius: var(--radius-lg);
+    background: rgba(0, 0, 0, 0.55);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
 }

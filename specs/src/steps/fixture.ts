@@ -14,10 +14,12 @@ export const test = base.extend<{ world: QuizmasterWorld }>({
             const globalState = globalThis as typeof globalThis & {
                 dispatchEvent: (event: Event) => boolean
                 __noCrazyBackground?: boolean
+                __noEpicBattleScene?: boolean
                 __quizClockNow?: number
                 __advanceQuizClock?: (ms: number) => void
             }
             globalState.__noCrazyBackground = true
+            globalState.__noEpicBattleScene = true
             globalState.__quizClockNow = Date.now()
             globalState.__advanceQuizClock = (ms: number) => {
                 globalState.__quizClockNow = (globalState.__quizClockNow ?? Date.now()) + ms

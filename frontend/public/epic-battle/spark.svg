@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Impact burst for the clash line. White core so Pixi `tint` can flash it
+       gold/team colour. Authored in-repo (CC0). -->
+  <defs>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.4" stop-color="#fff3c4"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="16" fill="url(#core)"/>
+  <g fill="#fff6d8">
+    <polygon points="32,0 36,30 28,30"/>
+    <polygon points="32,64 36,34 28,34"/>
+    <polygon points="0,32 30,28 30,36"/>
+    <polygon points="64,32 34,28 34,36"/>
+    <polygon points="9,9 30,28 26,32 28,26"/>
+    <polygon points="55,55 34,36 38,32 36,38"/>
+    <polygon points="55,9 36,28 32,26 38,30"/>
+    <polygon points="9,55 28,36 32,38 26,34"/>
+  </g>
+</svg>

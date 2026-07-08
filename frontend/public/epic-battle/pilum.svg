@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 8" width="48" height="8">
+  <!-- Flying pilum (volley projectile), pointing right. Authored in-repo (CC0). -->
+  <rect x="4" y="3" width="34" height="2" rx="1" fill="#7c5326"/>
+  <polygon points="38,4 44,1 44,7" fill="#c9d0d7"/>
+  <polygon points="4,2 0,4 4,6" fill="#5a3a1f"/>
+</svg>

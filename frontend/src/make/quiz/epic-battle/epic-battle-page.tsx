@@ -1,8 +1,13 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import './epic-battle-page.scss'
 import { fetchQuizEpicBattle, fetchWorkspaceQuiz } from '#fe/make/api/quiz.ts'
-import { EpicBattleArena, type EpicBattleArmy } from '#fe/make/quiz/epic-battle/epic-battle-arena.tsx'
+import type { EpicBattleArmy } from '#fe/make/quiz/epic-battle/epic-battle-arena.tsx'
+
+// Lazy so PixiJS (pulled in by the arena) is split off the main bundle.
+const EpicBattleArena = lazy(() =>
+    import('#fe/make/quiz/epic-battle/epic-battle-arena.tsx').then(module => ({ default: module.EpicBattleArena })),
+)
 import { Page } from '#fe/shared'
 import { useApi } from '#fe/shared/api/hooks.ts'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
@@ -87,7 +92,9 @@ export const EpicBattlePage = () => {
                     </div>
                 ))}
             </div>
-            <EpicBattleArena armies={armies} />
+            <Suspense fallback={null}>
+                <EpicBattleArena armies={armies} />
+            </Suspense>
         </Page>
     )
 }

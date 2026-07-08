@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 104" width="64" height="104">
+  <!-- Roman legionary, facing right. Neutral palette; team colour comes from
+       the separately-tinted crest and scutum sprites. Authored in-repo (CC0). -->
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cdd5dd"/>
+      <stop offset="1" stop-color="#8f99a3"/>
+    </linearGradient>
+    <linearGradient id="bronze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e3c169"/>
+      <stop offset="1" stop-color="#a67c2e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- shadow -->
+  <ellipse cx="30" cy="100" rx="18" ry="4" fill="#000000" opacity="0.28"/>
+
+  <!-- pilum (throwing spear), held upright in the rear hand -->
+  <rect x="46" y="6" width="2.4" height="82" rx="1.2" fill="#7c5326"/>
+  <polygon points="47.2,2 44.4,10 50,10" fill="#d8dde2"/>
+  <polygon points="47.2,2 47.2,10 50,10" fill="#aeb5bc"/>
+
+  <!-- rear leg -->
+  <rect x="26" y="70" width="8" height="22" rx="3" fill="#c69b64"/>
+  <rect x="25" y="90" width="10" height="5" rx="2" fill="#5a3a1f"/>
+  <!-- front leg -->
+  <rect x="34" y="72" width="8" height="20" rx="3" fill="#d9a066"/>
+  <rect x="33" y="90" width="11" height="5" rx="2" fill="#6b4726"/>
+
+  <!-- tunic / pteruges (leather strips) -->
+  <path d="M20 54 h24 v10 l-3 6 -3 -6 -3 6 -3 -6 -3 6 -3 -6 -3 6 -3 -6 z" fill="#b5553a"/>
+  <rect x="20" y="50" width="24" height="8" rx="2" fill="#8f4230"/>
+
+  <!-- torso: lorica segmentata -->
+  <rect x="20" y="30" width="24" height="24" rx="5" fill="url(#steel)"/>
+  <g stroke="#6f7982" stroke-width="1" opacity="0.8">
+    <line x1="21" y1="37" x2="43" y2="37"/>
+    <line x1="21" y1="43" x2="43" y2="43"/>
+    <line x1="21" y1="49" x2="43" y2="49"/>
+  </g>
+  <!-- shoulder guards -->
+  <rect x="18" y="30" width="8" height="7" rx="3" fill="url(#steel)"/>
+  <rect x="38" y="30" width="8" height="7" rx="3" fill="url(#steel)"/>
+
+  <!-- rear arm reaching up to the pilum -->
+  <path d="M40 34 q10 -2 8 -14" fill="none" stroke="#d9a066" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- neck + head -->
+  <rect x="28" y="24" width="8" height="7" fill="#d9a066"/>
+  <circle cx="32" cy="21" r="9" fill="#e0ac72"/>
+
+  <!-- galea helmet -->
+  <path d="M22 21 a10 10 0 0 1 20 0 v1 h-3 a7 7 0 0 0 -14 0 h-3 z" fill="url(#bronze)"/>
+  <rect x="22" y="20" width="20" height="3" rx="1.5" fill="#8a6420"/>
+  <!-- neck guard + cheek guard -->
+  <path d="M22 21 q-2 6 2 8 l3 -1 v-7 z" fill="url(#bronze)"/>
+  <rect x="39" y="14" width="4" height="3" rx="1" fill="#8a6420"/>
+</svg>
