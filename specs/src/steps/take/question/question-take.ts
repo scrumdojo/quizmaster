@@ -114,20 +114,8 @@ When('I ask the explanation chat {string}', async function (prompt: string) {
     await askExplanationChat(this, prompt)
 })
 
-When('I collapse the explanation chat', async function () {
-    await this.takeQuestionPage.collapseExplanationChat()
-})
-
 Then('I see a reply in the explanation chat', async function () {
     await this.takeQuestionPage.expectExplanationChatReplyVisible()
-})
-
-Then('I see a reply in the explanation chat mentioning {string}', async function (text: string) {
-    await this.takeQuestionPage.expectExplanationChatReplyContaining(text)
-})
-
-Then('I see my question {string} in the explanation chat', async function (text: string) {
-    await this.takeQuestionPage.expectExplanationChatUserMessage(text)
 })
 
 Then('I see individual explanations per answer:', async function (dataTable: DataTable) {

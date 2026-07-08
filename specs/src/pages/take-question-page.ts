@@ -54,11 +54,8 @@ export class TakeQuestionPage {
         this.explanationChatComposerLocator().locator('#explanation-chat-prompt')
     private explanationChatSendLocator = () => this.explanationChatComposerLocator().locator('.explanation-chat__send')
     private explanationChatReplyLocator = () => this.page.locator('.explanation-chat__message--assistant')
-    private explanationChatUserMessageLocator = (text: string) =>
-        this.page.locator('.explanation-chat__message--user', { hasText: text })
 
     expandExplanationChat = () => this.explanationChatToggleLocator().click()
-    collapseExplanationChat = () => this.explanationChatToggleLocator().click()
     fillExplanationChatPrompt = (prompt: string) => this.explanationChatPromptLocator().fill(prompt)
     sendExplanationChatPrompt = () => this.explanationChatSendLocator().click()
 
@@ -101,8 +98,4 @@ export class TakeQuestionPage {
 
     expectExplanationChatComposerVisible = () => expect(this.explanationChatComposerLocator()).toBeVisible()
     expectExplanationChatReplyVisible = () => expect(this.explanationChatReplyLocator().first()).toBeVisible()
-    expectExplanationChatReplyContaining = (text: string) =>
-        expect(this.explanationChatReplyLocator().last()).toContainText(text)
-    expectExplanationChatUserMessage = (text: string) =>
-        expect(this.explanationChatUserMessageLocator(text)).toBeVisible()
 }
