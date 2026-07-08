@@ -2,7 +2,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import type { CSSProperties, MouseEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import './quiz-share-page.scss'
 import {
     createCohort,
@@ -100,6 +100,7 @@ interface ShareBird {
 export const QuizSharePage = () => {
     const workspaceId = useWorkspaceId()
     const { id: quizId } = useParams()
+    const navigate = useNavigate()
     const [quiz, setQuiz] = useState<Quiz | undefined>(undefined)
     const [cohorts, setCohorts] = useState<readonly QuizCohort[]>([])
     const [draft, setDraft] = useState('')
@@ -307,7 +308,7 @@ export const QuizSharePage = () => {
         label: string,
         url: string,
         qrTestId: string,
-        options?: { readonly showLiveStats?: boolean },
+        options?: { readonly showLiveStats?: boolean; readonly showEpicBattle?: boolean },
     ) => (
         <div className="share-actions">
             <Button
@@ -336,6 +337,20 @@ export const QuizSharePage = () => {
                     </Button>
                     <HelpTooltip label="Live stats">
                         Opens live cohort standings by weighted points while participants answer the quiz.
+                    </HelpTooltip>
+                </>
+            )}
+            {options?.showEpicBattle && (
+                <>
+                    <Button
+                        className="button secondary"
+                        data-testid="epic-battle-button"
+                        onClick={() => navigate(urls.workspaceQuizEpicBattle(workspaceId, quiz.id))}
+                    >
+                        Epic Battle
+                    </Button>
+                    <HelpTooltip label="Epic Battle">
+                        Opens a full-page animated battle between the two cohorts, driven by live weighted points.
                     </HelpTooltip>
                 </>
             )}
@@ -472,6 +487,7 @@ export const QuizSharePage = () => {
                 {renderHiddenLink('quiz-take-link', '', takeUrl)}
                 {renderShareActions(quizQrKey, quiz.title, takeUrl, 'quiz-take-qr', {
                     showLiveStats: cohorts.length > 0,
+                    showEpicBattle: cohorts.length === 2,
                 })}
             </section>
             <section>

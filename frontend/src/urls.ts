@@ -14,6 +14,7 @@ export const ROUTES = {
     workspaceQuizEdit: '/workspace/:workspaceId/quiz/:id/edit',
     workspaceQuizStats: '/workspace/:workspaceId/quiz/:id/stats',
     workspaceQuizShare: '/workspace/:workspaceId/quiz/:id/share',
+    workspaceQuizEpicBattle: '/workspace/:workspaceId/quiz/:id/epic-battle',
     workspacePollNew: '/workspace/:workspaceId/poll/new',
     workspacePollEdit: '/workspace/:workspaceId/poll/:id/edit',
     workspacePollResults: '/workspace/:workspaceId/poll/:id/results',
@@ -44,6 +45,8 @@ export const urls = {
     workspaceQuizEdit: (workspaceId: string, id: number | string) => `/workspace/${workspaceId}/quiz/${id}/edit`,
     workspaceQuizStats: (workspaceId: string, id: number | string) => `/workspace/${workspaceId}/quiz/${id}/stats`,
     workspaceQuizShare: (workspaceId: string, id: number | string) => `/workspace/${workspaceId}/quiz/${id}/share`,
+    workspaceQuizEpicBattle: (workspaceId: string, id: number | string) =>
+        `/workspace/${workspaceId}/quiz/${id}/epic-battle`,
     workspacePollNew: (workspaceId: string) => `/workspace/${workspaceId}/poll/new`,
     workspacePollEdit: (workspaceId: string, id: number | string) => `/workspace/${workspaceId}/poll/${id}/edit`,
     workspacePollResults: (workspaceId: string, id: number | string) => `/workspace/${workspaceId}/poll/${id}/results`,

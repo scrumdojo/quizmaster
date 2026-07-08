@@ -13,6 +13,8 @@ import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.quiz.QuizResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizService;
+import cz.scrumdojo.quizmaster.quiz.epicbattle.EpicBattleResponse;
+import cz.scrumdojo.quizmaster.quiz.epicbattle.EpicBattleService;
 import cz.scrumdojo.quizmaster.quiz.livestats.QuizLiveStatsResponse;
 import cz.scrumdojo.quizmaster.quiz.livestats.QuizLiveStatsService;
 import cz.scrumdojo.quizmaster.quiz.stats.QuizStatsResponse;
@@ -42,6 +44,7 @@ public class WorkspaceQuizController {
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
     private final QuizLiveStatsService quizLiveStatsService;
+    private final EpicBattleService epicBattleService;
     private final AttemptService attemptService;
     private final CohortRepository cohortRepository;
     private final Clock clock;
@@ -53,6 +56,7 @@ public class WorkspaceQuizController {
         QuizService quizService,
         QuizStatsService quizStatsService,
         QuizLiveStatsService quizLiveStatsService,
+        EpicBattleService epicBattleService,
         AttemptService attemptService,
         CohortRepository cohortRepository,
         Clock clock
@@ -63,6 +67,7 @@ public class WorkspaceQuizController {
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
         this.quizLiveStatsService = quizLiveStatsService;
+        this.epicBattleService = epicBattleService;
         this.attemptService = attemptService;
         this.cohortRepository = cohortRepository;
         this.clock = clock;
@@ -124,6 +129,16 @@ public class WorkspaceQuizController {
         workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(quizLiveStatsService.getLiveStats(workspaceGuid, id));
+    }
+
+    @GetMapping("/{id}/epic-battle")
+    public ResponseEntity<EpicBattleResponse> getEpicBattle(
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id
+    ) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        return ResponseHelper.okOrNotFound(epicBattleService.getEpicBattle(workspaceGuid, id));
     }
 
     @Transactional
