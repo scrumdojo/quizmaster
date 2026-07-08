@@ -1,0 +1,41 @@
+.explanation-chat {
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0 0.5rem;
+}
+
+.explanation-chat__toggle {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.explanation-chat__composer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.explanation-chat__messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.explanation-chat__message--user {
+    font-weight: bold;
+}
+
+.explanation-chat__input-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.explanation-chat__input {
+    flex: 1;
+}

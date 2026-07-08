@@ -16,20 +16,17 @@ Feature: Follow-up chat on question explanations
     * I answer "Rome"
 
 
-  @skip
   Scenario: Explanation chat is collapsed by default
     Then I see the question explanation
     And the explanation chat is collapsed
 
 
-  @skip
   Scenario: Expanding the explanation chat reveals the composer
     When I expand the explanation chat
     Then I see the explanation chat composer
 
 
   @ai
-  @skip
   Scenario: Asking a follow-up question in the explanation chat returns a reply
     When I expand the explanation chat
     And I ask the explanation chat "Can you explain that differently?"

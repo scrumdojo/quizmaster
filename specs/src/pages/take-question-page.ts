@@ -48,6 +48,16 @@ export class TakeQuestionPage {
     questionScoreLocator = () => this.page.locator('p.question-score')
     questionExplanationLocator = () => this.page.locator('p.question-explanation')
 
+    private explanationChatToggleLocator = () => this.page.getByTestId('explanation-chat').locator('button')
+    private explanationChatComposerLocator = () => this.page.getByTestId('explanation-chat-composer')
+    private explanationChatPromptLocator = () => this.explanationChatComposerLocator().locator('#explanation-chat-prompt')
+    private explanationChatSendLocator = () => this.explanationChatComposerLocator().locator('.explanation-chat__send')
+    private explanationChatReplyLocator = () => this.page.locator('.explanation-chat__message--assistant')
+
+    expandExplanationChat = () => this.explanationChatToggleLocator().click()
+    fillExplanationChatPrompt = (prompt: string) => this.explanationChatPromptLocator().fill(prompt)
+    sendExplanationChatPrompt = () => this.explanationChatSendLocator().click()
+
     numericalInputLocator = () => this.page.locator('input[type="number"]')
     private numericalAnswerDigitsHintLocator = () =>
         this.page.locator('.question-fieldset p', { hasText: /decimal digits/i })
@@ -79,4 +89,12 @@ export class TakeQuestionPage {
             new RegExp(`\\b${digits}\\s+decimal\\s+digits?\\b`, 'i'),
         )
     expectNoNumericalAnswerDigitsHint = () => expect(this.numericalAnswerDigitsHintLocator()).not.toBeAttached()
+
+    expectExplanationChatCollapsed = async () => {
+        await expect(this.explanationChatToggleLocator()).toHaveAttribute('aria-expanded', 'false')
+        await expect(this.explanationChatComposerLocator()).not.toBeAttached()
+    }
+
+    expectExplanationChatComposerVisible = () => expect(this.explanationChatComposerLocator()).toBeVisible()
+    expectExplanationChatReplyVisible = () => expect(this.explanationChatReplyLocator().first()).toBeVisible()
 }

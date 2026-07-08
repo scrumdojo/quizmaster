@@ -5,6 +5,20 @@ import { expectTextToBe } from '#steps/common.ts'
 import { Then, When } from '#steps/fixture.ts'
 import { expectColorFeedback, expectQuestion } from '#steps/question/expects.ts'
 import { answerQuestion } from '#steps/take/question/ops.ts'
+import type { QuizmasterWorld } from '#steps/world'
+
+const AI_RESPONSE_TIMEOUT = 120_000
+
+// Sends the composer content and waits for the unified explanation-chat endpoint to answer.
+const askExplanationChat = async (world: QuizmasterWorld, prompt: string) => {
+    await world.takeQuestionPage.fillExplanationChatPrompt(prompt)
+    await Promise.all([
+        world.page.waitForResponse(response => response.url().includes('/explanation-chat') && response.ok(), {
+            timeout: AI_RESPONSE_TIMEOUT,
+        }),
+        world.takeQuestionPage.sendExplanationChatPrompt(),
+    ])
+}
 
 When('I take question {string}', async function (bookmark: string) {
     await this.workspacePage.goto(this.workspaceGuid)
@@ -82,6 +96,26 @@ Then('no answer is selected', async function () {
 
 Then('I see the question explanation', async function () {
     await expectTextToBe(this.takeQuestionPage.questionExplanationLocator(), this.activeQuestion.explanation ?? '')
+})
+
+Then('the explanation chat is collapsed', async function () {
+    await this.takeQuestionPage.expectExplanationChatCollapsed()
+})
+
+When('I expand the explanation chat', async function () {
+    await this.takeQuestionPage.expandExplanationChat()
+})
+
+Then('I see the explanation chat composer', async function () {
+    await this.takeQuestionPage.expectExplanationChatComposerVisible()
+})
+
+When('I ask the explanation chat {string}', async function (prompt: string) {
+    await askExplanationChat(this, prompt)
+})
+
+Then('I see a reply in the explanation chat', async function () {
+    await this.takeQuestionPage.expectExplanationChatReplyVisible()
 })
 
 Then('I see individual explanations per answer:', async function (dataTable: DataTable) {
