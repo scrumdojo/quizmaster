@@ -25,6 +25,7 @@ const SOLDIERS_PER_LEGION = 26
 
 interface Soldier {
     readonly container: Container
+    readonly shadow: Graphics // ground-planted contact shadow, decoupled from the bob
     readonly side: 'left' | 'right'
     readonly advance: number // 0 = front line, 1 = own rear edge
     readonly depth: number // 0 = closest/bottom, 1 = far/top
@@ -43,7 +44,9 @@ const makeSoldier = (side: 'left' | 'right', textures: SceneTextures): Soldier =
     const container = new Container()
 
     const body = new Sprite(textures.legionary)
-    body.anchor.set(0.5, 1)
+    // Anchor on the feet line (≈y=94/104), not the transparent viewBox bottom,
+    // so the placement point sits on the ground instead of below the boots.
+    body.anchor.set(0.5, 0.9)
 
     const shield = new Sprite(textures.scutum)
     shield.anchor.set(0.5, 0.5)
@@ -59,8 +62,12 @@ const makeSoldier = (side: 'left' | 'right', textures: SceneTextures): Soldier =
 
     container.addChild(body, crest, shield)
 
+    const shadow = new Graphics()
+    shadow.ellipse(0, 0, 18, 4.5).fill({ color: 0x000000, alpha: 0.28 })
+
     return {
         container,
+        shadow,
         side,
         advance: Math.random(),
         depth: Math.random(),
@@ -104,11 +111,12 @@ export const createBattleScene = async (mount: HTMLElement): Promise<BattleScene
     // world holds everything and is offset for screen shake.
     const world = new Container()
     const bg = new Graphics()
+    const shadows = new Container()
     const legionBack = new Container()
     const legionFront = new Container()
     const projectiles = new Container()
     const fx = new Container()
-    world.addChild(bg, legionBack, legionFront, projectiles, fx)
+    world.addChild(bg, shadows, legionBack, legionFront, projectiles, fx)
     app.stage.addChild(world)
 
     // Build both legions once (a full field), sorted far-to-near for correct
@@ -119,7 +127,10 @@ export const createBattleScene = async (mount: HTMLElement): Promise<BattleScene
         for (let i = 0; i < SOLDIERS_PER_LEGION; i++) soldiers.push(makeSoldier(side, textures))
     }
     soldiers.sort((a, b) => b.depth - a.depth)
-    for (const s of soldiers) (s.depth > 0.5 ? legionBack : legionFront).addChild(s.container)
+    for (const s of soldiers) {
+        shadows.addChild(s.shadow)
+        ;(s.depth > 0.5 ? legionBack : legionFront).addChild(s.container)
+    }
 
     const state = {
         left: { points: 0, hits: 0 } as { points: number; hits: number },
@@ -309,11 +320,17 @@ export const createBattleScene = async (mount: HTMLElement): Promise<BattleScene
                 jab = lunge * (5 + hitPulse[s.side] * 12) * dir
                 tilt = lunge * 0.12 * dir
             }
-            s.container.x = baseX + jab
-            s.container.y = groundY - s.depth * fieldDepth + Math.sin(t * s.bobSpeed + s.phase) * 2.2
+            const groundContactY = groundY - s.depth * fieldDepth
             const sc = 0.8 - s.depth * 0.34
+            s.container.x = baseX + jab
+            s.container.y = groundContactY + Math.sin(t * s.bobSpeed + s.phase) * 2.2
             s.container.scale.set(dir * sc, sc)
             s.container.rotation = tilt
+            // Shadow stays planted on the ground plane (no bob) so the soldier
+            // reads as standing on the dirt rather than floating.
+            s.shadow.x = baseX + jab
+            s.shadow.y = groundContactY
+            s.shadow.scale.set(sc, sc * 0.6)
         }
 
         // Constant low-level clashing keeps the front line alive between answers.

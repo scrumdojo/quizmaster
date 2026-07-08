@@ -12,9 +12,6 @@
     </linearGradient>
   </defs>
 
-  <!-- shadow -->
-  <ellipse cx="30" cy="100" rx="18" ry="4" fill="#000000" opacity="0.28"/>
-
   <!-- pilum (throwing spear), held upright in the rear hand -->
   <rect x="46" y="6" width="2.4" height="82" rx="1.2" fill="#7c5326"/>
   <polygon points="47.2,2 44.4,10 50,10" fill="#d8dde2"/>
