@@ -52,12 +52,16 @@ carries a title, an optional description, a question list, and optional
 
 Two settings shape _how_ takers experience the quiz:
 
-- **Mode** is either **Exam** or **Learning**.
+- **Mode** is **Exam**, **Learning**, or **Buzzer**.
     - In **Exam mode**, submitting an answer immediately moves to the next
       question. The taker sees no feedback or explanations until the whole quiz
       is finished, and the final score and feedback appear once at the end.
     - In **Learning mode**, feedback and explanations appear after each answer,
       and the taker advances manually. Learning quizzes can be retaken.
+    - In **Buzzer mode**, exactly two cohorts race each other: each cohort
+      joins as one shared attempt, and once the second cohort joins, a
+      10-second countdown starts. When it ends, question 1 appears to both
+      cohorts at the same time.
 
 - **Difficulty** is **easy**, **hard**, or **keep**. _Easy_ and _hard_ override
   each question's own easy mark at quiz time so the taker sees a uniformly

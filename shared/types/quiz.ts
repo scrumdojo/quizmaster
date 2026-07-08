@@ -113,3 +113,8 @@ export interface QuizAttemptStartRequest {
     readonly cohortGuid?: string
     readonly nickname?: string
 }
+
+export interface QuizBuzzerStatus {
+    readonly status: 'waiting' | 'countdown' | 'started'
+    readonly secondsRemaining: number | null
+}

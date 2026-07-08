@@ -85,6 +85,13 @@ public class QuizTakeController {
         return nickname.isEmpty() ? null : nickname;
     }
 
+    @GetMapping("/{quizId}/attempts/{attemptId}/buzzer-status")
+    public ResponseEntity<BuzzerStatus> getBuzzerStatus(@PathVariable Integer quizId, @PathVariable Integer attemptId) {
+        var quiz = requireQuiz(quizId);
+        requireAttemptNotFinished(quizId, attemptId);
+        return ResponseEntity.ok(attemptService.buzzerStatus(quiz, now()));
+    }
+
     @PostMapping("/{quizId}/attempts/{attemptId}/timeout")
     public ResponseEntity<Void> recordTimeout(@PathVariable Integer quizId, @PathVariable Integer attemptId) {
         var attempt = requireAttemptNotFinished(quizId, attemptId);

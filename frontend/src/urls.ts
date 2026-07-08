@@ -25,6 +25,7 @@ export const ROUTES = {
     quizTake: '/quiz/:id/questions/:questionId?',
     quizNickname: '/quiz/:id/nickname',
     quizNicknameWithCohort: '/quiz/:id/cohort/:cohortGuid/nickname',
+    quizBuzzerLobby: '/quiz/:id/buzzer',
 } as const
 
 export const urls = {
@@ -55,6 +56,7 @@ export const urls = {
     quizTake: (id: number | string) => `/quiz/${id}/questions`,
     quizNickname: (id: number | string) => `/quiz/${id}/nickname`,
     quizNicknameWithCohort: (id: number | string, cohortGuid: string) => `/quiz/${id}/cohort/${cohortGuid}/nickname`,
+    quizBuzzerLobby: (id: number | string) => `/quiz/${id}/buzzer`,
 }
 
 export const useWorkspaceId = () => {

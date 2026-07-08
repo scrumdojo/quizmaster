@@ -110,7 +110,17 @@ Then('progress shows {int} of {int}', async function (current: number, max: numb
 })
 
 When('{int} seconds pass', async function (seconds: number) {
-    await this.questionPage.timerLocator().waitFor({ state: 'visible' })
+    const hasQuestionTimer = await this.questionPage
+        .timerLocator()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
+        .catch(() => false)
+
+    if (!hasQuestionTimer) {
+        await advanceServerClock(this, seconds)
+        return
+    }
+
     const timerBefore = ((await this.questionPage.timerLocator().textContent()) ?? '00:00').trim()
     const remainingBefore = parseTimerTextToSeconds(timerBefore)
     const remainingAfter = Math.max(0, remainingBefore - seconds)

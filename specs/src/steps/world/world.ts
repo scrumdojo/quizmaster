@@ -18,9 +18,19 @@ import {
     PollResultsPage,
     TakeQuestionPage,
     TakePollPage,
+    QuizBuzzerLobbyPage,
 } from '#pages/index.ts'
 import { QuizNicknamePage } from '#pages/quiz-nickname-page'
+import { CLOCK_HEADER } from '#steps/clock.ts'
 import type { AnswerSpec, PollSpec, QuestionSpec } from '#steps/shared/specs.ts'
+
+export interface BuzzerTeamActor {
+    readonly page: Page
+    readonly quizWelcomePage: QuizWelcomePage
+    readonly quizNicknamePage: QuizNicknamePage
+    readonly quizBuzzerLobbyPage: QuizBuzzerLobbyPage
+    readonly takeQuestionPage: TakeQuestionPage
+}
 
 interface DelayedFlagSave {
     readonly waitForStarted: () => Promise<void>
@@ -141,6 +151,31 @@ export class QuizmasterWorld {
         nextQuestionIndex: number
     }
     nextParticipantNumber = 0
+
+    buzzerTeams: Record<string, BuzzerTeamActor> = {}
+
+    async getOrCreateBuzzerTeam(name: string): Promise<BuzzerTeamActor> {
+        const existing = this.buzzerTeams[name]
+        if (existing) return existing
+
+        const browser = this.page.context().browser()
+        if (!browser) throw new Error('No browser available to create a second team context')
+        const context = await browser.newContext()
+        const page = await context.newPage()
+        if (this.scenarioClockNow) {
+            await page.setExtraHTTPHeaders({ [CLOCK_HEADER]: this.scenarioClockNow.toISOString() })
+        }
+
+        const actor: BuzzerTeamActor = {
+            page,
+            quizWelcomePage: new QuizWelcomePage(page),
+            quizNicknamePage: new QuizNicknamePage(page),
+            quizBuzzerLobbyPage: new QuizBuzzerLobbyPage(page),
+            takeQuestionPage: new TakeQuestionPage(page),
+        }
+        this.buzzerTeams[name] = actor
+        return actor
+    }
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())

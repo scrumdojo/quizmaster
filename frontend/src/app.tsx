@@ -13,6 +13,7 @@ import { QuizSharePage } from '#fe/make/quiz/share/quiz-share-page.tsx'
 import { WorkspacePage } from '#fe/make/workspace/workspace.tsx'
 import { PollTakePage } from '#fe/take/poll-take'
 import { QuestionTakePage } from '#fe/take/question-take'
+import { QuizBuzzerLobbyPage } from '#fe/take/quiz-take/quiz-buzzer-lobby/quiz-buzzer-lobby-page.tsx'
 import { QuizNicknamePage } from '#fe/take/quiz-take/quiz-nickname/quiz-nickname-page.tsx'
 import { QuizTakePage } from '#fe/take/quiz-take/quiz-take-page.tsx'
 import { QuizWelcomePage } from '#fe/take/quiz-take/quiz-welcome/quiz-welcome-page.tsx'
@@ -239,6 +240,7 @@ export const App = () => {
                     <Route path={ROUTES.quizTake} element={<QuizTakePage isDryRun={false} />} />
                     <Route path={ROUTES.quizNickname} element={<QuizNicknamePage isDryRun={false} />} />
                     <Route path={ROUTES.quizNicknameWithCohort} element={<QuizNicknamePage isDryRun={false} />} />
+                    <Route path={ROUTES.quizBuzzerLobby} element={<QuizBuzzerLobbyPage />} />
                 </Routes>
             </div>
             <PiCornerToggle animationOnly={animationOnly} onToggle={() => setAnimationOnly(value => !value)} />

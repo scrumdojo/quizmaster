@@ -7,4 +7,6 @@ public enum QuizMode {
     LEARN,
     @JsonProperty("exam")
     EXAM,
+    @JsonProperty("buzzer")
+    BUZZER,
 }

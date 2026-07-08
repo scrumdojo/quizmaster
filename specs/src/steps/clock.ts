@@ -1,6 +1,6 @@
 import type { QuizmasterWorld } from '#steps/world'
 
-const HEADER = 'X-Test-Clock-At'
+export const CLOCK_HEADER = 'X-Test-Clock-At'
 
 /**
  * Anchor the scenario's server-side clock to "now" as the spec sees it. Each
@@ -13,7 +13,7 @@ const HEADER = 'X-Test-Clock-At'
  */
 export const initServerClock = async (world: QuizmasterWorld) => {
     world.scenarioClockNow = new Date()
-    await world.page.setExtraHTTPHeaders({ [HEADER]: world.scenarioClockNow.toISOString() })
+    await world.page.setExtraHTTPHeaders({ [CLOCK_HEADER]: world.scenarioClockNow.toISOString() })
 }
 
 export const advanceServerClock = async (world: QuizmasterWorld, seconds: number) => {
@@ -21,5 +21,9 @@ export const advanceServerClock = async (world: QuizmasterWorld, seconds: number
         await initServerClock(world)
     }
     world.scenarioClockNow = new Date(world.scenarioClockNow!.getTime() + seconds * 1000)
-    await world.page.setExtraHTTPHeaders({ [HEADER]: world.scenarioClockNow.toISOString() })
+    const headerValue = world.scenarioClockNow.toISOString()
+    await world.page.setExtraHTTPHeaders({ [CLOCK_HEADER]: headerValue })
+    for (const actor of Object.values(world.buzzerTeams)) {
+        await actor.page.setExtraHTTPHeaders({ [CLOCK_HEADER]: headerValue })
+    }
 }

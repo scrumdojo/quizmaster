@@ -2,6 +2,7 @@ import { fetchJson, postJson } from '#fe/shared/api/helpers.ts'
 import type {
     QuizAttemptStartRequest,
     QuizAttemptStartResponse,
+    QuizBuzzerStatus,
     QuizLeaderboardResponse,
     QuizMetadata,
     QuizTake,
@@ -29,3 +30,6 @@ export const createDryRun = async (workspaceGuid: string, quizId: number): Promi
         `/api/workspaces/${workspaceGuid}/quizzes/${quizId}/dry-runs`,
         undefined,
     )
+
+export const fetchBuzzerStatus = async (quizId: number, attemptId: number) =>
+    await fetchJson<QuizBuzzerStatus>(`/api/quiz/${quizId}/attempts/${attemptId}/buzzer-status`)

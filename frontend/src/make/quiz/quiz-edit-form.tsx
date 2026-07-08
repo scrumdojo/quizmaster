@@ -97,7 +97,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                 note={
                     <span id="feedback-mode-note">
                         Exam mode shows feedback at the end. Learning mode shows feedback after each answer and allows
-                        the taker to try again.
+                        the taker to try again. Buzzer mode pairs two cohorts and starts the quiz for both at once.
                     </span>
                 }
             >
@@ -105,7 +105,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz, onCreateNewQuestion }:
                     name="mode"
                     value={state.feedbackMode}
                     onChange={state.setFeedbackMode}
-                    options={{ exam: 'Exam', learn: 'Learning' }}
+                    options={{ exam: 'Exam', learn: 'Learning', buzzer: 'Buzzer' }}
                 />
             </Field>
             <Field
