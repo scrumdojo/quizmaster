@@ -9,12 +9,10 @@ When('I start creating a new poll', async function () {
 
 When('I start editing poll {string}', async function (pollBookmark: string) {
     const spec = this.pollBookmarks[pollBookmark]
-    if (!spec) {
-        throw new Error(`Poll bookmark "${pollBookmark}" is unknown`)
-    }
+    const pollQuestion = spec?.question ?? pollBookmark
 
     await this.workspacePage.goto(this.workspaceGuid)
-    await this.workspacePage.editPoll(spec.question)
+    await this.workspacePage.editPoll(pollQuestion)
     await this.pollFormPage.waitForLoaded()
 })
 
