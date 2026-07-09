@@ -1,9 +1,8 @@
 /**
- * tools.ts
+ * charterTool.ts
  *
- * What tools EXIST for the exploratory-testing agent:
- *   - the charter tools (below), bundled into an in-process MCP server, and
- *   - the Playwright MCP server config that gives Claude a real browser to drive.
+ * What tools EXIST for the exploratory-testing agent: the charter tools (below),
+ * bundled into an in-process MCP server for the Claude Agent SDK.
  *
  * Which of these THIS agent is allowed to call is agent *policy*, not a tool
  * definition — that allow-list lives in agent.ts next to the other permission
@@ -18,8 +17,6 @@
  * Requires: @anthropic-ai/claude-agent-sdk, zod
  */
 
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { z } from "zod"; // TypeScript library for schema validation
 import { tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import {
@@ -30,11 +27,8 @@ import {
   listTourSumaries,
   reportSchema,
   saveReport,
-  OUTPUT_DIR,
   type TourReport,
 } from './charterStore';
-
-const here = dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------
 // Tool 1: get_tour_charter
@@ -98,11 +92,12 @@ export const getTourCharterTool = tool(
 // each with a tour_id and a short description.
 // ---------------------------------------------------------------------------------
 
-"IMPLEMENT THIS TOOL: list_tour_charters" +
-"Tool definition: name, description, input schema (none), and handler function" +
-"Implement the list_tour_charters tool here, following the same pattern as get_tour_charter." +
-"The handler should return a JSON array of tour summaries, each with a tour_id and a short description. " +
-" Use the listTourSumaries function to get the data."
+
+//IMPLEMENT TOOL 2: list_tour_charters" +
+//Tool definition: name, description, input schema (none), and handler function" +
+//Implement the list_tour_charters tool here, following the same pattern as get_tour_charter." +
+//The handler should return a JSON array of tour summaries, each with a tour_id and a short description. " +
+//Use the listTourSumaries function to get the data."
 
 // ---------------------------------------------------------------------------
 // Tool 3: finish_charter — capture the final report and end the session
@@ -215,28 +210,3 @@ export const charterServer = createSdkMcpServer({
   version: "1.0.0",
   tools: [getTourCharterTool, finishCharterTool, recordFindingsTool, recordDefectsTool],
 });
-
-// ---------------------------------------------------------------------------
-// The Playwright MCP server: spawns a browser Claude can drive.
-// ---------------------------------------------------------------------------
-
-export const playwrightServer = {
-  type: "stdio" as const,
-  command: "npx",
-  // Pinned (not @latest) so npx always resolves the same MCP build, which in
-  // turn pins the required chromium revision. See PLAYWRIGHT_SETUP.md.
-  // The config sets browserName: "chromium" so the MCP uses the bundled
-  // Chromium, not the default "chrome" channel (which needs a system Google
-  // Chrome install at /opt/google/chrome/chrome that we don't have).
-  args: [
-    "@playwright/mcp@0.0.77",
-    "--headless",
-    "--config",
-    join(here, "playwright-mcp.config.json"),
-    // Write screenshots, traces, page snapshots, and console logs into a
-    // dedicated .playwright/ subdir so they don't clutter the reports dir
-    // alongside the JSON reports finish_charter writes.
-    "--output-dir",
-    join(OUTPUT_DIR, ".playwright"),
-  ],
-};

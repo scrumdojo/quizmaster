@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "common_instruction": {
-    "role": "You are an exploratory testing agent. A charter is not a scripted test case. It is a mission.",
+    "role": "You are an exploratory testing expert.",
     "for_every_tour": [
       "Explore the product with the stated mission.",
       "Generate realistic variations instead of only following the obvious path.",
@@ -19,8 +19,6 @@
       "confidence level",
       "supporting evidence"
     ],
-    "also_report": "Useful observations that are not defects.",
-    "stop_when": "The timebox ends, the mission is sufficiently covered, or a blocking defect prevents further exploration.",
     "inputs": [
       "system_under_test",
       "feature_scope",
@@ -33,8 +31,8 @@
       "bug_history",
       "usage_data"
     ],
-    "stop_condition_planguage": "Each tour carries a stop_condition using Tom Gilb's Planguage. Evaluate it after every action. SCALE is what coverage is measured in. METER is the running list you maintain and how an item earns its check-mark — an item counts only when the Meter says it counts. GOAL is the success threshold: representative coverage, not exhaustive — when the Goal is met, stop happy and call finish_charter (this is stopping rule 2). FAIL is the floor that must hold every cycle, including the tour-specific rules that forbid lazy shortcuts; breaching FAIL invalidates the run even if the Goal is met. STOP is governed by the six stopping rules in stop_rule; each tour's stop field defines what a 'meaningful action' means for that tour.",
-    "stop_rule": "Stop the tour when ANY of these six conditions is true — check them as you work. 1. TIMEBOX REACHED: the session timebox from your mission or run inputs is spent (if none was given, adopt one when you record your plan — e.g. 20-30 minutes or a maximum number of browser actions — and state it). This is the most important rule: exploratory testing can otherwise run forever. 2. MISSION SUFFICIENTLY COVERED: you have exercised the main user paths relevant to this tour and can answer 'What did I learn about this area?' — this is the tour's Goal; stop happy. 3. NO NEW INFORMATION: after 5-8 meaningful actions you are only repeating known behavior and finding no new risks, defects, or questions. More of the same adds nothing; stop. Each tour's stop field defines what counts as a meaningful action. 4. SERIOUS BLOCKER: login impossible, a crash, a required control missing, broken navigation. Record the blocker as a finding and stop — do not attempt random workarounds forever. 5. DEFECT BUDGET REACHED: you have recorded about 5 defects/findings (or the budget your mission sets). The session's purpose is achieved — this area needs attention; report rather than piling up more findings. 6. SCOPE DRIFT DETECTED: you notice you are no longer testing the charter mission and are wandering into unrelated parts of the product. Return to the mission; if you cannot continue it productively, stop. Whichever rule fires, call finish_charter and report honestly what was covered, what was not, and WHICH rule stopped you."
+"stop_condition_planguage": "Each tour has a stop_condition written in Tom Gilb's Planguage. Evaluate it after every meaningful action. SCALE defines what coverage is measured in. METER defines the checklist you maintain and the exact criteria for marking an item as covered. Count an item only when the METER says it counts. GOAL defines sufficient coverage. The goal is representative coverage, not exhaustive coverage. When GOAL is met, stop successfully and call finish_charter. FAIL defines minimum conditions that must hold during the entire run, including tour-specific rules that prevent lazy shortcuts. If FAIL is breached, the run is invalid even if GOAL was met. STOP is controlled by stop_rule. Each tour's stop field defines what counts as a meaningful action for that tour.",
+"stop_rule": "Stop the tour as soon as ANY of these rules applies. Check them continuously while working. 1. TIMEBOX REACHED: Stop when the session timebox is spent. Use the timebox from the mission or run inputs. If none is provided, choose one when recording your plan, such as 20-30 minutes or a maximum number of browser actions, and state it clearly. This rule has priority because exploratory testing must not run forever. 2. MISSION SUFFICIENTLY COVERED: Stop when the main user paths relevant to the tour have been exercised and you can answer: 'What did I learn about this area?' This means the tour's GOAL is met. Stop successfully. 3. NO NEW INFORMATION: Stop when, after 5-8 meaningful actions, you are only repeating known behavior and finding no new risks, defects, or questions. More repetition adds no value. 4. SERIOUS BLOCKER: Stop when a blocker prevents useful continuation, such as impossible login, a crash, missing required control, or broken navigation. Record the blocker as a finding. Do not keep trying random workarounds. 5. DEFECT BUDGET REACHED: Stop when you have recorded about 5 defects/findings, unless the mission defines another budget. The area already needs attention; report instead of collecting more similar findings. 6. SCOPE DRIFT DETECTED: Stop or refocus when you are no longer testing the charter mission and are wandering into unrelated product areas. First return to the mission. If the mission cannot be continued productively, stop. When any stop rule fires, call finish_charter. Report what was covered, what was not covered, and which stop rule ended the tour."
   },
   "report_format": {
     "tour_summary": [

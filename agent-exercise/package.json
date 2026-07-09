@@ -1,9 +1,10 @@
 {
-    "name": "exploratory-testing-agent-solution",
+    "name": "exploratory-testing-agent-exercise",
     "private": true,
     "version": "0.0.0",
     "type": "module",
     "scripts": {
+        "setup": "./install.sh",
         "run-tour": "tsx agent.ts",
         "tsc": "tsc -b"
     },
