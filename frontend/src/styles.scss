@@ -457,6 +457,35 @@ body {
     }
 }
 
+// ── Corner FABs: mobile sizing ─────────────────────────────────────────────────
+// Below 960px the three 72px trigger circles crowd the viewport, so shrink
+// them to 48x48 and drop the labels to 8px.
+
+@media (max-width: 960px) {
+    .corner-fabs {
+        gap: 3px;
+    }
+
+    .bg-game-fab,
+    .theme-fab,
+    .language-fab {
+        width: 95px;
+    }
+
+    .bg-game-trigger,
+    .theme-trigger,
+    .language-trigger {
+        width: 48px;
+        height: 48px;
+    }
+
+    .bg-game-label,
+    .theme-label,
+    .language-label {
+        font-size: 8px;
+    }
+}
+
 // ── Windows XP reskin ─────────────────────────────────────────────────────────
 // Everything below is scoped to html[data-app-theme='windows-xp'], set by the
 // theme selector FAB. Most components already read the --page-bg/--surface-*/
