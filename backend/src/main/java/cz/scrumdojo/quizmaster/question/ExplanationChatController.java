@@ -32,13 +32,9 @@ public class ExplanationChatController {
         @PathVariable Integer id,
         @RequestBody ExplanationChatRequest request
     ) {
-        requireQuestionExists(id);
-        return ResponseEntity.ok(explanationChatService.chat(request.messages()));
-    }
-
-    private void requireQuestionExists(Integer id) {
-        if (!questionRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        Question question = questionRepository
+            .findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok(explanationChatService.chat(question, request.givenAnswer(), request.messages()));
     }
 }

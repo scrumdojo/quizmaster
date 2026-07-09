@@ -2,17 +2,19 @@ import type { KeyboardEvent } from 'react'
 import { useState } from 'react'
 
 import { Alert, TextInput } from '#fe/shared'
+import type { QuestionAnswer } from '#fe/take/model/question.ts'
 
 import { useExplanationChat } from '../use-explanation-chat.ts'
 import './explanation-chat.scss'
 
 interface ExplanationChatProps {
     readonly questionId: number
+    readonly givenAnswer: QuestionAnswer
 }
 
-export const ExplanationChat = ({ questionId }: ExplanationChatProps) => {
+export const ExplanationChat = ({ questionId, givenAnswer }: ExplanationChatProps) => {
     const [isOpen, setIsOpen] = useState(false)
-    const { promptText, setPromptText, loading, error, messages, ask } = useExplanationChat(questionId)
+    const { promptText, setPromptText, loading, error, messages, ask } = useExplanationChat(questionId, givenAnswer)
 
     const submitPrompt = () => {
         if (loading || promptText.trim().length === 0) return

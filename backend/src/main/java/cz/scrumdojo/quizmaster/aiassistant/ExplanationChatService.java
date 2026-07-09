@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.scrumdojo.quizmaster.aiassistant.ExplanationChatRequest.ExplanationChatMessage;
+import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
+import cz.scrumdojo.quizmaster.question.QuestionType;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -12,7 +15,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -20,8 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-// Slice 1a: proves the OpenRouter round trip with a generic placeholder prompt.
-// The question, given answer, and explanation are not part of the conversation yet.
+// Slice 1b: seeds the conversation with the active question's own content so the
+// taker never has to repeat it. The given answer arrives as an index/value reference
+// into the question (like QuestionAnswerRequest for submit), never as free text.
 @Slf4j
 @Service
 public class ExplanationChatService {
@@ -52,16 +58,52 @@ public class ExplanationChatService {
         );
     }
 
-    public ExplanationChatResponse chat(List<ExplanationChatMessage> messages) {
+    public ExplanationChatResponse chat(
+        Question question,
+        QuestionAnswerRequest givenAnswer,
+        List<ExplanationChatMessage> messages
+    ) {
         validateChatRequest(messages);
 
         List<Message> replay = new ArrayList<>();
-        replay.add(new Message("system", explanationChatPrompt));
+        replay.add(new Message("system", explanationChatPrompt + contextBlock(question, givenAnswer)));
         for (ExplanationChatMessage message : messages) {
             replay.add(new Message(message.role(), message.content()));
         }
 
         return new ExplanationChatResponse(requestAssistant(replay.toArray(Message[]::new)));
+    }
+
+    private String contextBlock(Question question, QuestionAnswerRequest givenAnswer) {
+        String explanation = question.getQuestionExplanation();
+        return (
+            "\n\nContext for this conversation:\n" +
+            "Question: " +
+            question.getQuestion() +
+            "\n" +
+            "Taker's answer: " +
+            describeGivenAnswer(question, givenAnswer) +
+            "\n" +
+            "Explanation: " +
+            (explanation == null || explanation.isBlank() ? "No explanation provided." : explanation)
+        );
+    }
+
+    private String describeGivenAnswer(Question question, QuestionAnswerRequest givenAnswer) {
+        if (givenAnswer == null) {
+            return "No answer given.";
+        }
+        if (question.getQuestionType() == QuestionType.NUMERICAL) {
+            return givenAnswer.value() == null ? "No answer given." : String.valueOf(givenAnswer.value());
+        }
+        String[] answers = question.getAnswers();
+        if (givenAnswer.selectedIdxs() == null || givenAnswer.selectedIdxs().length == 0 || answers == null) {
+            return "No answer given.";
+        }
+        return Arrays.stream(givenAnswer.selectedIdxs())
+            .filter(idx -> idx >= 0 && idx < answers.length)
+            .mapToObj(idx -> answers[idx])
+            .collect(Collectors.joining(", "));
     }
 
     private void validateChatRequest(List<ExplanationChatMessage> messages) {

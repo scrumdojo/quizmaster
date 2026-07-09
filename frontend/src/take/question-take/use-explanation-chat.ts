@@ -2,13 +2,14 @@ import { useState } from 'react'
 
 import type { ExplanationChatMessage } from '#fe/take/api/question.ts'
 import { postExplanationChat } from '#fe/take/api/question.ts'
+import type { QuestionAnswer } from '#fe/take/model/question.ts'
 
 export interface ExplanationChatEntry {
     readonly role: 'user' | 'assistant'
     readonly text: string
 }
 
-export const useExplanationChat = (questionId: number) => {
+export const useExplanationChat = (questionId: number, givenAnswer: QuestionAnswer) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -23,7 +24,7 @@ export const useExplanationChat = (questionId: number) => {
         setPromptText('')
         try {
             const nextTranscript = [...transcript, { role: 'user' as const, content: submittedPrompt }]
-            const response = await postExplanationChat(questionId, { messages: nextTranscript })
+            const response = await postExplanationChat(questionId, { givenAnswer, messages: nextTranscript })
             setTranscript([...nextTranscript, { role: 'assistant', content: response.reply }])
             setMessages(previous => [
                 ...previous,

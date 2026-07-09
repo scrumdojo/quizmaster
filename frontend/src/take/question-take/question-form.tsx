@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { Form } from '#fe/shared'
-import type { Question, QuestionTake } from '#fe/take/model/question.ts'
+import type { Question, QuestionAnswer, QuestionTake } from '#fe/take/model/question.ts'
 import { countDecimalDigits } from '#fe/take/model/question.ts'
 
 import { AnswerCountHint } from './components/answer-count-hint.tsx'
@@ -33,6 +33,9 @@ export const QuestionForm = ({ question }: QuestionFormProps) => {
     const correctAnswerCount =
         'correctAnswers' in displayQuestion ? displayQuestion.correctAnswers.length : displayQuestion.correctAnswerCount
     const questionExplanation = state.feedbackQuestion?.questionExplanation ?? ''
+    const givenAnswer: QuestionAnswer = state.isNumerical
+        ? { type: 'numerical', value: Number(state.numericalAnswer) }
+        : { type: 'choice', selectedIdxs: state.selectedAnswerIdxs }
 
     const decimalDigits =
         state.isNumerical && answers[0]
@@ -81,6 +84,7 @@ export const QuestionForm = ({ question }: QuestionFormProps) => {
                         status={state.status}
                         score={state.score}
                         explanation={questionExplanation}
+                        givenAnswer={givenAnswer}
                     />
                 )}
             </div>

@@ -12,6 +12,7 @@ export interface ExplanationChatMessage {
 }
 
 export interface ExplanationChatRequest {
+    readonly givenAnswer: QuestionAnswer
     readonly messages: readonly ExplanationChatMessage[]
 }
 
