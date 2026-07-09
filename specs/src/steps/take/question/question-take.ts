@@ -2,7 +2,7 @@ import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
 import { expectTextToBe } from '#steps/common.ts'
-import { Then, When } from '#steps/fixture.ts'
+import { Given, Then, When } from '#steps/fixture.ts'
 import { expectColorFeedback, expectQuestion } from '#steps/question/expects.ts'
 import { answerQuestion } from '#steps/take/question/ops.ts'
 import type { QuizmasterWorld } from '#steps/world'
@@ -114,6 +114,25 @@ When('I ask the explanation chat {string}', async function (prompt: string) {
     await askExplanationChat(this, prompt)
 })
 
+Given('the explanation chat service is unavailable', async function () {
+    await this.page.route(/\/explanation-chat$/, async route => {
+        await route.fulfill({
+            status: 503,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'AI token is not configured.', code: 'ai-token-not-configured' }),
+        })
+    })
+})
+
+When('I try to ask the explanation chat {string}', async function (prompt: string) {
+    await this.takeQuestionPage.fillExplanationChatPrompt(prompt)
+    await this.takeQuestionPage.sendExplanationChatPrompt()
+})
+
+Then('I see an explanation chat error {string}', async function (text: string) {
+    await this.takeQuestionPage.expectExplanationChatErrorContaining(text)
+})
+
 When('I collapse the explanation chat', async function () {
     await this.takeQuestionPage.collapseExplanationChat()
 })
@@ -124,6 +143,10 @@ Then('I see a reply in the explanation chat', async function () {
 
 Then('I see a reply in the explanation chat mentioning {string}', async function (text: string) {
     await this.takeQuestionPage.expectExplanationChatReplyContaining(text)
+})
+
+Then('the explanation chat reply does not contain {string}', async function (text: string) {
+    await this.takeQuestionPage.expectExplanationChatReplyNotContaining(text)
 })
 
 Then('I see my question {string} in the explanation chat', async function (text: string) {

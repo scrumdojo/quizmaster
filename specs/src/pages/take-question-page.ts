@@ -57,6 +57,7 @@ export class TakeQuestionPage {
     private explanationChatReplyLocator = () => this.page.locator('.explanation-chat__message--assistant')
     private explanationChatUserMessageLocator = (text: string) =>
         this.page.locator('.explanation-chat__message--user', { hasText: text })
+    private explanationChatErrorLocator = () => this.page.getByTestId('explanation-chat').locator('.alert.error')
 
     expandExplanationChat = () => this.explanationChatToggleLocator().click()
     collapseExplanationChat = () => this.explanationChatToggleLocator().click()
@@ -104,6 +105,10 @@ export class TakeQuestionPage {
     expectExplanationChatReplyVisible = () => expect(this.explanationChatReplyLocator().first()).toBeVisible()
     expectExplanationChatReplyContaining = (text: string) =>
         expect(this.explanationChatReplyLocator().last()).toContainText(text)
+    expectExplanationChatReplyNotContaining = (text: string) =>
+        expect(this.explanationChatReplyLocator().last()).not.toContainText(text)
     expectExplanationChatUserMessage = (text: string) =>
         expect(this.explanationChatUserMessageLocator(text)).toBeVisible()
+    expectExplanationChatErrorContaining = (text: string) =>
+        expect(this.explanationChatErrorLocator()).toContainText(text)
 }

@@ -162,6 +162,27 @@ similar to an existing question in the same workspace is not shown — Robin
 says so in the chat, and the maker refines the request in the next message.
 The conversation is ephemeral: closing the assistant discards it.
 
+## Explanation chat
+
+Wherever a [question](#question)'s explanation is shown to a
+[quiz taker](#roles) — a learning-mode quiz question or a standalone
+question — an expandable chat underneath lets the taker ask a free-form
+follow-up question about it: an unfamiliar term, a deeper explanation, a
+concrete example, or an alternative explanation (e.g. a comparison). The chat
+already knows the question, the taker's given answer, and the explanation, so
+the taker never has to repeat any of it.
+
+The chat stays bounded to that question's topic: an unrelated question is not
+answered on its own terms, and the AI instead steers the taker back to the
+topic without ending the conversation, so a later on-topic question still
+gets a normal, helpful reply. The AI mirrors the taker's tone and language,
+except when the taker is rude or unfriendly — then it stays neutral and
+friendly instead of escalating.
+
+The conversation persists only while the question stays active (surviving a
+collapse/re-expand of the chat); it starts empty again once the taker
+re-answers the question or begins a new attempt.
+
 ---
 
 ## Alphabetical index
@@ -176,6 +197,7 @@ The conversation is ephemeral: closing the assistant discards it.
 | Difficulty            | [Quiz](#quiz)                            |
 | Easy                  | [Question](#question), [Quiz](#quiz)     |
 | Exam mode             | [Quiz](#quiz)                            |
+| Explanation chat      | [Explanation chat](#explanation-chat)    |
 | Explanation           | [Question](#question)                    |
 | Finished              | [Attempt](#taking-a-quiz-attempt)        |
 | Image                 | [Question](#question)                    |

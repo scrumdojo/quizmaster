@@ -13,7 +13,7 @@ export interface InputProps<V> {
 }
 
 export function Input<V>(type: string, toText: (value: V) => string, toValue: (value: string) => V) {
-    return ({ placeholder, className, id, value, onChange, min, step }: InputProps<V>) => (
+    return ({ placeholder, className, id, value, onChange, onKeyDown, min, step }: InputProps<V>) => (
         <input
             type={type}
             id={id}
@@ -23,6 +23,7 @@ export function Input<V>(type: string, toText: (value: V) => string, toValue: (v
             step={step}
             value={toText(value)}
             onChange={e => onChange(toValue(e.target.value))}
+            onKeyDown={onKeyDown}
         />
     )
 }

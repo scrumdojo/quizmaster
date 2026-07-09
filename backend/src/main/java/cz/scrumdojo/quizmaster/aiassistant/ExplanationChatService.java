@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.scrumdojo.quizmaster.aiassistant.ExplanationChatRequest.ExplanationChatMessage;
+import cz.scrumdojo.quizmaster.common.CodedResponseStatusException;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
 import cz.scrumdojo.quizmaster.question.QuestionType;
@@ -108,17 +109,26 @@ public class ExplanationChatService {
 
     private void validateChatRequest(List<ExplanationChatMessage> messages) {
         if (messages == null || messages.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Messages must not be empty.");
+            throw new CodedResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Messages must not be empty.",
+                "empty-chat-messages"
+            );
         }
         ExplanationChatMessage last = messages.get(messages.size() - 1);
         if (!"user".equals(last.role()) || last.content() == null || last.content().isBlank()) {
-            throw new ResponseStatusException(
+            throw new CodedResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "Last message must be a user message with non-empty content."
+                "Last message must be a user message with non-empty content.",
+                "invalid-last-message"
             );
         }
         if (apiToken == null || apiToken.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI token is not configured.");
+            throw new CodedResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "AI token is not configured.",
+                "ai-token-not-configured"
+            );
         }
     }
 

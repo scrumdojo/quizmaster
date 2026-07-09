@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import { useState } from 'react'
 
-import { Alert, TextInput } from '#fe/shared'
+import { Alert, Button, TextInput } from '#fe/shared'
 import type { QuestionAnswer } from '#fe/take/model/question.ts'
 
 import { useExplanationChat } from '../use-explanation-chat.ts'
@@ -61,14 +61,13 @@ export const ExplanationChat = ({ questionId, givenAnswer }: ExplanationChatProp
                             onChange={setPromptText}
                             onKeyDown={onPromptKeyDown}
                         />
-                        <button
-                            type="button"
-                            className="explanation-chat__send"
+                        <Button
+                            className="primary button explanation-chat__send"
                             disabled={loading || promptText.trim().length === 0}
                             onClick={submitPrompt}
                         >
                             Send
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

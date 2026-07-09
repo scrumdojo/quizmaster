@@ -11,7 +11,7 @@ export class HomePage {
 
     // Locators for the links
     createWorkspaceLink = () => this.page.locator('a[href="/workspace/new"]')
-    workspaceLink = (title: string) => this.page.locator('.home-workspaces__link', { hasText: title })
+    workspaceLink = (title: string) => this.page.locator('.home-workspaces__link', { hasText: title }).first()
     private workspaceListLocator = () => this.page.locator('.home-workspaces__list')
     private workspaceFilterSubmitLocator = () => this.page.locator('#workspace-filter-form button[type="submit"]')
 

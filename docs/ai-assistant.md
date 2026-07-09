@@ -1,11 +1,16 @@
 # AI Assistant
 
-Quizmaster generates question drafts on demand for [Quiz makers](domain-language.md#roles).
-The feature has three pieces: **Robin AI** in the frontend (the FAB and chat
-sheet the maker interacts with), an AI assistant service in the backend, and
-**OpenRouter** as the external LLM provider.
+Quizmaster has two AI-assisted flows, both built on the same shape (frontend
+transcript, stateless backend endpoint, one system prompt, OpenRouter as the
+LLM provider): **Robin AI** generates question drafts on demand for
+[Quiz makers](domain-language.md#roles), and the **explanation chat** lets
+[Quiz takers](domain-language.md#roles) ask free-form follow-up questions
+under a question's explanation. Most of this document describes Robin, since
+the explanation chat only deviates from it in a few places — see
+[The explanation chat is Robin's shape, for the taker instead of the maker](#the-explanation-chat-is-robins-shape-for-the-taker-instead-of-the-maker).
 
-For the user-facing behavior, see [domain-language.md](domain-language.md#ai-assistance-robin-ai).
+For the user-facing behavior, see [domain-language.md](domain-language.md#ai-assistance-robin-ai)
+and [domain-language.md](domain-language.md#explanation-chat).
 This document covers the architectural decisions worth knowing before changing
 the code.
 
@@ -99,6 +104,52 @@ Configuration lives under the `ai.*` namespace in `application.properties`
 max-tokens). See [devenv/how-to-develop.md](devenv/how-to-develop.md) for
 how to set them up locally.
 
+## The explanation chat is Robin's shape, for the taker instead of the maker
+
+Takers can ask free-form follow-up questions under a question's explanation
+(learning-mode quizzes and standalone questions alike — it triggers on
+"an explanation is showing", not on `QuizMode.LEARN` specifically). The
+feature reuses Robin's architecture almost unchanged: one stateless endpoint,
+`POST /api/question/{id}/explanation-chat` (`ExplanationChatController`,
+`question/` package), one system prompt
+(`backend/src/main/resources/prompts/explanation-chat.md`), one
+`ExplanationChatService` (`aiassistant/` package) that replays the
+frontend-owned transcript to OpenRouter. There is no new database table — the
+transcript lives only in frontend state (`use-explanation-chat.ts`) and is
+discarded when the `ExplanationChat` component unmounts (collapsing does not
+unmount it; answering again or starting a new attempt does).
+
+The backend seeds the conversation itself: the request carries only
+`questionId` (path) and the taker's `givenAnswer` (an index/value reference,
+same shape as `QuestionAnswerRequest` for submit) — never the question text,
+answer text, or explanation as free text from the client. `ExplanationChatService`
+loads the `Question` by id and builds the opening context block from
+`question.getQuestion()`, `describeGivenAnswer()` (branches on
+`QuestionType` — numerical vs. index-based choice), and
+`questionExplanation` (falls back to "No explanation provided." when blank,
+so a question without an explanation still supports the chat).
+
+The system prompt carries two behavioral constraints beyond "answer helpfully
+using the context":
+
+- **Topic boundary**: an off-topic follow-up is not answered on its own terms
+  and does not end the conversation — the model names the quiz question's
+  topic and steers back to it, leaving the conversation open for a later
+  on-topic question.
+- **Tone mirroring with a floor**: the model matches the taker's tone and
+  language, except when the taker is rude or unfriendly — then it stays
+  neutral and friendly rather than mirroring or escalating.
+
+Both are prompt-only behaviors (no code branches), verified by `@ai`-tagged
+specs in `specs/features/take/question/Question.Take.ExplanationChat.OffTopic.feature`
+and `...Tone.feature` that assert against real model output.
+
+Validation failures carry the same stable error codes as Robin
+(`ai-token-not-configured`, `empty-chat-messages`, `invalid-last-message`, via
+`CodedResponseStatusException`), and `use-explanation-chat.ts` maps them to a
+clearer message the same way Robin's `errorMessageFor` does — an AI-call
+failure surfaces as a visible error in the chat, never a silent no-op.
+
 ## MCP does not expose Robin
 
 The MCP server deliberately has no AI drafting tool — an MCP client is itself
@@ -114,3 +165,9 @@ an AI and drafts questions directly. See [mcp/overview.md](mcp/overview.md).
 - Backend lives under `backend/src/main/java/cz/scrumdojo/quizmaster/aiassistant/`.
   `AiAssistantService.chat` orchestrates the transcript replay, per-type
   validation, and dedup; the embedding stack is in the same package.
+- The explanation chat's frontend lives under
+  `frontend/src/take/question-take/` (`components/explanation-chat.tsx` renders
+  the collapsible chat; `use-explanation-chat.ts` owns the transcript). The API
+  call is in `frontend/src/take/api/question.ts`. Its backend service
+  (`ExplanationChatService`) sits in `aiassistant/` alongside Robin's; its
+  controller (`ExplanationChatController`) sits in `question/`.

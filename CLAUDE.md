@@ -135,14 +135,19 @@ Endpoints live under `/api/`. Two flavors:
   `totalQuestions`; each per-question entry also carries `missedBefore` — true
   when the same taker (`nickname` + `cohortGuid`) got that question wrong on an
   earlier finished attempt of the same quiz.
+  `POST /api/question/{id}/explanation-chat` drives the taker-facing follow-up
+  chat under a question's explanation (stateless, frontend-owned transcript,
+  same shape as Robin's chat endpoint) — see `docs/ai-assistant.md`.
 - Plus `GET /api/feature-flag`.
 
 Controllers are the source of truth: workspace authoring lives in
 `workspace/` (`WorkspaceController`, `WorkspaceQuestionController`,
 `WorkspaceQuizController`), with poll authoring in `poll/`
 (`PollController`); taking lives in `*TakeController` +
-`AttemptController`; AI drafting in `AiAssistantController`. See
-`docs/mcp/rest-auth.md` for the (absent) auth state.
+`AttemptController`; AI drafting in `AiAssistantController`; the taker-facing
+explanation chat in `ExplanationChatController` (`question/`), backed by
+`ExplanationChatService` (`aiassistant/`). See `docs/mcp/rest-auth.md` for the
+(absent) auth state.
 
 ## Frontend Routes
 
