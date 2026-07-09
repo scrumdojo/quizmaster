@@ -58,13 +58,15 @@ const ICONS = ['🦣', '😇'] as const
 // Scaffolding for a future full app reskin: persists the chosen theme and
 // exposes it as `data-app-theme` on <html> for CSS to hook into later.
 
-type AppTheme = 'default' | 'windows-xp' | 'star-trek'
+type AppTheme = 'default' | 'windows-xp' | 'star-trek' | 'mac-aqua'
 
 const APP_THEME_STORAGE_KEY = 'app-theme'
 
+const APP_THEME_VALUES: AppTheme[] = ['windows-xp', 'star-trek', 'mac-aqua']
+
 const readAppTheme = (): AppTheme => {
     const v = localStorage.getItem(APP_THEME_STORAGE_KEY)
-    return v === 'windows-xp' || v === 'star-trek' ? v : 'default'
+    return (APP_THEME_VALUES as string[]).includes(v ?? '') ? (v as AppTheme) : 'default'
 }
 
 document.documentElement.dataset.appTheme = readAppTheme()
@@ -73,6 +75,7 @@ const APP_THEME_OPTIONS: { value: AppTheme; label: string }[] = [
     { value: 'default', label: 'Standaard' },
     { value: 'windows-xp', label: 'Windows XP' },
     { value: 'star-trek', label: 'Star Trek' },
+    { value: 'mac-aqua', label: 'Mac OS X' },
 ]
 
 const AppThemeFab = () => {
@@ -227,6 +230,32 @@ const LcarsBar = () => {
     )
 }
 
+// Decorative Aqua menu bar — same pattern as XpTaskbar, only shown via CSS
+// when data-app-theme="mac-aqua" (see .aqua-menu-bar in styles.scss).
+const AquaMenuBar = () => {
+    const [now, setNow] = useState<Date>(() => new Date())
+
+    useEffect(() => {
+        const id = window.setInterval(() => setNow(new Date()), 30_000)
+        return () => window.clearInterval(id)
+    }, [])
+
+    const clock = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+    return (
+        <div className="aqua-menu-bar" aria-hidden="true">
+            <span className="aqua-menu-bar__apple">🍎</span>
+            <span className="aqua-menu-bar__app">Quizmaster</span>
+            <span className="aqua-menu-bar__item">File</span>
+            <span className="aqua-menu-bar__item">Edit</span>
+            <span className="aqua-menu-bar__item">View</span>
+            <span className="aqua-menu-bar__item">Window</span>
+            <span className="aqua-menu-bar__item">Help</span>
+            <span className="aqua-menu-bar__clock">{clock}</span>
+        </div>
+    )
+}
+
 interface BackgroundGameFabProps {
     readonly battleOnly: boolean
     readonly onBattleOnlyChange: (value: boolean) => void
@@ -377,6 +406,7 @@ export const App = () => {
                 </div>
                 <XpTaskbar />
                 <LcarsBar />
+                <AquaMenuBar />
             </BrowserRouter>
         </LanguageProvider>
     )

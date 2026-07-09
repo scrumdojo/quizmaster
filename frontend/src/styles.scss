@@ -1603,3 +1603,516 @@ html[data-app-theme='star-trek'] .lcars-bar {
     margin-left: auto;
     color: #99ccff;
 }
+
+// ── Mac OS X Aqua reskin ───────────────────────────────────────────────────────
+// Aqua is glossy blue-gel pill controls, heavy rounding, and brushed-metal
+// title bars with red/yellow/green traffic-light dots. Same strategy as the
+// other reskins: recolor broadly via variables, then add Aqua panel/button
+// chrome to the highest-visibility surfaces plus a decorative top menu bar.
+
+html[data-app-theme='mac-aqua'] {
+    --page-bg: #dfe8f2;
+    --surface-strong: #ffffff;
+    --surface-soft: #eef3f9;
+    --surface-accent: #dceefc;
+    --border-subtle: #a8b7c7;
+    --border-strong: #3b6ea5;
+    --text-strong: #1a1a1a;
+    --text-soft: #45505c;
+    --text-muted: #6b7684;
+    --accent: #2f7ae0;
+    --accent-strong: #1c5fc0;
+    --accent-soft: #cfe3fb;
+    --accent-warm: #ff9500;
+    --accent-warm-soft: #ffe0b3;
+    --accent-mint: #24b34c;
+    --accent-mint-soft: #d4f5dc;
+    --shadow-lg: 0 24px 60px rgba(20, 50, 90, 0.22);
+    --shadow-md: 0 14px 34px rgba(20, 50, 90, 0.16);
+    --shadow-sm: 0 8px 20px rgba(20, 50, 90, 0.12);
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+
+    background:
+        radial-gradient(circle at 25% 15%, rgba(255, 255, 255, 0.35), transparent 45%),
+        linear-gradient(160deg, #1c4b82 0%, #3a7bd5 45%, #7fc7e8 100%);
+
+    &::-webkit-scrollbar {
+        width: 15px;
+        height: 15px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #eef3f9;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #ffffff 0%, #cfe3fb 50%, #a8b7c7 100%);
+        border: 1px solid #8fa4b8;
+        border-radius: 999px;
+    }
+
+    &::-webkit-scrollbar-button {
+        display: none;
+    }
+}
+
+html[data-app-theme='mac-aqua'] body {
+    font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: transparent;
+    padding-top: 26px;
+}
+
+html[data-app-theme='mac-aqua'] input:not([type='checkbox']):not([type='radio']),
+html[data-app-theme='mac-aqua'] select,
+html[data-app-theme='mac-aqua'] textarea {
+    font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    border: 1px solid #a8b7c7;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+    background: #ffffff;
+
+    &:focus {
+        outline: none;
+        border-color: #3b6ea5;
+        box-shadow:
+            inset 0 1px 3px rgba(0, 0, 0, 0.12),
+            0 0 0 3px rgba(59, 110, 165, 0.25);
+    }
+}
+
+html[data-app-theme='mac-aqua'] input[type='checkbox'],
+html[data-app-theme='mac-aqua'] input[type='radio'] {
+    accent-color: #2f7ae0;
+}
+
+// Glossy blue-gel pill button — the iconic Aqua "candy" control: a bright
+// highlight on the top half, a hard color break, then a darker gradient below.
+@mixin aqua-button-face($color: #2f7ae0, $color-dark: #1c66d6) {
+    font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
+    border-radius: 999px;
+    border: 1px solid #1c4e91;
+    background: linear-gradient(180deg, #ffffff 0%, $color 46%, $color-dark 50%, $color 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 2px 6px rgba(20, 50, 90, 0.3);
+
+    &:hover {
+        transform: none;
+        filter: brightness(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.7),
+            0 3px 8px rgba(20, 50, 90, 0.35);
+    }
+
+    &:active {
+        transform: translateY(1px);
+        filter: brightness(0.92);
+    }
+}
+
+html[data-app-theme='mac-aqua'] .button {
+    @include aqua-button-face;
+
+    &.secondary {
+        color: #1c5fc0;
+        text-shadow: none;
+        border: 1px solid #a8b7c7;
+        background: linear-gradient(180deg, #ffffff 0%, #eef3f9 46%, #d7e0ea 50%, #eef3f9 100%);
+    }
+
+    &:disabled {
+        color: #9aa5b1;
+        text-shadow: none;
+        background: #dfe4ea;
+        border-color: #c3ccd6;
+        box-shadow: none;
+    }
+}
+
+html[data-app-theme='mac-aqua'] .link-button {
+    @include aqua-button-face;
+}
+
+html[data-app-theme='mac-aqua'] .link-button--secondary {
+    color: #1c5fc0;
+    text-shadow: none;
+    border: 1px solid #a8b7c7;
+    background: linear-gradient(180deg, #ffffff 0%, #eef3f9 46%, #d7e0ea 50%, #eef3f9 100%);
+
+    &:hover {
+        color: #1c5fc0;
+        background: linear-gradient(180deg, #ffffff 0%, #eef3f9 100%);
+    }
+}
+
+// Reused "Aqua window" chrome: a brushed-metal title bar with traffic-light
+// dots on the left and a centered title, like a real Mac OS X window.
+@mixin aqua-window-titlebar($title, $body: linear-gradient(180deg, #ffffff 0%, #eef3f9 100%)) {
+    position: relative;
+    background: $body;
+    border: 1px solid #8fa4b8;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(20, 50, 90, 0.28);
+    backdrop-filter: none;
+    padding-top: 2.2rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 1.7rem;
+        background:
+            radial-gradient(circle 5px at 16px 50%, #ff5f57, transparent 60%),
+            radial-gradient(circle 5px at 34px 50%, #ffbd2e, transparent 60%),
+            radial-gradient(circle 5px at 52px 50%, #28c840, transparent 60%),
+            linear-gradient(180deg, #f3f6f9 0%, #d3dce4 48%, #b9c5d0 52%, #e6ebf0 100%);
+        border-bottom: 1px solid #8fa4b8;
+        border-radius: 12px 12px 0 0;
+        filter: none;
+        pointer-events: none;
+    }
+
+    &::after {
+        content: $title;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 1.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333333;
+        font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-weight: 700;
+        font-size: 0.82rem;
+        filter: none;
+        pointer-events: none;
+    }
+}
+
+html[data-app-theme='mac-aqua'] .page {
+    @include aqua-window-titlebar('Quizmaster');
+}
+
+html[data-app-theme='mac-aqua'] .home-hero__content {
+    @include aqua-window-titlebar('Quizmaster');
+}
+
+html[data-app-theme='mac-aqua'] .home-hero__panel {
+    @include aqua-window-titlebar('Workflow');
+}
+
+html[data-app-theme='mac-aqua'] .home-highlight-card {
+    @include aqua-window-titlebar('Tip');
+}
+
+html[data-app-theme='mac-aqua'] .home-workspaces {
+    @include aqua-window-titlebar('Jump Back In');
+}
+
+html[data-app-theme='mac-aqua'] .home-workspaces__link {
+    border-radius: 8px;
+}
+
+html[data-app-theme='mac-aqua'] #inline-question-modal {
+    @include aqua-window-titlebar('New Question');
+
+    &::backdrop {
+        background: rgba(10, 20, 40, 0.5);
+    }
+}
+
+html[data-app-theme='mac-aqua'] .inline-question-modal__close {
+    top: 0.5rem;
+    left: 0.6rem;
+    right: auto;
+    width: 1.1rem;
+    height: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #ff8f88 0%, #e0453b 100%);
+    border: 1px solid #a8332c;
+    border-radius: 999px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.7rem;
+    z-index: 2;
+
+    &:hover {
+        color: #fff;
+        background: linear-gradient(180deg, #ffa89f 0%, #e8564c 100%);
+    }
+}
+
+// ── Aqua: quiz stats & share ────────────────────────────────────────────────
+
+html[data-app-theme='mac-aqua'] .share-qr-dialog {
+    @include aqua-window-titlebar('QR Code');
+}
+
+html[data-app-theme='mac-aqua'] .live-stats-dialog {
+    @include aqua-window-titlebar('Live Stats');
+}
+
+html[data-app-theme='mac-aqua'] .cohort-row,
+html[data-app-theme='mac-aqua'] .quiz-stats__hero,
+html[data-app-theme='mac-aqua'] .quiz-stats__section,
+html[data-app-theme='mac-aqua'] .quiz-stats__highlight,
+html[data-app-theme='mac-aqua'] .quiz-stats table {
+    border-radius: 10px;
+    border-color: #a8b7c7;
+}
+
+// ── Aqua: Robin AI chatsheet ──────────────────────────────────────────────────
+
+html[data-app-theme='mac-aqua'] .robin-sheet {
+    background: #eef3f9;
+    border: 1px solid #8fa4b8;
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -10px 30px rgba(20, 50, 90, 0.22);
+
+    .title {
+        color: #1c5fc0;
+    }
+
+    .close-button {
+        color: #1c5fc0;
+    }
+}
+
+html[data-app-theme='mac-aqua'] .robin-sheet--chat .robin-sheet__composer {
+    background: #eef3f9;
+    border-top: 1px solid #a8b7c7;
+}
+
+html[data-app-theme='mac-aqua'] .robin-chat-message--user {
+    background: linear-gradient(180deg, #ffffff 0%, #2f7ae0 46%, #1c66d6 50%, #2f7ae0 100%);
+    color: #fff;
+}
+
+html[data-app-theme='mac-aqua'] .robin-chat-message--assistant {
+    background: #ffffff;
+    color: #10233f;
+    border: 1px solid #a8b7c7;
+}
+
+html[data-app-theme='mac-aqua'] .generated-question {
+    background: #ffffff;
+    border: 1px solid #a8b7c7;
+}
+
+html[data-app-theme='mac-aqua'] .generated-question__number {
+    color: #1c5fc0;
+}
+
+// ── Aqua menu bar (decorative) ────────────────────────────────────────────────
+
+.aqua-menu-bar {
+    display: none;
+}
+
+html[data-app-theme='mac-aqua'] .aqua-menu-bar {
+    display: flex;
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 24px;
+    align-items: center;
+    gap: 16px;
+    padding: 0 12px;
+    background: linear-gradient(180deg, #f6f8fa 0%, #dde5ed 55%, #c5d0da 100%);
+    border-bottom: 1px solid #8fa4b8;
+    box-shadow: 0 1px 4px rgba(20, 50, 90, 0.2);
+    z-index: 9000;
+    font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.aqua-menu-bar__apple,
+.aqua-menu-bar__app {
+    font-weight: 700;
+}
+
+.aqua-menu-bar__clock {
+    margin-left: auto;
+}
+
+// ── Aqua: workspace page ──────────────────────────────────────────────────────
+
+html[data-app-theme='mac-aqua'] .workspace-page {
+    @include aqua-window-titlebar('Quizmaster — Workspace');
+    position: relative;
+}
+
+html[data-app-theme='mac-aqua'] .workspace-header {
+    border-radius: 12px;
+    border: 1px solid #a8b7c7;
+    background: linear-gradient(180deg, #ffffff 0%, #eef3f9 100%);
+}
+
+html[data-app-theme='mac-aqua'] .workspace-header__eyebrow {
+    border-radius: 999px;
+    background: #dceefc;
+    color: #1c5fc0;
+}
+
+html[data-app-theme='mac-aqua'] .workspace-header__stat {
+    border-radius: 10px;
+    border: 1px solid #a8b7c7;
+    background: #ffffff;
+}
+
+html[data-app-theme='mac-aqua'] .workspace-tabs {
+    gap: 4px;
+    border-radius: 999px;
+    background: #dceefc;
+}
+
+html[data-app-theme='mac-aqua'] .workspace-tab {
+    font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: #1c5fc0;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.6);
+        color: #1c5fc0;
+    }
+
+    &[aria-selected='true'] {
+        @include aqua-button-face;
+        color: #fff;
+    }
+}
+
+html[data-app-theme='mac-aqua'] .workspace-pagination__page {
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #a8b7c7;
+    color: #1a1a1a;
+
+    &:hover {
+        color: #1a1a1a;
+        background: #eef3f9;
+    }
+
+    &--active {
+        @include aqua-button-face;
+        color: #fff;
+    }
+}
+
+html[data-app-theme='mac-aqua'] .workspace-question-tag-filter__button {
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #a8b7c7;
+    color: #1a1a1a;
+
+    &--selected,
+    &[aria-pressed='true'] {
+        @include aqua-button-face;
+        color: #fff;
+    }
+}
+
+html[data-app-theme='mac-aqua'] .workspace-empty-state,
+html[data-app-theme='mac-aqua'] .workspace-empty-state--questions,
+html[data-app-theme='mac-aqua'] .workspace-empty-state--quizzes {
+    border-radius: 12px;
+    border: 1px dashed #a8b7c7;
+    background: #ffffff;
+}
+
+html[data-app-theme='mac-aqua'] .workspace-empty-state__badge {
+    border-radius: 999px;
+    background: #dceefc;
+    color: #1c5fc0;
+}
+
+html[data-app-theme='mac-aqua'] .question-item,
+html[data-app-theme='mac-aqua'] .quiz-item {
+    border-radius: 10px;
+    border: 1px solid #a8b7c7;
+    background: #ffffff;
+}
+
+html[data-app-theme='mac-aqua'] .quiz-item__dropdown-menu,
+html[data-app-theme='mac-aqua'] .question-used-wrapper .in-quiz-list {
+    border-radius: 10px;
+    border: 1px solid #a8b7c7;
+}
+
+html[data-app-theme='mac-aqua'] .question-used-wrapper .in-quiz-list li {
+    border-color: #dceefc;
+}
+
+// ── Aqua: quiz/question taking flow ───────────────────────────────────────────
+
+html[data-app-theme='mac-aqua'] .take-card {
+    @include aqua-window-titlebar('Quizmaster');
+}
+
+html[data-app-theme='mac-aqua'] .quiz-play .question-fieldset {
+    @include aqua-window-titlebar('Question');
+}
+
+html[data-app-theme='mac-aqua'] .quiz-score .question-fieldset {
+    @include aqua-window-titlebar('Review');
+}
+
+html[data-app-theme='mac-aqua'] .score-summary {
+    position: relative;
+    @include aqua-window-titlebar('Score');
+}
+
+html[data-app-theme='mac-aqua'] .quiz-welcome-card .leaderboard-panel {
+    @include aqua-window-titlebar('Leaderboard');
+}
+
+html[data-app-theme='mac-aqua'] .bookmark-list,
+html[data-app-theme='mac-aqua'] .countdown,
+html[data-app-theme='mac-aqua'] .quiz-progress progress {
+    border-radius: 999px;
+}
+
+html[data-app-theme='mac-aqua'] .dry-run-indicator {
+    background: linear-gradient(180deg, #fff2cf 0%, #ffcc66 100%);
+    color: #5a3d00;
+}
+
+html[data-app-theme='mac-aqua'] .submit-btn {
+    @include aqua-button-face;
+}
+
+html[data-app-theme='mac-aqua'] ul.answers li {
+    input[type='checkbox'],
+    input[type='radio'] {
+        border-color: #a8b7c7;
+        background-color: #ffffff;
+    }
+
+    input[type='checkbox']:checked,
+    input[type='radio']:checked {
+        border-color: #1c5fc0;
+    }
+
+    input[type='checkbox']:checked::after,
+    input[type='radio']:checked::after {
+        color: #2f7ae0;
+    }
+}
