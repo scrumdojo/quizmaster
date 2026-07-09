@@ -142,6 +142,10 @@ Endpoints live under `/api/`. Two flavors:
   `POST /api/question/{id}/explanation-chat` drives the taker-facing follow-up
   chat under a question's explanation (stateless, frontend-owned transcript,
   same shape as Robin's chat endpoint) — see `docs/ai-assistant.md`.
+  `GET /api/quiz/{quizId}/mistakes-history?nickname=...&cohortGuid=...` returns
+  every question that taker has ever gotten wrong (or partially wrong) across
+  all of their finished attempts at that quiz — the data backing the taker's
+  persistent mistakes-history page.
 - Plus `GET /api/feature-flag`.
 
 Controllers are the source of truth: workspace authoring lives in
@@ -162,6 +166,9 @@ The router lives in `frontend/src/`. Path families:
   Includes `/workspace/:workspaceId/quiz/:id/epic-battle`, the full-page animated
   battle view linked from a two-cohort quiz's Share screen.
 - `/quiz/:id`, `/quiz/:id/questions/:questionId?` — taker views for quizzes.
+  `/quiz/:id/history?nickname=...&cohortGuid=...` is the taker's persistent
+  mistakes-history page, linked from the score page; identity lives in the
+  query string so the page is bookmarkable/refresh-safe.
 - `/question/:id` — taker view for a standalone question.
 - `/poll/:id` — taker view for a standalone poll.
 

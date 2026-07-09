@@ -319,6 +319,11 @@ export interface Translations {
         readonly timeLeftLabel: string
         readonly timesUp: string
         readonly thankYouForVoting: string
+        readonly viewMistakesHistory: string
+        readonly mistakesHistoryTitle: string
+        readonly mistakesHistoryIntro: string
+        readonly mistakesHistoryEmpty: string
+        readonly mistakesHistoryLoadError: string
     }
     readonly robin: {
         readonly tooltip: string

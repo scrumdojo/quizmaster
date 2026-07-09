@@ -332,6 +332,11 @@ export const en: Translations = {
         timeLeftLabel: 'Time left',
         timesUp: "Time's up",
         thankYouForVoting: 'Thank you for voting',
+        viewMistakesHistory: 'View my mistakes history',
+        mistakesHistoryTitle: 'Your mistakes on this quiz',
+        mistakesHistoryIntro: 'Questions you have missed across your attempts at this quiz.',
+        mistakesHistoryEmpty: "You haven't missed any questions on this quiz yet.",
+        mistakesHistoryLoadError: 'Could not load your mistakes history.',
     },
     robin: {
         tooltip: 'AI Helper',

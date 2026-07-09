@@ -82,3 +82,7 @@ Then('I see a note that I missed {string} before', async function (question: str
 Then('I do not see a note that I missed {string} before', async function (question: string) {
     await this.quizScorePage.expectNoMissedBeforeNote(question)
 })
+
+When('I open my mistakes history', async function () {
+    await this.quizScorePage.openMistakesHistory()
+})

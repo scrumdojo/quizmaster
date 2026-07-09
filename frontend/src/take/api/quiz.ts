@@ -5,6 +5,7 @@ import type {
     QuizBuzzerStatus,
     QuizLeaderboardResponse,
     QuizMetadata,
+    QuizMistakesHistoryResponse,
     QuizTake,
 } from '#fe/shared/model/quiz.ts'
 
@@ -33,3 +34,13 @@ export const createDryRun = async (workspaceGuid: string, quizId: number): Promi
 
 export const fetchBuzzerStatus = async (quizId: number, attemptId: number) =>
     await fetchJson<QuizBuzzerStatus>(`/api/quiz/${quizId}/attempts/${attemptId}/buzzer-status`)
+
+export const fetchMistakesHistory = async (quizId: number, nickname?: string, cohortGuid?: string) => {
+    const params = new URLSearchParams()
+    if (nickname) params.set('nickname', nickname)
+    if (cohortGuid) params.set('cohortGuid', cohortGuid)
+    const query = params.toString()
+    return await fetchJson<QuizMistakesHistoryResponse>(
+        `/api/quiz/${quizId}/mistakes-history${query ? `?${query}` : ''}`,
+    )
+}

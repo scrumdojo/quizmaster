@@ -27,6 +27,7 @@ export const ROUTES = {
     quizNickname: '/quiz/:id/nickname',
     quizNicknameWithCohort: '/quiz/:id/cohort/:cohortGuid/nickname',
     quizBuzzerLobby: '/quiz/:id/buzzer',
+    quizMistakesHistory: '/quiz/:id/history',
 } as const
 
 export const urls = {
@@ -60,6 +61,13 @@ export const urls = {
     quizNickname: (id: number | string) => `/quiz/${id}/nickname`,
     quizNicknameWithCohort: (id: number | string, cohortGuid: string) => `/quiz/${id}/cohort/${cohortGuid}/nickname`,
     quizBuzzerLobby: (id: number | string) => `/quiz/${id}/buzzer`,
+    quizMistakesHistory: (id: number | string, nickname?: string, cohortGuid?: string) => {
+        const params = new URLSearchParams()
+        if (nickname) params.set('nickname', nickname)
+        if (cohortGuid) params.set('cohortGuid', cohortGuid)
+        const query = params.toString()
+        return `/quiz/${id}/history${query ? `?${query}` : ''}`
+    },
 }
 
 export const useWorkspaceId = () => {

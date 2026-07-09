@@ -1,0 +1,23 @@
+.quiz-mistakes-history {
+    &__intro {
+        color: var(--text-muted);
+        margin: 0 0 1rem;
+    }
+
+    &__error {
+        color: var(--feedback-incorrect-fg);
+    }
+
+    &__empty {
+        color: var(--text-muted);
+    }
+
+    &__list {
+        margin: 0;
+        padding: 0 0 0 1.2rem;
+
+        li {
+            margin: 0.3rem 0;
+        }
+    }
+}

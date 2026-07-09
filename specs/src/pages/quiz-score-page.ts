@@ -9,6 +9,9 @@ export class QuizScorePage {
     private backToHomeLinkLocator = () => this.page.locator('#quiz-score #back')
     goToHome = () => this.backToHomeLinkLocator().click()
 
+    private mistakesHistoryLinkLocator = () => this.page.locator('.mistakes-history-link a')
+    openMistakesHistory = () => this.mistakesHistoryLinkLocator().click()
+
     private correctAnswerLocator = () => this.page.locator('#correct-answers')
 
     private totalQuestionsLocator = () => this.page.locator('#total-questions')

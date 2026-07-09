@@ -13,6 +13,7 @@ import { QuizPlayForm } from './quiz-play.tsx'
 import { QuizScorePage } from './quiz-score-page.tsx'
 import {
     clearQuizTakeSession,
+    getStoredQuizCohortGuid,
     getStoredQuizNickname,
     getStoredQuizRunId,
     loadQuizAnswers,
@@ -34,6 +35,7 @@ export const QuizTakePage = ({ isDryRun }: QuizTakePageProps) => {
     )
     const quizRunId = quizId !== null ? getStoredQuizRunId(quizId) : null
     const quizNickname = quizId !== null ? getStoredQuizNickname(quizId) : null
+    const quizCohortGuid = quizId !== null ? getStoredQuizCohortGuid(quizId) : null
     const fetchedQuiz = useQuizAttemptApi(initialStateQuiz ? null : quizRunId)
     const quiz = initialStateQuiz ?? fetchedQuiz
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswers | null>(() => loadQuizAnswers())
@@ -72,7 +74,13 @@ export const QuizTakePage = ({ isDryRun }: QuizTakePageProps) => {
             <>
                 {isDryRun && <DryRunIndicator />}
                 {quizAnswers && scoredQuiz ? (
-                    <QuizScorePage quiz={quiz} quizAnswers={quizAnswers} result={scoredQuiz} />
+                    <QuizScorePage
+                        quiz={quiz}
+                        quizAnswers={quizAnswers}
+                        result={scoredQuiz}
+                        nickname={quizNickname ?? undefined}
+                        cohortGuid={quizCohortGuid ?? undefined}
+                    />
                 ) : (
                     <QuizPlayForm
                         quiz={quiz}

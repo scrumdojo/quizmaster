@@ -9,5 +9,6 @@ export type {
     QuizLeaderboardIndividual,
     QuizLeaderboardResponse,
     QuizMetadata,
+    QuizMistakesHistoryResponse,
     QuizTake,
 } from '#shared/types/quiz.ts'

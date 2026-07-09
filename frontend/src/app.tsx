@@ -17,6 +17,7 @@ import { WorkspacePage } from '#fe/make/workspace/workspace.tsx'
 import { PollTakePage } from '#fe/take/poll-take'
 import { QuestionTakePage } from '#fe/take/question-take'
 import { QuizBuzzerLobbyPage } from '#fe/take/quiz-take/quiz-buzzer-lobby/quiz-buzzer-lobby-page.tsx'
+import { QuizMistakesHistoryPage } from '#fe/take/quiz-take/quiz-mistakes-history/quiz-mistakes-history-page.tsx'
 import { QuizNicknamePage } from '#fe/take/quiz-take/quiz-nickname/quiz-nickname-page.tsx'
 import { QuizTakePage } from '#fe/take/quiz-take/quiz-take-page.tsx'
 import { QuizWelcomePage } from '#fe/take/quiz-take/quiz-welcome/quiz-welcome-page.tsx'
@@ -397,6 +398,7 @@ export const App = () => {
                         <Route path={ROUTES.quizNickname} element={<QuizNicknamePage isDryRun={false} />} />
                         <Route path={ROUTES.quizNicknameWithCohort} element={<QuizNicknamePage isDryRun={false} />} />
                         <Route path={ROUTES.quizBuzzerLobby} element={<QuizBuzzerLobbyPage />} />
+                        <Route path={ROUTES.quizMistakesHistory} element={<QuizMistakesHistoryPage />} />
                     </Routes>
                 </div>
                 <div className="corner-fabs">

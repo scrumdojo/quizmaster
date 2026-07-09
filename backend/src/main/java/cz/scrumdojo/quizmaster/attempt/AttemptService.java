@@ -78,12 +78,21 @@ public class AttemptService {
             attempt.getCohortGuid(),
             attempt.getId()
         );
-        if (earlierAttempts.isEmpty()) {
+        return missedQuestionIdsFrom(earlierAttempts);
+    }
+
+    public Set<Integer> missedQuestionIdsAcrossAttempts(Integer quizId, String nickname, String cohortGuid) {
+        List<Attempt> attempts = attemptRepository.findFinishedAttempts(quizId, nickname, cohortGuid);
+        return missedQuestionIdsFrom(attempts);
+    }
+
+    private Set<Integer> missedQuestionIdsFrom(List<Attempt> attempts) {
+        if (attempts.isEmpty()) {
             return Set.of();
         }
-        List<Integer> earlierAttemptIds = earlierAttempts.stream().map(Attempt::getId).toList();
+        List<Integer> attemptIds = attempts.stream().map(Attempt::getId).toList();
         return attemptQuestionRepository
-            .findByAttemptIdInOrderByPosition(earlierAttemptIds)
+            .findByAttemptIdInOrderByPosition(attemptIds)
             .stream()
             .filter(row -> row.getStatus() != AnswerStatus.CORRECT)
             .map(AttemptQuestion::getQuestionId)

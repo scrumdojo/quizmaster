@@ -8,9 +8,11 @@ import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardResponse;
 import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardService;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +50,28 @@ public class QuizTakeController {
     @GetMapping("/{id}/leaderboard")
     public ResponseEntity<QuizLeaderboardResponse> getQuizLeaderboard(@PathVariable Integer id) {
         return ResponseHelper.okOrNotFound(quizLeaderboardService.getLeaderboard(id));
+    }
+
+    @GetMapping("/{id}/mistakes-history")
+    public ResponseEntity<QuizMistakesHistoryResponse> getMistakesHistory(
+        @PathVariable Integer id,
+        @RequestParam(required = false) String nickname,
+        @RequestParam(required = false) String cohortGuid
+    ) {
+        var quiz = requireQuiz(id);
+        Set<Integer> missedQuestionIds = attemptService.missedQuestionIdsAcrossAttempts(
+            id,
+            blankToNull(nickname),
+            blankToNull(cohortGuid)
+        );
+        int[] missedInQuizOrder = Arrays.stream(quiz.getQuestionIds()).filter(missedQuestionIds::contains).toArray();
+        return ResponseEntity.ok(QuizMistakesHistoryResponse.from(quizService.loadQuestions(missedInQuizOrder)));
+    }
+
+    private String blankToNull(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     @PostMapping("/{id}/attempts")

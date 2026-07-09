@@ -43,7 +43,7 @@ export const QuizNicknamePage = ({ isDryRun }: QuizNicknamePageProps) => {
                 nickname: trimmedNickname,
             })
             const playableQuiz: QuizTake = { ...quiz, questions, questionReleased }
-            setQuizRun(attemptId, quiz.id, trimmedNickname)
+            setQuizRun(attemptId, quiz.id, trimmedNickname, cohortGuid)
             const target = quiz.mode === 'buzzer' ? urls.quizBuzzerLobby(quiz.id) : urls.quizTake(quiz.id)
             navigate(target, { state: { quiz: playableQuiz } })
         } catch {

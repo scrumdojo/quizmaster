@@ -1,4 +1,6 @@
 import './quiz-score-page.scss'
+import { Link } from 'react-router'
+
 import { useLanguage } from '#fe/i18n/language-context.tsx'
 import { Page } from '#fe/shared'
 import type { QuizEvaluationResponse, QuizTake } from '#fe/shared/model/quiz.ts'
@@ -11,9 +13,11 @@ interface QuizScorePageProps {
     readonly quiz: QuizTake
     readonly quizAnswers: QuizAnswers
     readonly result: QuizEvaluationResponse
+    readonly nickname?: string
+    readonly cohortGuid?: string
 }
 
-export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps) => {
+export const QuizScorePage = ({ quiz, quizAnswers, result, nickname, cohortGuid }: QuizScorePageProps) => {
     const { t } = useLanguage()
     const percentage = result.totalWeight > 0 ? (result.weightedScore / result.totalWeight) * 100 : 0
     const passed = percentage >= quiz.passScore
@@ -68,6 +72,10 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
                     </div>
                 </dl>
             </section>
+
+            <p className="mistakes-history-link">
+                <Link to={urls.quizMistakesHistory(quiz.id, nickname, cohortGuid)}>{t.take.viewMistakesHistory}</Link>
+            </p>
 
             {mistakes.length > 0 && (
                 <section className="mistakes-summary" id="mistakes-summary">

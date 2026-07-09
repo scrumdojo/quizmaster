@@ -334,6 +334,11 @@ export const nl: Translations = {
         timeLeftLabel: 'Resterende tijd',
         timesUp: 'De tijd is om',
         thankYouForVoting: 'Bedankt voor je stem',
+        viewMistakesHistory: 'Bekijk mijn foutenoverzicht',
+        mistakesHistoryTitle: 'Jouw fouten bij deze quiz',
+        mistakesHistoryIntro: 'Vragen die je hebt gemist tijdens je pogingen bij deze quiz.',
+        mistakesHistoryEmpty: 'Je hebt nog geen vragen gemist bij deze quiz.',
+        mistakesHistoryLoadError: 'Kon je foutenoverzicht niet laden.',
     },
     robin: {
         tooltip: 'AI-helper',

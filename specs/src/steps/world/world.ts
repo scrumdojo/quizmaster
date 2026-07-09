@@ -20,6 +20,7 @@ import {
     TakePollPage,
     EpicBattlePage,
     QuizBuzzerLobbyPage,
+    QuizMistakesHistoryPage,
 } from '#pages/index.ts'
 import { QuizNicknamePage } from '#pages/quiz-nickname-page'
 import { CLOCK_HEADER } from '#steps/clock.ts'
@@ -62,6 +63,7 @@ export class QuizmasterWorld {
         this.quizCreatePage = new QuizCreatePage(this.page)
         this.quizNicknamePage = new QuizNicknamePage(this.page)
         this.homePage = new HomePage(this.page)
+        this.quizMistakesHistoryPage = new QuizMistakesHistoryPage(this.page)
     }
 
     readonly appPage: AppPage
@@ -84,6 +86,7 @@ export class QuizmasterWorld {
 
     readonly quizNicknamePage: QuizNicknamePage
     readonly homePage: HomePage
+    readonly quizMistakesHistoryPage: QuizMistakesHistoryPage
 
     workspaceGuid = ''
 

@@ -28,4 +28,19 @@ public interface AttemptRepository extends JpaRepository<Attempt, Integer> {
         @Param("cohortGuid") String cohortGuid,
         @Param("excludeAttemptId") Integer excludeAttemptId
     );
+
+    @Query(
+        """
+        select a from Attempt a
+        where a.quizId = :quizId
+          and a.finishedAt is not null
+          and ((:nickname is null and a.nickname is null) or a.nickname = :nickname)
+          and ((:cohortGuid is null and a.cohortGuid is null) or a.cohortGuid = :cohortGuid)
+        """
+    )
+    List<Attempt> findFinishedAttempts(
+        @Param("quizId") Integer quizId,
+        @Param("nickname") String nickname,
+        @Param("cohortGuid") String cohortGuid
+    );
 }

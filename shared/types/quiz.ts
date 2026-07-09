@@ -131,3 +131,7 @@ export interface QuizBuzzerStatus {
     readonly status: 'waiting' | 'countdown' | 'started'
     readonly secondsRemaining: number | null
 }
+
+export interface QuizMistakesHistoryResponse {
+    readonly questions: readonly Question[]
+}
